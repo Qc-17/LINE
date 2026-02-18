@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manuale LINE 2.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Fraunces:ital,wght@0,300;0,600;0,800;1,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0e0f14;
+      --surface:   #161820;
+      --surface2:  #1d1f2b;
+      --border:    #2a2d3e;
+      --accent:    #7fdbca;
+      --accent2:   #c084fc;
+      --accent3:   #fbbf24;
+      --text:      #e2e4ef;
+      --muted:     #6b7099;
+      --code-bg:   #111320;
+      --output-bg: #0d1a16;
+      --keyword:   #7fdbca;
+      --string:    #86efac;
+      --comment:   #4b5280;
+      --number:    #fbbf24;
+      --operator:  #c084fc;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* ── LAYOUT ── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 80px 0 56px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 64px;
+    }
+
+    .hero-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hero-tag::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+      max-width: 120px;
+      opacity: 0.4;
+    }
+
+    .hero h1 {
+      font-size: clamp(48px, 8vw, 80px);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #e2e4ef 0%, var(--accent) 55%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 300;
+    }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 28px 32px;
+      margin-bottom: 64px;
+    }
+    .toc-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    .toc ol {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 32px;
+    }
+    .toc li { counter-increment: toc-count; }
+    .toc a {
+      color: var(--muted);
+      text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toc a::before {
+      content: counter(toc-count, decimal-leading-zero) '.';
+      color: var(--border);
+      font-size: 10px;
+    }
+    .toc a:hover { color: var(--accent); }
+
+    /* ── SECTIONS ── */
+    .section {
+      margin-bottom: 72px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      opacity: 0.6;
+      min-width: 28px;
+    }
+
+    .section h2 {
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #fff;
+    }
+
+    .section h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--accent2);
+      margin: 32px 0 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+    }
+
+    p { margin-bottom: 14px; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+
+    /* ── INLINE CODE ── */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.85em;
+      color: var(--accent);
+    }
+
+    /* ── CODE BLOCKS ── */
+    .code-wrap {
+      margin: 16px 0;
+    }
+
+    .code-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 7px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      display: inline-block;
+    }
+
+    pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13.5px;
+      line-height: 1.65;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 0 6px 6px 6px;
+      padding: 18px 22px;
+      overflow-x: auto;
+      tab-size: 4;
+      white-space: pre;
+    }
+    .code-wrap + .code-wrap { margin-top: 8px; }
+
+    .out-label { color: var(--accent); }
+    pre.output {
+      background: var(--output-bg);
+      border-color: #1d3d31;
+      border-left: 3px solid var(--accent);
+      color: #86efac;
+    }
+
+    /* ── SYNTAX HIGHLIGHTING ── */
+    .kw   { color: var(--keyword);  font-weight: 600; }
+    .str  { color: var(--string); }
+    .cmt  { color: var(--comment);  font-style: italic; }
+    .num  { color: var(--number); }
+    .op   { color: var(--operator); }
+    .var_ { color: #93c5fd; }
+
+    /* ── TABLES ── */
+    .def-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    .def-table th {
+      background: var(--surface2);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .def-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .def-table tr:last-child td { border-bottom: none; }
+    .def-table tr:hover td { background: rgba(127,219,202,0.03); }
+
+    /* ── CALLOUT ── */
+    .callout {
+      background: rgba(127, 219, 202, 0.05);
+      border: 1px solid rgba(127, 219, 202, 0.2);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      margin: 18px 0;
+      font-size: 15px;
+      color: #b5f5ec;
+    }
+
+    .callout.warn {
+      background: rgba(251, 191, 36, 0.05);
+      border-color: rgba(251, 191, 36, 0.15);
+      border-left-color: var(--accent3);
+      color: #fde68a;
+    }
+
+    .callout.purple {
+      background: rgba(192, 132, 252, 0.05);
+      border-color: rgba(192, 132, 252, 0.15);
+      border-left-color: var(--accent2);
+      color: #e9d5ff;
+    }
+
+    /* ── ERROR TABLE ── */
+    .error-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      font-size: 13.5px;
+      margin: 16px 0;
+    }
+    .error-grid .ec, .error-grid .em {
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .error-grid .ec:last-of-type, .error-grid .em:last-of-type {
+      border-bottom: none;
+    }
+    .error-grid .ec {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent3);
+      background: var(--code-bg);
+      white-space: nowrap;
+      font-weight: 600;
+      border-right: 1px solid var(--border);
+    }
+    .error-grid .em { color: var(--muted); background: var(--surface); }
+    .error-grid .eh {
+      grid-column: 1 / -1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--surface2);
+      color: var(--accent);
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
+      margin-top: 80px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    footer span { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .wrapper { padding: 0 18px 60px; }
+      .toc ol { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 48px; }
+    }
+
+    @media print {
+      body { background: #fff; color: #111; }
+      .hero h1 { -webkit-text-fill-color: #111; color: #111; }
+      pre, .code-label { font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-tag">Documentazione ufficiale</div>
+    <h1>LINE 2.0</h1>
+    <p class="hero-sub">// Manuale di riferimento del linguaggio</p>
+  </header>
+
+  <!-- TOC -->
+  <nav class="toc" aria-label="Indice">
+    <div class="toc-title">Indice</div>
+    <ol>
+      <li><a href="#commenti">Commenti</a></li>
+      <li><a href="#variabili">Variabili</a></li>
+      <li><a href="#output">TALK — Output e Input</a></li>
+      <li><a href="#input">Note su INP</a></li>
+      <li><a href="#matematica">Operazioni matematiche</a></li>
+      <li><a href="#comparazione">Operazioni di comparazione</a></li>
+      <li><a href="#logiche">Operazioni logiche</a></li>
+      <li><a href="#if">IF Block</a></li>
+      <li><a href="#funzioni">Funzioni</a></li>
+      <li><a href="#go">GO Block</a></li>
+      <li><a href="#liste">Liste</a></li>
+      <li><a href="#altrechiavi">Altre parole chiave</a></li>
+      <li><a href="#errori">Gestione errori</a></li>
+      <li><a href="#moduli">Moduli</a></li>
+      <li><a href="#file">File LINE</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1. COMMENTI -->
+  <section class="section" id="commenti">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Commenti</h2>
+    </div>
+    <p>In questo segue la sintassi di linguaggi come C:</p>
+    <div class="code-wrap">
+      <div class="code-label">Sintassi</div>
+      <pre><span class="cmt">// Per commenti su singola linea</span>
+<span class="cmt">/* Per commenti multilinea
+   e per chiudere */</span></pre>
+    </div>
+  </section>
+
+  <!-- 2. VARIABILI -->
+  <section class="section" id="variabili">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Variabili</h2>
+    </div>
+    <p>Una variabile ha questa forma:</p>
+    <div class="code-wrap">
+      <div class="code-label">Sintassi</div>
+      <pre><span class="var_">nome_variabile</span> <span class="op">=</span> contenuto</pre>
+    </div>
+    <p>Nel nome è possibile usare solo lettere, numeri (non in prima posizione) e il trattino basso (<code>_</code>).<br>Nel contenuto si può usare qualsiasi carattere.</p>
+
+    <h3>Tipi di dato</h3>
+    <p>Esistono 3 tipi di dati:</p>
+    <table class="def-table">
+      <thead><tr><th>Tipo</th><th>Descrizione</th></tr></thead>
+      <tbody>
+        <tr><td><code>Stringa</code></td><td>Immagazzina i dati per come si vedono.</td></tr>
+        <tr><td><code>Numerale</code></td><td>Immagazzina il numero non tanto per come si vede, ma per il suo valore.</td></tr>
+        <tr><td><code>Booleano</code></td><td>Ha solo due valori possibili: <code>V</code> (Verum) e <code>F</code> (Falsum).</td></tr>
+      </tbody>
+    </table>
+    <p>Per indicare che una variabile immagazzina un numerale o booleano bisogna precedere il nome della variabile con <code>$</code>.</p>
+    <div class="code-wrap">
+      <div class="code-label">Esempio</div>
+      <pre><span class="var_">var</span>  <span class="op">=</span> <span class="num">8</span>       <span class="cmt">// immagazzina una stringa (8)</span>
+<span class="op">$</span><span class="var_">var</span> <span class="op">=</span> <span class="num">8</span>       <span class="cmt">// immagazzina un numero (8)</span>
+<span class="var_">var</span>  <span class="op">=</span> <span class="str">V</span>       <span class="cmt">// immagazzina una stringa (V)</span>
+<span class="op">$</span><span class="var_">var</span> <span class="op">=</span> <span class="str">V</span>       <span class="cmt">// immagazzina un booleano (V)</span></pre>
+    </div>
+    <div class="callout warn">Se in una variabile preceduta da <code>$</code> si immagazzina qualcosa che non può essere né numerale né booleano, risulterà in un errore.</div>
+
+    <h3>Conversione di tipo</h3>
+
+    <p><strong>Da stringa a numerale</strong> — si usa il comando <code>n:</code></p>
+    <ul style="margin: 0 0 12px 20px; color: var(--muted); font-size: 15px;">
+      <li>Se la stringa è un numero, la trasformata avrà il valore equivalente.</li>
+      <li>Se la stringa non ha solo numeri, varrà <code>1</code>.</li>
+      <li>Se è una stringa vuota, varrà <code>0</code>.</li>
+    </ul>
+    <div class="code-wrap">
+      <div class="code-label">Esempio</div>
+      <pre><span class="var_">var</span> <span class="op">=</span> <span class="num">8</span>
+<span class="kw">n:</span><span class="var_">var</span>   <span class="cmt">// n: è il comando per numerificare</span></pre>
+    </div>
+
+    <p><strong>Da stringa a booleano</strong> — si usa il comando <code>b:</code></p>
+    <ul style="margin: 0 0 12px 20px; color: var(--muted); font-size: 15px;">
+      <li>Se è una stringa vuota, verrà convertita in <code>F</code>.</li>
+      <li>Altrimenti sarà <code>V</code>.</li>
+    </ul>
+    <div class="code-wrap">
+      <div class="code-label">Esempio</div>
+      <pre><span class="var_">var</span> <span class="op">=</span> <span class="str">ciao</span>
+<span class="kw">s:</span><span class="var_">var</span>   <span class="cmt">// ora var è un booleano che vale V</span></pre>
+    </div>
+
+    <p><strong>Da numero a booleano e viceversa</strong></p>
+    <ul style="margin: 0 0 12px 20px; color: var(--muted); font-size: 15px;">
+      <li>Se vale zero, si converte in <code>F</code>, altrimenti diventa <code>V</code>. Viceversa, <code>V</code> diventa <code>1</code> e <code>F</code> diventa <code>0</code>.</li>
+    </ul>
+    <div class="code-wrap">
+      <div class="code-label">Esempio</div>
+      <pre><span class="op">$</span><span class="var_">numero</span> <span class="op">=</span> <span class="num">5</span>
+<span class="op">$</span><span class="var_">bool</span>   <span class="op">=</span> <span class="str">V</span>
+<span class="kw">b:</span><span class="var_">numero</span>   <span class="cmt">// = V</span>
+<span class="kw">n:</span><span class="var_">bool</span>     <span class="cmt">// = 1</span></pre>
+    </div>
+
+    <p><strong>Da numero/booleano a stringa</strong> — si usa <code>s:</code></p>
+    <p>Il valore diventa semplicemente leggibile per l'umano, ma non cambia struttura.</p>
+    <div class="code-wrap">
+      <div class="code-label">Esempio</div>
+      <pre><span class="op">$</span><span class="var_">numero</span> <span class="op">=</span> <span class="num">5</span>
+<span class="op">$</span><span class="var_">bool</span>   <span class="op">=</span> <span class="str">V</span>
+<span class="kw">s:</span><span class="var_">numero</span>   <span class="cmt">// = 5</span>
+<span class="kw">s:</span><span class="var_">bool</span>     <span class="cmt">// = V</span></pre>
+    </div>
+
+    <div class="callout">Per sapere il tipo di una variabile si usa il comando <code>\t</code> (dove <code>\</code> è l'escape di linea). I nomi sono dati in inglese: <code>string</code>, <code>number</code>, <code>bool</code>.</div>
+
+    <h3>Riassegnazione</h3>
+    <p>A una variabile si può sempre riassegnare un nuovo valore.</p>
+    <div class="code-wrap">
+      <div class="code-label">Esempio</div>
+      <pre><span class="var_">var</span> <span class="op">=</span> <span class="num">5</span>
+<span class="var_">var</span> <span class="op">=</span> <span class="num">10</span>
+<span class="kw">n:</span><span class="var_">var</span></pre>
+    </div>
+    <p>Così avremo una <code>var</code> numerale che immagazzina <code>10</code>.</p>
+  </section>
+
+  <!-- 3. TALK (OUTPUT + INPUT) -->
+  <section class="section" id="output">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>TALK — Output e Input unificati</h2>
+    </div>
+    <p>Per interagire con l'utente si usa la parola chiave <code>TALK</code>. Questa combina output e input in un'unica istruzione intuitiva.</p>
+
+    <h3>Comportamento di TALK</h3>
+    <p><code>TALK</code> stampa il testo fornito e, se incontra una variabile non ancora esistente (preceduta da <code>@</code>), chiede automaticamente all'utente di inserire un valore per quella variabile.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Solo output (tutte variabili esistenti)</div>
+      <pre><span class="var_">nome</span> <span class="op">=</span> <span class="str">Mario</span>
+<span class="kw">TALK</span> Ciao <span class="op">@</span><span class="var_">nome</span>!</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">Ciao Mario!</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Output + Input (variabile non esistente)</div>
+      <pre><span class="var_">nome</span> <span class="op">=</span> <span class="str">Mario</span>
+<span class="kw">TALK</span> Ciao <span class="op">@</span><span class="var_">nome</span> <span class="op">@</span><span class="var_">cognome</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">Ciao Mario <span style="color: #ffd580;">[richiede input per 'cognome']</span>
+\\utente inserisce: Rossi
+Ciao Mario Rossi</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Esempio completo</div>
+      <pre><span class="kw">TALK</span> Come ti chiami? <span class="op">@</span><span class="var_">nome</span>
+<span class="kw">TALK</span> Quanti anni hai? <span class="op">@</span><span class="var_">eta</span>
+<span class="kw">TALK</span> Ciao <span class="op">@</span><span class="var_">nome</span>, hai <span class="op">@</span><span class="var_">eta</span> anni!</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">Come ti chiami? <span style="color: #ffd580;">[richiede 'nome']</span>
+\\utente: Marco
+Quanti anni hai? <span style="color: #ffd580;">[richiede 'eta']</span>
+\\utente: 25
+Ciao Marco, hai 25 anni!</pre>
+    </div>
+
+    <h3>Zucchero sintattico — OUT e INP</h3>
+    <p>Per comodità, LINE mantiene anche le parole chiave tradizionali <code>OUT</code> e <code>INP</code> come scorciatoie:</p>
+
+    <table class="def-table">
+      <thead><tr><th>Comando</th><th>Comportamento</th><th>Equivalente TALK</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>OUT</code></td>
+          <td>Solo output, nessun input</td>
+          <td>TALK con tutte variabili esistenti</td>
+        </tr>
+        <tr>
+          <td><code>INP</code></td>
+          <td>Solo input, nessun testo prima</td>
+          <td>TALK con solo variabili non esistenti</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="code-wrap">
+      <div class="code-label">OUT — solo output</div>
+      <pre><span class="var_">var</span> <span class="op">=</span> <span class="str">ciao</span>
+<span class="kw">OUT</span> <span class="op">@</span><span class="var_">var</span> mondo!</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">ciao mondo!</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">INP — solo input</div>
+      <pre><span class="kw">INP</span> Nome: <span class="op">@</span><span class="var_">nome</span> \nCognome: <span class="op">@</span><span class="var_">cognome</span>
+<span class="kw">OUT</span> Ciao <span class="op">@</span><span class="var_">nome</span> <span class="op">@</span><span class="var_">cognome</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">Nome: <span style="color: #ffd580;">[input]</span>
+Cognome: <span style="color: #ffd580;">[input]</span>
+Ciao [nome] [cognome]</pre>
+    </div>
+
+    <h3>Caratteri speciali</h3>
+    <div class="callout">Il "potere" di <code>@</code> finisce con qualsiasi carattere che non sia includibile in un nome di variabile (<code>a-z</code>, <code>0-9</code>, <code>_</code>).</div>
+
+    <div class="code-wrap">
+      <div class="code-label">Tipo di variabile con \t</div>
+      <pre><span class="var_">var</span> <span class="op">=</span> <span class="str">ciao</span>
+<span class="kw">OUT</span> \t<span class="var_">var</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">String</pre>
+    </div>
+    <p>In questo caso <code>@</code> si può omettere perché <code>\t</code> funziona solo con nomi di variabili esistenti.</p>
+
+    <h3>Escape e spazi</h3>
+    <p>Ogni spazio eccetto il primo dopo <code>TALK</code>/<code>OUT</code> viene considerato. Se si vuole stampare la chiocciola si può usare l'escape <code>\</code>.</p>
+    <div class="code-wrap">
+      <div class="code-label">Esempio</div>
+      <pre><span class="var_">var1</span> <span class="op">=</span> <span class="str">Ciao</span>
+<span class="var_">var2</span> <span class="op">=</span> <span class="str">mondo!</span>
+<span class="kw">TALK</span> <span class="op">@</span><span class="var_">var1</span><span class="op">@</span><span class="var_">var2</span>
+<span class="kw">TALK</span> <span class="op">@</span><span class="var_">var1</span> <span class="op">@</span><span class="var_">var2</span>
+<span class="kw">TALK</span> \<span class="op">@</span><span class="var_">var1</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">Ciaomondo!
+Ciao mondo!
+@var1</pre>
+    </div>
+
+    <p>Il comando <code>\n</code> serve a indicare di andare a capo.</p>
+  </section>
+
+  <!-- 4. INPUT (rimosso, ora parte di TALK) -->
+  <section class="section" id="input">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Note su INP (deprecato)</h2>
+    </div>
+    <div class="callout warn">
+      <strong>Nota:</strong> <code>INP</code> è mantenuto per retrocompatibilità, ma <code>TALK</code> è il metodo raccomandato per gestire input e output in modo unificato.
+    </div>
+    <p>Se si usa ancora <code>INP</code>, il comportamento è:</p>
+    <div class="code-wrap">
+      <div class="code-label">Sintassi INP</div>
+      <pre><span class="kw">INP</span> <span class="op">@</span><span class="var_">var</span></pre>
+    </div>
+    <div class="callout warn">Se nell'input si mette il nome di una variabile esistente, <code>INP</code> non chiederà nessun input ma visualizzerà semplicemente il contenuto della variabile.</div>
+  </section>
+
+  <!-- 5. OPERAZIONI MATEMATICHE -->
+  <section class="section" id="matematica">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Operazioni matematiche</h2>
+    </div>
+    <p>Fra numeri si possono svolgere le seguenti operazioni matematiche:</p>
+    <table class="def-table">
+      <thead><tr><th>Operazione</th><th>Operatore</th></tr></thead>
+      <tbody>
+        <tr><td>Addizione</td><td><code>+</code></td></tr>
+        <tr><td>Sottrazione</td><td><code>-</code></td></tr>
+        <tr><td>Moltiplicazione</td><td><code>*</code></td></tr>
+        <tr><td>Divisione</td><td><code>/</code></td></tr>
+        <tr><td>Parte intera divisione</td><td><code>//</code></td></tr>
+        <tr><td>Resto divisione</td><td><code>%</code></td></tr>
+      </tbody>
+    </table>
+    <div class="callout">Queste operazioni si possono compiere solo all'interno di variabili. Anche in una variabile numerica i vari segni saranno interpretati come operazioni. Verrà immagazzinato solo il risultato.</div>
+  </section>
+
+  <!-- 6. OPERAZIONI DI COMPARAZIONE -->
+  <section class="section" id="comparazione">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Operazioni di comparazione</h2>
+    </div>
+    <p>Si possono svolgere fra qualsiasi tipo di dato:</p>
+    <table class="def-table">
+      <thead><tr><th>Operazione</th><th>Operatore</th></tr></thead>
+      <tbody>
+        <tr><td>Uguaglianza</td><td><code>==</code></td></tr>
+        <tr><td>Diseguaglianza</td><td><code>!=</code></td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">Un <code>5</code> numerale è diverso da un <code>5</code> stringa.</div>
+    <p>Queste invece si possono eseguire solo fra numeri:</p>
+    <table class="def-table">
+      <thead><tr><th>Operazione</th><th>Operatore</th></tr></thead>
+      <tbody>
+        <tr><td>Maggiore</td><td><code>&gt;</code></td></tr>
+        <tr><td>Minore</td><td><code>&lt;</code></td></tr>
+        <tr><td>Minore o uguale</td><td><code>&lt;=</code></td></tr>
+        <tr><td>Maggiore o uguale</td><td><code>&gt;=</code></td></tr>
+      </tbody>
+    </table>
+    <p>Queste operazioni non possono essere svolte all'interno di variabili, ma solo all'interno di IF block, e danno come risultato un booleano.</p>
+  </section>
+
+  <!-- 7. OPERAZIONI LOGICHE -->
+  <section class="section" id="logiche">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Operazioni logiche</h2>
+    </div>
+    <p>Operabili solo fra booleani:</p>
+    <table class="def-table">
+      <thead><tr><th>Operazione</th><th>Keyword</th></tr></thead>
+      <tbody>
+        <tr><td>AND</td><td><code>ET</code></td></tr>
+        <tr><td>OR</td><td><code>VEL</code></td></tr>
+        <tr><td>XOR</td><td><code>AUT</code></td></tr>
+        <tr><td>NOT</td><td><code>!</code> (prefisso)</td></tr>
+      </tbody>
+    </table>
+    <p>Operabili solo in IF block, danno come risultato un booleano. Si possono anche usare per concatenare operazioni di comparazione.</p>
+    <div class="code-wrap">
+      <div class="code-label">Esempio</div>
+      <pre><span class="op">@</span><span class="var_">var</span> <span class="op">&lt;</span> <span class="num">5</span> <span class="kw">ET</span> <span class="op">@</span><span class="var_">var</span> <span class="op">&gt;</span> <span class="num">6</span></pre>
+    </div>
+  </section>
+
+  <!-- 8. IF BLOCK -->
+  <section class="section" id="if">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>IF Block</h2>
+    </div>
+    <p>Un IF block viene definito così:</p>
+    <div class="code-wrap">
+      <div class="code-label">Sintassi</div>
+      <pre><span class="kw">IF</span> <span class="var_">nome_if</span> <span class="op">=</span> condizione</pre>
+    </div>
+    <table class="def-table">
+      <thead><tr><th>Parte</th><th>Descrizione</th></tr></thead>
+      <tbody>
+        <tr><td><code>IF</code></td><td>La parola chiave.</td></tr>
+        <tr><td><code>nome_if</code></td><td>Il nome univoco del blocco.</td></tr>
+        <tr><td><code>condizione</code></td><td>La condizione: se vera (<code>V</code>) si esegue il GO che richiama questo IF.</td></tr>
+      </tbody>
+    </table>
+    <div class="code-wrap">
+      <div class="code-label">Esempi</div>
+      <pre><span class="kw">IF</span> <span class="var_">prova</span>  <span class="op">=</span> <span class="num">5</span> <span class="op">==</span> <span class="num">3</span>            <span class="cmt">// questo è falso</span>
+<span class="kw">IF</span> <span class="var_">prova2</span> <span class="op">=</span> <span class="num">5</span> <span class="op">!=</span> <span class="num">3</span>            <span class="cmt">// questo è vero</span>
+<span class="op">$</span><span class="var_">var</span> <span class="op">=</span> <span class="num">5</span>
+<span class="kw">IF</span> <span class="var_">prova3</span> <span class="op">=</span> <span class="op">@</span><span class="var_">var</span> <span class="op">==</span> <span class="num">5</span>         <span class="cmt">// questo è vero</span>
+<span class="kw">IF</span> <span class="var_">prova4</span> <span class="op">=</span> \t<span class="var_">var</span> <span class="op">==</span> <span class="str">number</span>   <span class="cmt">// questo è vero</span></pre>
+    </div>
+  </section>
+
+  <!-- 9. FUNZIONI -->
+  <section class="section" id="funzioni">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>Funzioni</h2>
+    </div>
+    <p>Le funzioni sono dei blocchi di codice che descrivono senza eseguire.</p>
+    <div class="code-wrap">
+      <div class="code-label">Sintassi</div>
+      <pre><span class="kw">FUN</span> <span class="var_">nome_funzione</span>(parametri)
+  <span class="cmt">...</span>
+  <span class="kw">return</span>
+  <span class="kw">FEND</span></pre>
+    </div>
+    <table class="def-table">
+      <thead><tr><th>Elemento</th><th>Descrizione</th></tr></thead>
+      <tbody>
+        <tr><td><code>FUN</code></td><td>Parola chiave.</td></tr>
+        <tr><td><code>nome_funzione</code></td><td>Nome univoco della funzione.</td></tr>
+        <tr><td><code>parametri</code></td><td>Valori di variabili esterne da considerare. Se ne possono mettere quanti se ne vogliono (anche nessuno), separati da virgola.</td></tr>
+        <tr><td><code>...</code></td><td>Codice della funzione.</td></tr>
+        <tr><td><code>return</code></td><td>Facoltativo; se incluso, va messo obbligatoriamente alla fine. Il valore di ritorno si può salvare in una variabile o stamparlo. Se ne può includere uno solo per funzione.</td></tr>
+        <tr><td><code>FEND</code></td><td>Chiude il blocco.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Chiamata di una funzione</h3>
+    <div class="code-wrap">
+      <div class="code-label">Esecuzione</div>
+      <pre><span class="var_">nome_funzione</span>()</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">Salvare il valore di ritorno</div>
+      <pre><span class="var_">nome_variabile</span> <span class="op">=</span> <span class="var_">nome_funzione</span>()</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Esempio semplice</div>
+      <pre><span class="kw">FUN</span> <span class="var_">ciao</span>()
+  <span class="kw">OUT</span> ciao
+  <span class="kw">FEND</span>
+<span class="var_">ciao</span>()</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">ciao</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Esempio con parametri e return</div>
+      <pre><span class="var_">nome</span> <span class="op">=</span> <span class="str">Mario</span>
+<span class="kw">FUN</span> <span class="var_">ciao</span>(<span class="var_">iniziale</span>)
+  <span class="kw">OUT</span> ciao <span class="op">@</span><span class="var_">iniziale</span>!
+  <span class="op">$</span><span class="var_">numero</span> <span class="op">=</span> <span class="num">5</span>
+  <span class="kw">return</span> <span class="op">@</span><span class="var_">numero</span>
+  <span class="kw">FEND</span>
+<span class="var_">ciao</span>(<span class="op">@</span><span class="var_">nome</span>)
+<span class="var_">val</span> <span class="op">=</span> <span class="var_">ciao</span>(<span class="op">@</span><span class="var_">nome</span>)
+<span class="kw">OUT</span> <span class="op">@</span><span class="var_">val</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">ciao Mario!
+5</pre>
+    </div>
+
+    <h3>Blocchi THEN</h3>
+    <p>Esistono delle funzioni speciali che non accettano argomenti e non ritornano valori: i blocchi <code>THEN</code>. La struttura è simile a quella delle funzioni, ma bisogna sostituire <code>FUN</code> con <code>THEN</code> e <code>FEND</code> con <code>THEND</code>, e non è possibile includere un <code>return</code>.</p>
+    <div class="code-wrap">
+      <div class="code-label">Sintassi THEN</div>
+      <pre><span class="kw">THEN</span> <span class="var_">nome_then</span>
+  <span class="cmt">...</span>
+  <span class="kw">THEND</span></pre>
+    </div>
+    <p>Che è equivalente a:</p>
+    <div class="code-wrap">
+      <div class="code-label">Equivalente con FUN</div>
+      <pre><span class="kw">FUN</span> <span class="var_">nome_funzione</span>()
+  <span class="cmt">...</span>
+  <span class="kw">FEND</span></pre>
+    </div>
+    <div class="callout purple">L'uso di <code>THEN</code> è puramente facoltativo e solo per comodità. Questa tipologia può essere chiamata solo in un GO block.</div>
+  </section>
+
+  <!-- 10. GO BLOCK -->
+  <section class="section" id="go">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2>GO Block</h2>
+    </div>
+    <p>Per eseguire una certa funzione (solitamente un <code>THEN</code>, in quanto il GO non accede a funzioni che accettano parametri e che ritornano valori) in relazione a un certo IF, si usa il GO block.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Sintassi</div>
+      <pre><span class="kw">GO</span> <span class="op">#</span><span class="var_">nome_if</span> <span class="op">#</span><span class="var_">nome_funzione</span>() <span class="op">#</span><span class="var_">ripetizioni</span>
+
+<span class="cmt">// o se si è usato THEN al posto di FUN</span>
+
+<span class="kw">GO</span> <span class="op">#</span><span class="var_">nome_if</span> <span class="op">#</span><span class="var_">nome_then</span> <span class="op">#</span><span class="var_">ripetizioni</span></pre>
+    </div>
+    <table class="def-table">
+      <thead><tr><th>Elemento</th><th>Descrizione</th></tr></thead>
+      <tbody>
+        <tr><td><code>#nome_if</code></td><td>Nome del IF block a cui si riferisce.</td></tr>
+        <tr><td><code>#nome_funzione() / #nome_then</code></td><td>Nome della funzione a cui si riferisce. Come già detto la funzione non può includere <code>return</code> e non può accettare argomenti; è buona norma usare <code>THEN</code> per chiarezza.</td></tr>
+        <tr><td><code>#ripetizioni</code></td><td>Volte che deve essere eseguito di fila. Se uguale a <code>1</code> si può omettere. Esiste un valore speciale <code>c</code>: con esso il GO si ripeterà finché la condizione è vera.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Esempi</h3>
+    <div class="code-wrap">
+      <div class="code-label">Esecuzione singola</div>
+      <pre><span class="kw">IF</span> <span class="var_">se</span> <span class="op">=</span> <span class="str">V</span>
+<span class="kw">THEN</span> <span class="var_">allora</span>
+  <span class="kw">OUT</span> Evviva!
+  <span class="kw">THEND</span>
+<span class="kw">GO</span> <span class="op">#</span><span class="var_">se</span> <span class="op">#</span><span class="var_">allora</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">Evviva!</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Ripetizioni con variabile</div>
+      <pre><span class="op">$</span><span class="var_">conta</span> <span class="op">=</span> <span class="num">2</span>
+<span class="kw">IF</span> <span class="var_">se</span> <span class="op">=</span> <span class="str">V</span>
+<span class="kw">THEN</span> <span class="var_">allora</span>
+  <span class="kw">OUT</span> Evviva!
+  <span class="kw">THEND</span>
+<span class="kw">GO</span> <span class="op">#</span><span class="var_">se</span> <span class="op">#</span><span class="var_">allora</span> <span class="op">#@</span><span class="var_">conta</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">Evviva!
+Evviva!</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Ripetizioni con numero fisso</div>
+      <pre><span class="kw">IF</span> <span class="var_">se</span> <span class="op">=</span> <span class="str">V</span>
+<span class="kw">THEN</span> <span class="var_">allora</span>
+  <span class="kw">OUT</span> Evviva!
+  <span class="kw">THEND</span>
+<span class="kw">GO</span> <span class="op">#</span><span class="var_">se</span> <span class="op">#</span><span class="var_">allora</span> <span class="op">#</span><span class="num">3</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">Evviva!
+Evviva!
+Evviva!</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Ripetizioni con c (finché la condizione è vera)</div>
+      <pre><span class="op">$</span><span class="var_">conta</span> <span class="op">=</span> <span class="num">0</span>
+<span class="kw">IF</span> <span class="var_">se</span> <span class="op">=</span> <span class="op">@</span><span class="var_">conta</span> <span class="op">&lt;</span> <span class="num">3</span>
+<span class="kw">THEN</span> <span class="var_">allora</span>
+  <span class="kw">OUT</span> Evviva!
+  <span class="var_">conta</span> <span class="op">=</span> <span class="op">@</span><span class="var_">conta</span> <span class="op">+</span> <span class="num">1</span>
+  <span class="kw">THEND</span>
+<span class="kw">GO</span> <span class="op">#</span><span class="var_">se</span> <span class="op">#</span><span class="var_">allora</span> <span class="op">#</span>c</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">Evviva!
+Evviva!
+Evviva!</pre>
+    </div>
+
+    <h3>Concatenazione di condizioni — elif / else</h3>
+    <p>Se si vuole che nel caso non soddisfi la condizione iniziale si esegua un'altra azione sotto un'altra condizione, dopo le tre parti del GO se ne aggiungono altre tre con <code>&amp;</code>. Equivale a un <code>elif</code> di Python.</p>
+    <p>Se invece si usa <code>&amp;&amp;</code>, viene interpretata come il <code>then</code> da eseguire nel caso in cui tutte le condizioni precedenti siano false. Equivale a un <code>else</code> di Python. Si può porre solo alla fine; non si possono aggiungere altri <code>&amp;</code> dopo di esso. Una sola condizione alla volta può essere vera.</p>
+    <div class="code-wrap">
+      <div class="code-label">Struttura completa elif/else</div>
+      <pre><span class="kw">GO</span> <span class="op">#</span><span class="var_">if_1</span> <span class="op">#</span><span class="var_">then_1</span> <span class="op">#</span><span class="var_">ripetizioni_1</span> <span class="op">&amp;</span> <span class="op">#</span><span class="var_">if_2</span> <span class="op">#</span><span class="var_">then_2</span> <span class="op">&amp;&amp;</span> <span class="op">#</span><span class="var_">then_3</span> <span class="op">#</span><span class="var_">ripetizioni_3</span></pre>
+    </div>
+  </section>
+
+  <!-- 11. LISTE -->
+  <section class="section" id="liste">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <h2>Liste</h2>
+    </div>
+    <p>È possibile creare variabili che immagazzinano più valori: le <strong>liste</strong>.</p>
+    <div class="code-wrap">
+      <div class="code-label">Sintassi</div>
+      <pre><span class="var_">lista</span> <span class="op">=</span> [<span class="str">ciao</span> <span class="op">;</span> <span class="str">salve</span>]</pre>
+    </div>
+    <p>La lista si deve includere fra parentesi quadre. Ogni elemento è separato da <code>;</code> (usare <code>\</code> per indicare che <code>;</code> è un elemento della lista e non un divisore).</p>
+
+    <h3>Indici e tag</h3>
+    <p>A ogni elemento si associa:</p>
+    <ul style="margin: 0 0 14px 20px; color: var(--muted); font-size: 15px;">
+      <li>Un <strong>indice</strong>, che indica la posizione nella lista e parte da <code>0</code>. Per esempio <code>ciao</code> ha indice <code>0</code> e <code>salve</code> ha indice <code>1</code>.</li>
+      <li>Uno o più <strong>tag</strong>, che si possono aggiungere con <code>|</code>. Se si vuole usare <code>|</code> come carattere usare l'escape <code>\</code>.</li>
+    </ul>
+    <div class="code-wrap">
+      <div class="code-label">Lista con tag</div>
+      <pre><span class="var_">lista</span> <span class="op">=</span> [<span class="str">saluto</span> <span class="op">|</span> <span class="str">ciao</span>]</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">Lista con più tag</div>
+      <pre><span class="var_">lista</span> <span class="op">=</span> [<span class="str">italiano</span> <span class="op">|</span> <span class="str">saluto</span> <span class="op">|</span> <span class="str">ciao</span> <span class="op">;</span> <span class="str">salve</span>]</pre>
+    </div>
+    <p>In questo caso <code>ciao</code> ha due tag (<code>saluto</code> e <code>italiano</code>) e <code>salve</code> nessuno.</p>
+
+    <h3>Liste annidate</h3>
+    <p>Elementi di una lista possono essere liste stesse:</p>
+    <div class="code-wrap">
+      <div class="code-label">Lista annidata</div>
+      <pre><span class="var_">lista</span> <span class="op">=</span> [<span class="str">nomi</span> <span class="op">|</span> [<span class="str">Giulio</span> <span class="op">;</span> <span class="str">Carlo</span>] <span class="op">;</span> <span class="str">cognomi</span> <span class="op">|</span> [<span class="str">Bianchi</span> <span class="op">;</span> <span class="str">Ferrari</span>]]</pre>
+    </div>
+
+    <h3>Aggiungere elementi — ADD</h3>
+    <div class="code-wrap">
+      <div class="code-label">Sintassi</div>
+      <pre><span class="kw">ADD</span> <span class="var_">nome_lista</span> <span class="kw">AT</span> <span class="var_">indice</span> <span class="op">=</span> valore</pre>
+    </div>
+    <table class="def-table">
+      <thead><tr><th>Elemento</th><th>Descrizione</th></tr></thead>
+      <tbody>
+        <tr><td><code>ADD</code></td><td>Parola chiave.</td></tr>
+        <tr><td><code>nome_lista</code></td><td>Nome della lista a cui aggiungere.</td></tr>
+        <tr><td><code>AT</code></td><td>Parola chiave. L'indice deve essere minore o uguale all'ultimo indice; quello che c'era già a quell'indice verrà spostato di uno in avanti. Se lasciato vuoto va all'ultimo posto.</td></tr>
+        <tr><td><code>valore</code></td><td>Valore da aggiungere.</td></tr>
+      </tbody>
+    </table>
+    <div class="code-wrap">
+      <div class="code-label">Inserimento in posizione specifica</div>
+      <pre><span class="var_">lista</span> <span class="op">=</span> [<span class="str">ciao</span> <span class="op">;</span> <span class="str">salve</span>]
+<span class="kw">ADD</span> <span class="var_">lista</span> <span class="kw">AT</span> <span class="num">1</span> <span class="op">=</span> <span class="str">buongiorno</span>
+<span class="kw">OUT</span> <span class="op">@</span><span class="var_">lista</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">[ciao ; buongiorno ; salve]</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Inserimento in fondo</div>
+      <pre><span class="var_">lista</span> <span class="op">=</span> [<span class="str">ciao</span> <span class="op">;</span> <span class="str">salve</span>]
+<span class="kw">ADD</span> <span class="var_">lista</span> <span class="kw">AT</span> <span class="op">=</span> <span class="str">buongiorno</span>
+<span class="kw">OUT</span> <span class="op">@</span><span class="var_">lista</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">[ciao ; salve ; buongiorno]</pre>
+    </div>
+
+    <p>Per <strong>sostituire</strong> un elemento al posto di <code>AT</code> si usa <code>IN</code>:</p>
+    <div class="code-wrap">
+      <div class="code-label">Sostituzione con IN</div>
+      <pre><span class="var_">lista</span> <span class="op">=</span> [<span class="str">ciao</span> <span class="op">;</span> <span class="str">salve</span>]
+<span class="kw">ADD</span> <span class="var_">lista</span> <span class="kw">IN</span> <span class="num">1</span> <span class="op">=</span> <span class="str">buongiorno</span>
+<span class="kw">OUT</span> <span class="op">@</span><span class="var_">lista</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">[ciao ; buongiorno]</pre>
+    </div>
+
+    <h3>Cancellare elementi — CANC</h3>
+    <div class="code-wrap">
+      <div class="code-label">Sintassi</div>
+      <pre><span class="kw">CANC</span> <span class="var_">nome_lista</span> <span class="kw">AT</span> indice    <span class="cmt">// per indice</span>
+<span class="kw">CANC</span> <span class="var_">nome_lista</span> <span class="kw">IN</span> tag       <span class="cmt">// per tag</span>
+<span class="kw">CANC</span> <span class="var_">nome_lista</span> <span class="kw">IS</span> valore    <span class="cmt">// per valore</span></pre>
+    </div>
+    <div class="callout warn">Se due elementi hanno un tag in comune verranno eliminati entrambi. Si può scegliere anche una lista di tag:
+      <br><br><code>CANC nome_lista IN [tag1 ; tag2]</code>
+    </div>
+
+    <h3>Richiamare elementi</h3>
+    <p>Per richiamare le liste si usa <code>@</code> (non dare a liste e variabili lo stesso nome, sono la stessa cosa!).</p>
+    <div class="code-wrap">
+      <div class="code-label">Accesso per indice/tag</div>
+      <pre><span class="var_">nome_lista</span>[<span class="var_">indice</span>]
+<span class="var_">nome_lista</span>[<span class="var_">tag</span>]
+<span class="var_">nome_lista</span>[<span class="var_">tag1</span> <span class="op">;</span> <span class="var_">tag2</span>]</pre>
+    </div>
+    <p>I valori di una lista sono solo stringhe, ma si può sempre convertire quando si richiama. Se si stampa una lista, verranno visualizzati solo i valori e non i tag. Per visualizzare anche i tag si usa <code>tOUT</code> al posto di <code>OUT</code>.</p>
+    <div class="code-wrap">
+      <div class="code-label">OUT vs tOUT</div>
+      <pre><span class="var_">lista</span> <span class="op">=</span> [<span class="str">saluto</span> <span class="op">|</span> <span class="str">ciao</span>]
+<span class="kw">OUT</span>  <span class="op">@</span><span class="var_">lista</span>
+<span class="kw">tOUT</span> <span class="op">@</span><span class="var_">lista</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">[saluto]
+[saluto | ciao]</pre>
+    </div>
+  </section>
+
+  <!-- 12. ALTRE PAROLE CHIAVE -->
+  <section class="section" id="altrechiavi">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <h2>Altre parole chiave</h2>
+    </div>
+
+    <h3>Scope delle variabili — RET / DEFRET / TEMP</h3>
+    <p>Di default una variabile in un blocco è accessibile solo all'interno del blocco stesso o dei blocchi interni. Per rendere una variabile globale si antepone <code>RET</code> al nome.</p>
+    <p>Se invece si vuole che di default in un dato blocco tutte le variabili siano globali, si usa all'inizio del blocco la parola <code>DEFRET</code>. Dopodiché, se si vuole che una singola variabile rimanga non globale, si antepone <code>TEMP</code>.</p>
+    <div class="code-wrap">
+      <div class="code-label">Esempio</div>
+      <pre><span class="kw">FUN</span> <span class="var_">ciao</span>()
+  <span class="kw">RET</span> <span class="op">$</span><span class="var_">uno</span> <span class="op">=</span> <span class="num">1</span>
+  <span class="op">$</span><span class="var_">tre</span> <span class="op">=</span> <span class="num">3</span>
+  <span class="kw">FEND</span>
+<span class="kw">FUN</span> <span class="var_">cioa</span>()
+  <span class="kw">DEFRET</span>
+  <span class="op">$</span><span class="var_">due</span> <span class="op">=</span> <span class="num">2</span>
+  <span class="kw">TEMP</span> <span class="op">$</span><span class="var_">quattro</span> <span class="op">=</span> <span class="num">4</span></pre>
+    </div>
+    <p>In questo caso le variabili <code>tre</code> e <code>quattro</code> non sono accessibili dall'esterno; invece <code>uno</code> e <code>due</code> sì.</p>
+
+    <h3>Operatore IN</h3>
+    <p><code>IN</code> si usa per determinare se un elemento è in un dato insieme di valori (per esempio una lista). Se è presente, il risultato è <code>V</code>, altrimenti è <code>F</code>.</p>
+    <div class="code-wrap">
+      <div class="code-label">Esempio</div>
+      <pre><span class="var_">lista</span> <span class="op">=</span> [<span class="str">ciao</span>]
+<span class="kw">IF</span> <span class="var_">esiste</span> <span class="op">=</span> <span class="str">ciao</span> <span class="kw">IN</span> <span class="var_">lista</span>
+<span class="kw">THEN</span> <span class="var_">stampa</span>
+  <span class="kw">OUT</span> c'è!
+  <span class="kw">THEND</span>
+<span class="kw">GO</span> <span class="op">#</span><span class="var_">esiste</span> <span class="op">#</span><span class="var_">stampa</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">c'è!</pre>
+    </div>
+
+    <h3>Costanti — STAY</h3>
+    <p><code>STAY</code> si antepone al nome di una variabile per renderla immodificabile (costante).</p>
+    <div class="code-wrap">
+      <div class="code-label">Esempio</div>
+      <pre><span class="kw">STAY</span> <span class="var_">ciao</span> <span class="op">=</span> <span class="str">ciao</span>
+<span class="var_">ciao</span> <span class="op">=</span> <span class="str">cioa</span>  <span class="cmt">// errore!</span></pre>
+    </div>
+  </section>
+
+  <!-- 13. GESTIONE ERRORI -->
+  <section class="section" id="errori">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <h2>Gestione errori</h2>
+    </div>
+
+    <h3>Codici di errore</h3>
+    <div class="error-grid">
+      <div class="eh">Codici di errore LINE</div>
+      <div class="ec">VAR_NOT_FOUND</div><div class="em">Variabile inesistente</div>
+      <div class="ec">TYPE_ERROR</div><div class="em">Tipo di dato non valido</div>
+      <div class="ec">INVALID_CONVERSION</div><div class="em">Conversione di tipo non possibile</div>
+      <div class="ec">CONST_MODIFY</div><div class="em">Tentativo di modifica di una costante (STAY)</div>
+      <div class="ec">DIV_BY_ZERO</div><div class="em">Divisione per zero</div>
+      <div class="ec">MATH_ERROR</div><div class="em">Operazione matematica non valida</div>
+      <div class="ec">BOOL_EXPECTED</div><div class="em">Atteso valore booleano</div>
+      <div class="ec">NUMBER_EXPECTED</div><div class="em">Atteso valore numerico</div>
+      <div class="ec">STRING_EXPECTED</div><div class="em">Attesa stringa</div>
+      <div class="ec">LIST_NOT_FOUND</div><div class="em">Lista inesistente</div>
+      <div class="ec">LIST_OUT_OF_RANGE</div><div class="em">Indice fuori dai limiti della lista</div>
+      <div class="ec">LIST_EMPTY</div><div class="em">Lista vuota</div>
+      <div class="ec">TAG_NOT_FOUND</div><div class="em">Tag inesistente nella lista</div>
+      <div class="ec">DUPLICATE_TAG</div><div class="em">Tag duplicato non consentito</div>
+      <div class="ec">FUNC_NOT_FOUND</div><div class="em">Funzione inesistente</div>
+      <div class="ec">INVALID_ARGUMENTS</div><div class="em">Argomenti non validi</div>
+      <div class="ec">RETURN_NOT_ALLOWED</div><div class="em">Uso di return non consentito</div>
+      <div class="ec">THEN_ARGUMENTS</div><div class="em">Uso di argomenti in un blocco THEN</div>
+      <div class="ec">IF_NOT_FOUND</div><div class="em">IF block inesistente</div>
+      <div class="ec">GO_INVALID</div><div class="em">GO block non valido</div>
+      <div class="ec">GO_LOOP_ERROR</div><div class="em">Loop infinito o non valido</div>
+      <div class="ec">INPUT_ERROR</div><div class="em">Errore nell'input</div>
+      <div class="ec">OUTPUT_ERROR</div><div class="em">Errore di output</div>
+      <div class="ec">SYNTAX_ERROR</div><div class="em">Errore di sintassi</div>
+      <div class="ec">ESCAPE_ERROR</div><div class="em">Escape non valido</div>
+      <div class="ec">UNKNOWN_ERROR</div><div class="em">Errore sconosciuto</div>
+      <div class="ec">MOD_NOT_FOUND</div><div class="em">Modulo non trovato</div>
+    </div>
+
+    <h3>TRY / SHOW / YET</h3>
+    <p><code>TRY</code>, <code>SHOW</code> e <code>YET</code> permettono di gestire errori di esecuzione senza interrompere bruscamente il programma. <code>SHOW</code> e <code>YET</code> sono facoltativi.</p>
+    <div class="code-wrap">
+      <div class="code-label">Struttura</div>
+      <pre><span class="kw">TRY</span> <span class="var_">nome_try</span>
+  <span class="cmt">...</span>
+  <span class="kw">TREND</span>
+
+<span class="kw">SHOW</span> <span class="var_">nome_show</span> <span class="op">#</span><span class="var_">nome_try</span>
+  <span class="cmt">...</span>
+  <span class="kw">SEND</span>
+
+<span class="kw">YET</span> <span class="op">#</span><span class="var_">nome_try</span>
+  <span class="cmt">...</span>
+  <span class="kw">YEND</span></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Esempio TRY / SHOW</div>
+      <pre><span class="kw">TRY</span> <span class="var_">prova</span>
+  <span class="op">$</span><span class="var_">a</span> <span class="op">=</span> <span class="num">10</span> <span class="op">/</span> <span class="num">0</span>
+  <span class="kw">TREND</span>
+
+<span class="kw">SHOW</span> <span class="var_">gestisci</span> <span class="op">#</span><span class="var_">prova</span>
+  <span class="kw">OUT</span> Errore
+  <span class="kw">SEND</span></pre>
+    </div>
+
+    <h3>Variabili di errore</h3>
+    <p>Quando avviene un errore gestito da LINE, nello <code>SHOW</code> sono disponibili le variabili:</p>
+    <table class="def-table">
+      <thead><tr><th>Variabile</th><th>Tipo</th><th>Descrizione</th></tr></thead>
+      <tbody>
+        <tr><td><code>ERR_CODE</code></td><td>Numerale</td><td>Se è un errore gestito da LINE (vedi la lista sopra), vale <code>1</code>.</td></tr>
+        <tr><td><code>ERR_MSG</code></td><td>Stringa</td><td>Descrizione testuale dell'errore.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">Le variabili <code>ERR_CODE</code> e <code>ERR_MSG</code> esistono solo all'interno dello SHOW.</div>
+    <div class="code-wrap">
+      <div class="code-label">Esempio con ERR_CODE / ERR_MSG</div>
+      <pre><span class="kw">TRY</span> <span class="var_">prova</span>
+  <span class="kw">OUT</span> <span class="op">@</span><span class="var_">inesistente</span>
+  <span class="kw">TREND</span>
+
+<span class="kw">SHOW</span> <span class="var_">gestisci</span> <span class="op">#</span><span class="var_">prova</span>
+  <span class="kw">OUT</span> <span class="op">@</span><span class="var_">ERR_CODE</span>
+  <span class="kw">OUT</span> <span class="op">@</span><span class="var_">ERR_MSG</span>
+  <span class="kw">SEND</span></pre>
+    </div>
+
+    <h3>YET — esecuzione garantita</h3>
+    <p>Il blocco <code>YET</code> viene sempre eseguito, sia in caso di errore sia in caso di esecuzione corretta.</p>
+    <div class="code-wrap">
+      <div class="code-label">Esempio YET</div>
+      <pre><span class="kw">TRY</span> <span class="var_">prova</span>
+  <span class="op">$</span><span class="var_">a</span> <span class="op">=</span> <span class="num">10</span> <span class="op">/</span> <span class="num">2</span>
+  <span class="kw">TREND</span>
+
+<span class="kw">YET</span> <span class="op">#</span><span class="var_">prova</span>
+  <span class="kw">OUT</span> Fine operazione
+  <span class="kw">YEND</span></pre>
+    </div>
+
+    <h3>Comportamento di default</h3>
+    <p>Di default LINE assume questo comportamento: se un errore avviene all'interno di un <code>TRY</code> e non è intercettato da nessuno <code>SHOW</code>, allora:</p>
+    <ul style="margin: 0 0 16px 20px; color: var(--muted); font-size: 15px;">
+      <li>Assegna <code>ERR_CODE = 1</code></li>
+      <li>Stampa <code>ERR_MSG</code></li>
+      <li>Termina l'esecuzione del programma</li>
+    </ul>
+
+    <div class="callout">Regole importanti:
+      <ul style="margin: 8px 0 0 16px; font-size: 15px;">
+        <li><code>TRY</code> non può essere annidato</li>
+        <li>Ogni <code>TRY</code> può avere un solo <code>SHOW</code></li>
+        <li>Ogni <code>TRY</code> può avere un solo <code>YET</code></li>
+        <li><code>ERR_CODE</code> ed <code>ERR_MSG</code> esistono solo nello <code>SHOW</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 14. MODULI -->
+  <section class="section" id="moduli">
+    <div class="section-header">
+      <span class="section-num">14</span>
+      <h2>Moduli</h2>
+    </div>
+    <p>I moduli sono file con codice al loro interno, suddiviso in funzioni. Per usare queste funzioni all'interno del proprio file bisogna prima importare il modulo; le funzioni al suo interno si richiamano come funzioni normali.</p>
+    <p>Una funzione in un modulo ha un nome composto così: <code>nomemodulo_nomefunzione()</code>.</p>
+
+    <div class="code-wrap">
+      <div class="code-label">Sintassi import</div>
+      <pre><span class="kw">TAKE</span> <span class="var_">nomemodulo</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">Esempio</div>
+      <pre><span class="kw">TAKE</span> <span class="var_">math</span>
+<span class="var_">var</span> <span class="op">=</span> <span class="var_">math_sqrt</span>(<span class="num">9</span>)
+<span class="kw">OUT</span> <span class="op">@</span><span class="var_">var</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label out-label">Output</div>
+      <pre class="output">3</pre>
+    </div>
+
+    <div class="callout">Per conoscere l'elenco dei moduli, digitare <code>.MODS</code> in un file vuoto ed eseguire il codice: nella console si avrà la lista completa dei moduli.<br><br>Per vedere l'elenco delle funzioni di un modulo e il loro funzionamento, digitare il nome in maiuscolo del modulo preceduto da un punto (es. <code>.MATH</code>) in un file vuoto ed eseguire.</div>
+  </section>
+
+  <!-- 15. FILE LINE -->
+  <section class="section" id="file">
+    <div class="section-header">
+      <span class="section-num">15</span>
+      <h2>File LINE</h2>
+    </div>
+    <p>Un file con codice LINE viene salvato con estensione <code>.line</code>.</p>
+    <div class="code-wrap">
+      <div class="code-label">Estensione file</div>
+      <pre><span class="var_">nomefile</span><span class="op">.line</span></pre>
+    </div>
+  </section>
+
+  <footer>
+    Manuale <span>LINE 2.0</span> &nbsp;·&nbsp; Documentazione di riferimento
+  </footer>
+
+</div>
+</body>
+</html>
