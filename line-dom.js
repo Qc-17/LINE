@@ -91,12 +91,22 @@
     return (tag === "input" || tag === "textarea") ? el.value : el.textContent.trim();
   }
 
+  /* ── Inietta variabili da input DOM in cima al sorgente ── */
+  function injectInputVars(src) {
+    const lines = [];
+    document.querySelectorAll('input[id], textarea[id], select[id]').forEach(el => {
+      const val = el.value.replace(/\\/g, '\\\\').replace(/\n/g, '\\n');
+      lines.push(el.id + ' = ' + val);
+    });
+    return lines.length ? lines.join('\n') + '\n' + src : src;
+  }
+
   /* ── LINE_dom (API programmatica) ── */
   async function LINE_dom(src, options = {}) {
     if (typeof G.LINE_run !== "function")
       throw new Error("[LINE-DOM] LINE_run non trovato. Carica interpreter.js prima di line-dom.js.");
 
-    const processed = preprocess(src);
+    const processed = preprocess(injectInputVars(src));
     const opts = {
       replace:   options.replace   || false,
       separator: options.separator !== undefined ? options.separator : "\n",
