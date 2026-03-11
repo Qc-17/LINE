@@ -123,6 +123,10 @@
     };
 
     const inputHandler = async (prompt) => {
+      // Prima cerca un elemento con id = nome della variabile
+      const elById = document.getElementById(prompt);
+      if (elById) return readFromElement(elById);
+      // Poi prova l'elemento corrente (tag <id>INP</id>)
       if (currentId) {
         const el = document.getElementById(currentId);
         if (el) { const v = readFromElement(el); if (v !== "") return v; }
