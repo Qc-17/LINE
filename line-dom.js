@@ -199,7 +199,7 @@
       const trimmed = line.trim();
 
       // THEN:btnId nomeblocco
-      const thenM = trimmed.match(/^THEN:(\w+)\s+(\w+)/);
+      const thenM = trimmed.match(/^THEN:([\w-]+)\s+(\w+)/);
       if (thenM) {
         blocks[thenM[1]] = thenM[2];
         cleaned.push(line.replace(':' + thenM[1], ''));
@@ -207,7 +207,7 @@
       }
 
       // FUN:btnId nome(...)
-      const funM = trimmed.match(/^FUN:(\w+)\s+(\w+)/);
+      const funM = trimmed.match(/^FUN:([\w-]+)\s+(\w+)/);
       if (funM) {
         blocks[funM[1]] = funM[2];
         cleaned.push(line.replace(':' + funM[1], ''));
@@ -215,7 +215,7 @@
       }
 
       // GO:btnId @{...} — avvolge in un THEN anonimo generato
-      const goM = trimmed.match(/^GO:(\w+)\s+/);
+      const goM = trimmed.match(/^GO:([\w-]+)\s+/);
       if (goM) {
         const btnId    = goM[1];
         const autoName = '__go_' + btnId + '_' + Math.random().toString(36).slice(2, 7);
