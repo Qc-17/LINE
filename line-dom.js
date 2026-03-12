@@ -6,39 +6,34 @@
  *
  *  ROUTING OUTPUT
  *  ──────────────
- *  <id>TALK testo</id>           → scrive in #id (replace)
- *  <id=after>TALK testo</id>     → appende in fondo a #id
- *  <id=before>TALK testo</id>    → inserisce all'inizio di #id
- *  <.cls>TALK testo</.cls>       → scrive in tutti gli elementi con classe .cls
- *  <.cls=after>TALK testo</.cls> → appende a tutti gli elementi con classe .cls
+ *  <id>TALK testo</id>             → scrive in #id (replace)
+ *  <id=after>TALK testo</id>       → appende in fondo a #id
+ *  <id=before>TALK testo</id>      → inserisce all'inizio di #id
+ *  <.cls>TALK testo</.cls>         → scrive in tutti gli elementi con classe cls
+ *  <.cls=after>TALK testo</.cls>   → appende a tutti gli elementi con classe cls
  *
  *  LOCALSTORAGE
  *  ────────────
- *  <ls>var = valore</ls>   → salva var in localStorage (KEY: "line_var")
- *                            e la inietta come variabile LINE ad ogni run
+ *  <ls>var = valore</ls>   → salva "var" in localStorage con chiave "line_var"
+ *                            le variabili salvate vengono iniettate ad ogni run
  *
  *  ESCAPE
  *  ──────
- *  \n nel testo → <br> nell'HTML (negli elementi non-input)
+ *  \n nel testo → <br> negli elementi HTML (non negli input)
  *
- *  ONCLICK
- *  ───────
- *  Se l'etichetta di un THEN/FUN/GO corrisponde all'id di un bottone,
- *  line-dom registra automaticamente il click su quel bottone per
- *  eseguire quel blocco. Implementato tramite attributo onclick="label"
- *  nel tag script:
- *    <script type="text/line" onclick="btnId:label">
- *  Il formato è  btnId:nomeLabel  (più coppie separate da virgola)
+ *  ONCLICK SU BLOCCO
+ *  ─────────────────
+ *  <script type="text/line" onclick="btnId:nomeLabel,btn2:label2">
+ *  Aggancia il click di #btnId all'esecuzione del blocco THEN/FUN "nomeLabel"
  *
  *  ATTRIBUTI DEL TAG  <script type="text/line">
  *  ─────────────────────────────────────────────
- *  trigger="id"        → esegue l'intero programma al click
- *  autorun             → esegue subito al caricamento
- *  replace             → ogni TALK sostituisce (default: replace)
- *  counter="id"        → inietta __N__ e scrive il contatore in #id
- *  body-class="id"     → applica il testo di #id come className del body
- *  onclick="btnId:lbl" → aggancia click di #btnId all'esecuzione del
- *                        blocco THEN/FUN di nome lbl (virgola per più coppie)
+ *  trigger="id"         → esegue l'intero programma al click di #id
+ *  autorun              → esegue subito al caricamento
+ *  replace              → ogni TALK sostituisce (default)
+ *  counter="id"         → inietta __N__ e scrive il contatore in #id
+ *  body-class="id"      → applica testo di #id come className del body
+ *  onclick="btnId:lbl"  → aggancia click di #btnId al blocco lbl
  *
  *  API PROGRAMMATICA
  *  ─────────────────
@@ -50,33 +45,30 @@
 (function (G) {
   "use strict";
 
-  /* ── Marcatori interni ── */
-  const M_SET   = "\x01";   // \x01<target>\x01  — imposta target corrente
-  const M_RESET = "\x02";   // \x02              — reset al fallback
-  const M_LS    = "\x03";   // \x03<key>=<val>   — localStorage set
+  const M_SET   = "\x01";
+  const M_RESET = "\x02";
 
   /* ══════════════════════════════════════════════════════════
      1. PREPROCESSORE
-     Trasforma tag <id>, <id=after>, <.cls>, <ls> in marker OUT.
+     Trasforma <id>, <id=mode>, <.cls>, <ls> in marker OUT.
   ══════════════════════════════════════════════════════════ */
   function preprocess(src) {
     const lines = src.split("\n");
     const out   = [];
-    const stack = [];   // stack di target attivi
+    const stack = [];
 
     for (const line of lines) {
       let rest = line, buf = "";
 
       while (rest.length > 0) {
 
-        /* ── Tag di apertura: <id>, <id=after>, <id=before>, <.cls>, <ls> ── */
-        // Formato: <target> oppure <target=mode>
+        // Apertura: <name>, <name=mode>, <.cls>, <.cls=mode>, <ls>
         const openM = rest.match(/^(.*?)<(\.[.\w-]+|ls|[\w][\w-]*)(?:=([\w]+))?>([\s\S]*)$/);
         if (openM) {
           buf += openM[1];
-          const rawTarget = openM[2];
-          const mode      = openM[3] || 'replace';  // replace | after | before
-          const target    = rawTarget + ':' + mode;  // es. "myDiv:after"
+          const name   = openM[2];
+          const mode   = openM[3] || 'replace';
+          const target = name + ':' + mode;
           stack.push(target);
           rest = openM[4];
           if (buf.trim()) out.push(buf.trimEnd());
@@ -84,7 +76,7 @@
           buf = ""; continue;
         }
 
-        /* ── Tag di chiusura: </id>, </.cls>, </ls> ── */
+        // Chiusura: </name>, </.cls>, </ls>
         const closeM = rest.match(/^(.*?)<\/(\.[\w-]+|ls|[\w][\w-]*)>([\s\S]*)$/);
         if (closeM) {
           buf += closeM[1];
@@ -104,63 +96,44 @@
   }
 
   /* ══════════════════════════════════════════════════════════
-     2. ESCAPE  \n → <br>
+     2. RISOLVE TARGET  "nome:mode"
   ══════════════════════════════════════════════════════════ */
-  function applyEscape(text) {
-    return text.replace(/\\n/g, '\n');
+  function resolveTarget(target) {
+    const i    = target.lastIndexOf(':');
+    const name = target.slice(0, i);
+    const mode = target.slice(i + 1);   // replace | after | before
+    if (name === 'ls') return { isLS: true, mode };
+    if (name.startsWith('.')) {
+      return { elements: Array.from(document.getElementsByClassName(name.slice(1))), mode, isLS: false };
+    }
+    const el = document.getElementById(name);
+    return { elements: el ? [el] : [], mode, isLS: false };
   }
 
   /* ══════════════════════════════════════════════════════════
-     3. SCRITTURA SU ELEMENTO
+     3. SCRITTURA SU ELEMENTO  (con escape \n → <br>)
   ══════════════════════════════════════════════════════════ */
-  function writeToElements(elements, text, mode) {
-    const escaped = applyEscape(text);
-    const hasNewline = escaped.includes('\n');
-
+  function writeToElements(elements, rawText, mode) {
     elements.forEach(el => {
       const tag = el.tagName.toLowerCase();
 
-      /* Input / textarea: sempre replace del value, no HTML */
       if (tag === 'input' || tag === 'textarea') {
-        if (mode === 'after')  { el.value += text; }
-        else if (mode === 'before') { el.value = text + el.value; }
-        else                   { el.value = text; }
+        if      (mode === 'after')  el.value += rawText;
+        else if (mode === 'before') el.value  = rawText + el.value;
+        else                        el.value  = rawText;
         el.dispatchEvent(new Event('input', { bubbles: true }));
         return;
       }
 
-      /* Elemento generico: usa innerHTML per supportare <br> */
-      if (mode === 'after') {
-        el.innerHTML += hasNewline ? escaped.replace(/\n/g, '<br>') : escaped;
-      } else if (mode === 'before') {
-        el.innerHTML = (hasNewline ? escaped.replace(/\n/g, '<br>') : escaped) + el.innerHTML;
-      } else {
-        /* replace */
-        el.innerHTML = hasNewline ? escaped.replace(/\n/g, '<br>') : escaped;
-      }
+      // Applica escape \n → <br>
+      const html = rawText.replace(/\\n/g, '<br>');
+
+      if      (mode === 'after')  el.innerHTML += html;
+      else if (mode === 'before') el.innerHTML  = html + el.innerHTML;
+      else                        el.innerHTML  = html;
 
       if (el.scrollHeight > el.clientHeight) el.scrollTop = el.scrollHeight;
     });
-  }
-
-  /* ── Risolve un target "nome:mode" → { elements, mode, isLS } ── */
-  function resolveTarget(target) {
-    const colonIdx = target.lastIndexOf(':');
-    const name = target.slice(0, colonIdx);
-    const mode = target.slice(colonIdx + 1);  // replace | after | before
-
-    /* localStorage */
-    if (name === 'ls') return { isLS: true, mode };
-
-    /* Classe  .nomeclasse */
-    if (name.startsWith('.')) {
-      const cls = name.slice(1);
-      return { elements: Array.from(document.getElementsByClassName(cls)), mode, isLS: false };
-    }
-
-    /* ID */
-    const el = document.getElementById(name);
-    return { elements: el ? [el] : [], mode, isLS: false };
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -168,8 +141,12 @@
   ══════════════════════════════════════════════════════════ */
   const LS_PREFIX = 'line_';
 
-  function lsSave(varName, value) {
-    try { localStorage.setItem(LS_PREFIX + varName, value); } catch(e) {}
+  function handleLS(text) {
+    const eq = text.indexOf('=');
+    if (eq < 0) return;
+    const key = text.slice(0, eq).trim();
+    const val = text.slice(eq + 1).trim();
+    try { localStorage.setItem(LS_PREFIX + key, val); } catch(e) {}
   }
 
   function lsLoadAll() {
@@ -177,23 +154,12 @@
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k.startsWith(LS_PREFIX)) {
-          const varName = k.slice(LS_PREFIX.length);
-          const val     = localStorage.getItem(k);
-          lines.push(`${varName} = ${val}`);
+        if (k && k.startsWith(LS_PREFIX)) {
+          lines.push(`${k.slice(LS_PREFIX.length)} = ${localStorage.getItem(k)}`);
         }
       }
     } catch(e) {}
     return lines;
-  }
-
-  /* Quando il target è <ls>, il testo è "varName = valore" */
-  function handleLS(text) {
-    const eq = text.indexOf('=');
-    if (eq < 0) return;
-    const varName = text.slice(0, eq).trim();
-    const value   = text.slice(eq + 1).trim();
-    lsSave(varName, value);
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -202,50 +168,101 @@
   function readFromElement(el) {
     const tag = el.tagName.toLowerCase();
     return (tag === 'input' || tag === 'textarea' || tag === 'select')
-      ? el.value
-      : el.textContent.trim();
+      ? el.value : el.textContent.trim();
   }
 
   /* ══════════════════════════════════════════════════════════
-     6. INIEZIONE VARIABILI PRIMA DEL RUN
-        - input/textarea/select[id] → variabile LINE
-        - localStorage (prefisso line_) → variabile LINE
+     6. INIEZIONE VARIABILI  (input DOM + localStorage)
   ══════════════════════════════════════════════════════════ */
   function injectVars(src) {
     const lines = [];
-
-    /* Input DOM */
     document.querySelectorAll('input[id], textarea[id], select[id]').forEach(el => {
       const val = el.value.replace(/\\/g, '\\\\').replace(/\n/g, '\\n');
       lines.push(`${el.id} = ${val}`);
     });
-
-    /* LocalStorage */
     lines.push(...lsLoadAll());
-
     return lines.length ? lines.join('\n') + '\n' + src : src;
   }
 
   /* ══════════════════════════════════════════════════════════
-     7. LINE_dom  —  API PRINCIPALE
+     7. ONCLICK SCANNER
+     Scansiona GO:id / THEN:id / FUN:id nel sorgente,
+     registra i click listener, restituisce il sorgente pulito.
+  ══════════════════════════════════════════════════════════ */
+  function scanOnclick(src, runFn) {
+    const lines   = src.split("\n");
+    const cleaned = [];
+    const blocks  = {};  // btnId → nome blocco da chiamare
+
+    // Prima passata: trova i pattern e raccogli i nomi
+    lines.forEach(line => {
+      const trimmed = line.trim();
+
+      // THEN:btnId nomeblocco
+      const thenM = trimmed.match(/^THEN:(\w+)\s+(\w+)/);
+      if (thenM) {
+        blocks[thenM[1]] = thenM[2];
+        cleaned.push(line.replace(':' + thenM[1], ''));
+        return;
+      }
+
+      // FUN:btnId nome(...)
+      const funM = trimmed.match(/^FUN:(\w+)\s+(\w+)/);
+      if (funM) {
+        blocks[funM[1]] = funM[2];
+        cleaned.push(line.replace(':' + funM[1], ''));
+        return;
+      }
+
+      // GO:btnId @{...} — avvolge in un THEN anonimo generato
+      const goM = trimmed.match(/^GO:(\w+)\s+/);
+      if (goM) {
+        const btnId    = goM[1];
+        const autoName = '__go_' + btnId + '_' + Math.random().toString(36).slice(2, 7);
+        blocks[btnId]  = autoName;
+        cleaned.push('THEN ' + autoName);
+        cleaned.push('  ' + line.replace(':' + btnId, '').trim());
+        cleaned.push('THEND');
+        return;
+      }
+
+      cleaned.push(line);
+    });
+
+    // Registra i listener per ogni btnId trovato
+    Object.entries(blocks).forEach(([btnId, label]) => {
+      const btn = document.getElementById(btnId);
+      if (btn && !btn.__linedom_bound) {
+        btn.__linedom_bound = true;
+        btn.addEventListener('click', () => runFn(label));
+      }
+    });
+
+    return cleaned.join("\n");
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     8. LINE_dom  —  API PRINCIPALE
   ══════════════════════════════════════════════════════════ */
   async function LINE_dom(src, options = {}) {
     if (typeof G.LINE_run !== 'function')
       throw new Error('[LINE-DOM] LINE_run non trovato. Carica interpreter.js prima di line-dom.js.');
 
-    const processed = preprocess(injectVars(src));
+    // Registra gli onclick inline (GO:id / THEN:id / FUN:id)
+    // runBlock esegue il sorgente completo + chiamata al blocco
+    const srcScanned = scanOnclick(src, async (label) => {
+      await LINE_dom(src + '\n' + label + '()', options);
+    });
 
-    let currentTarget = null;   // stringa "nome:mode" oppure null
+    const processed   = preprocess(injectVars(srcScanned));
+    let currentTarget = null;
 
     const outputHandler = (text) => {
-      /* Marker SET */
       if (text.startsWith(M_SET) && text.endsWith(M_SET) && text.length > 2) {
         currentTarget = text.slice(1, -1); return;
       }
-      /* Marker RESET */
       if (text === M_RESET) { currentTarget = null; return; }
 
-      /* Scrittura verso target */
       if (currentTarget) {
         const { elements, mode, isLS } = resolveTarget(currentTarget);
         if (isLS) { handleLS(text); return; }
@@ -255,17 +272,13 @@
           return;
         }
       }
-
-      /* Fallback */
       if (typeof options.output === 'function') options.output(text);
       else console.log('[LINE]', text);
     };
 
     const inputHandler = async (prompt) => {
-      /* Cerca elemento con id = nome variabile */
       const elById = document.getElementById(prompt);
       if (elById) return readFromElement(elById);
-      /* Prova il target corrente */
       if (currentTarget) {
         const { elements } = resolveTarget(currentTarget);
         if (elements.length) { const v = readFromElement(elements[0]); if (v !== '') return v; }
@@ -278,19 +291,19 @@
   }
 
   /* ══════════════════════════════════════════════════════════
-     8. AUTO-INIT  —  <script type="text/line" ...>
+     9. AUTO-INIT  —  <script type="text/line" ...>
   ══════════════════════════════════════════════════════════ */
   function autoInit() {
     document.querySelectorAll('script[type="text/line"]').forEach(script => {
       const src         = script.textContent;
       const triggerId   = script.getAttribute('trigger');
-      const replace     = script.hasAttribute('replace');
       const autorun     = script.hasAttribute('autorun');
+      const replace     = script.hasAttribute('replace');
       const counterId   = script.getAttribute('counter');
       const bodyClassId = script.getAttribute('body-class');
-      const onclickAttr = script.getAttribute('onclick');  // "btnId:label,btnId2:label2"
+      const onclickAttr = script.getAttribute('onclick');
 
-      /* body-class: MutationObserver su #id → body.className */
+      /* body-class */
       if (bodyClassId) {
         const watchEl = document.getElementById(bodyClassId);
         if (watchEl) {
@@ -303,23 +316,22 @@
 
       let busy = false, n = 0;
 
+      function getSrc() {
+        n++;
+        return counterId ? src.replace(/__N__/g, n) : src;
+      }
+
       /* Esegue l'intero programma */
       async function runAll() {
-        if (busy) return; busy = true; n++;
-        const resolved = counterId ? src.replace(/__N__/g, n) : src;
-        await LINE_dom(resolved, { replace });
+        if (busy) return; busy = true;
+        await LINE_dom(getSrc(), { replace });
         busy = false;
       }
 
-      /* Esegue solo il blocco THEN/FUN con nome label */
+      /* Esegue solo un blocco THEN/FUN — ri-esegue tutto ma chiama solo il blocco */
       async function runBlock(label) {
-        if (busy) return; busy = true; n++;
-        // Costruisce un mini-programma che chiama solo quel blocco
-        // Estrae tutto il sorgente (serve per avere i THEN/FUN definiti)
-        // e poi aggiunge una chiamata al blocco in fondo
-        const resolved = (counterId ? src.replace(/__N__/g, n) : src)
-          + '\n' + label + '()';
-        await LINE_dom(resolved, { replace });
+        if (busy) return; busy = true;
+        await LINE_dom(getSrc() + '\n' + label + '()', { replace });
         busy = false;
       }
 
@@ -332,10 +344,12 @@
       /* onclick="btnId:label,btnId2:label2" */
       if (onclickAttr) {
         onclickAttr.split(',').forEach(pair => {
-          const [btnId, label] = pair.trim().split(':');
-          if (!btnId || !label) return;
-          const btn = document.getElementById(btnId.trim());
-          if (btn) btn.addEventListener('click', () => runBlock(label.trim()));
+          const parts = pair.trim().split(':');
+          if (parts.length < 2) return;
+          const btnId = parts[0].trim();
+          const label = parts[1].trim();
+          const btn   = document.getElementById(btnId);
+          if (btn) btn.addEventListener('click', () => runBlock(label));
         });
       }
 
