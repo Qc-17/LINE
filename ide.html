@@ -2,275 +2,1077 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>L'Oracolo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
-<script src="https://qc-17.github.io/LINE/interpreter.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>LINE 3.0 — Editor</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+
 <style>
-  :root {
-    --ink:   #1a0a00;
-    --paper: #f5ead6;
-    --gold:  #b8860b;
-    --gold2: #e8c96a;
-    --smoke: #8b7355;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg0:#07090d; --bg1:#0c1118; --bg2:#111822; --bg3:#192130;
+  --bdr:#1d2d3e; --bdrg:#273f58;
+  --acc:#00e5ff; --accd:#008ea8; --accg:rgba(0,229,255,.10);
+  --amb:#ffb300; --ambd:#a07200;
+  --grn:#00e676; --pink:#ff4081; --vio:#ce93d8; --teal:#80cbc4; --ora:#ff9100;
+  --t1:#cdd9e5; --t2:#7a8fa8; --t3:#3a5068; --t4:#1e3048;
+  --sk:#00e5ff; --sf:#ff9100; --sc:#3d7a55; --so:#ff4081; --sl:#f06292;
+  --sr:#69f0ae; --sh:#b39ddb; --sb:#4fc3f7; --sn:#ffcc02; --sp:#ce93d8;
+  --su:#80cbc4; --se:#ff8a65; --slb:#ffa726; --sgo:#64ffda; --snot:#ff4081;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
 
-  body {
-    min-height: 100dvh;
-    background: var(--paper);
-    background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: 'IM Fell English SC', serif;
-    color: var(--ink);
-    padding: 2rem;
-  }
+/* TOPBAR */
+#topbar{background:var(--bg1);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 12px;height:46px;gap:10px;flex-shrink:0;z-index:100;}
+#logo{font-weight:700;font-size:17px;letter-spacing:4px;color:var(--acc);text-shadow:0 0 16px var(--acc);white-space:nowrap;flex-shrink:0;}
+#logo span{color:var(--amb);}
+.vsep{width:1px;height:20px;background:var(--bdr);flex-shrink:0;}
+#filename-wrap{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--bdr);border-radius:4px;padding:0 8px;height:28px;flex:1;min-width:0;max-width:200px;}
+#filename{background:none;border:none;outline:none;color:var(--t1);font-family:'Share Tech Mono',monospace;font-size:12px;width:100%;min-width:0;}
+#fext{color:var(--accd);font-family:'Share Tech Mono',monospace;font-size:12px;flex-shrink:0;}
+.tbtn{background:transparent;border:1px solid var(--bdr);color:var(--t2);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:0 11px;height:28px;border-radius:3px;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;touch-action:manipulation;}
+.tbtn:hover,.tbtn:active{background:var(--bg3);border-color:var(--bdrg);color:var(--t1);}
+.tbtn.pri{background:var(--accg);border-color:var(--accd);color:var(--acc);}
+.tbtn.pri:hover,.tbtn.pri:active{background:rgba(0,229,255,.18);border-color:var(--acc);box-shadow:0 0 10px rgba(0,229,255,.2);}
+#hambtn{display:none;background:none;border:1px solid var(--bdr);color:var(--t2);width:34px;height:28px;border-radius:3px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation;}
+#fszbtns{display:flex;gap:3px;flex-shrink:0;}
+.fszbtn{background:var(--bg2);border:1px solid var(--bdr);color:var(--t2);font-family:'Share Tech Mono',monospace;font-size:12px;width:24px;height:24px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;transition:all .15s;}
+.fszbtn:hover{color:var(--acc);border-color:var(--accd);}
 
-  .rule {
-    width: min(400px, 90vw);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.8rem;
-  }
-  .rule span { flex: 1; height: 1px; background: var(--gold); }
-  .rule-diamond {
-    width: 8px; height: 8px;
-    background: var(--gold);
-    transform: rotate(45deg);
-    flex-shrink: 0;
-  }
+/* LAYOUT */
+#layout{display:flex;flex:1;overflow:hidden;position:relative;}
 
-  h1 {
-    font-family: 'Cinzel', serif;
-    font-size: clamp(2.2rem, 7vw, 3.8rem);
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    color: var(--gold);
-    text-shadow: 0 2px 8px rgba(184,134,11,0.25);
-    text-align: center;
-    line-height: 1;
-    margin-bottom: 0.3rem;
-  }
+/* SIDEBAR */
+#sidebar{width:210px;background:var(--bg1);border-right:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;transition:transform .25s ease;}
+.sb-sec{border-bottom:1px solid var(--bdr);padding:5px 0;}
+.sb-hd{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);padding:4px 13px 5px;font-weight:600;}
+.si{display:flex;align-items:center;gap:8px;padding:5px 13px;cursor:pointer;font-size:12px;color:var(--t2);font-family:'Share Tech Mono',monospace;transition:all .1s;border-left:2px solid transparent;touch-action:manipulation;user-select:none;}
+.si:hover,.si:active{background:var(--bg3);color:var(--t1);border-left-color:var(--acc);}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.dot.k{background:var(--sk);box-shadow:0 0 5px var(--sk);}
+.dot.f{background:var(--sf);box-shadow:0 0 5px var(--sf);}
+.dot.l{background:var(--sl);box-shadow:0 0 5px var(--sl);}
+.dot.p{background:var(--sp);box-shadow:0 0 5px var(--sp);}
+.dot.u{background:var(--su);box-shadow:0 0 5px var(--su);}
+.dot.e{background:var(--se);box-shadow:0 0 5px var(--se);}
+.dot.c{background:var(--sc);box-shadow:0 0 5px var(--sc);}
+.dot.b{background:var(--sb);box-shadow:0 0 5px var(--sb);}
+.dot.lb{background:var(--slb);box-shadow:0 0 5px var(--slb);}
+.dot.go{background:var(--sgo);box-shadow:0 0 5px var(--sgo);}
+.si-arr{margin-left:auto;font-size:9px;color:var(--t4);opacity:0;transition:opacity .1s;}
+.si:hover .si-arr{opacity:1;}
 
-  .subtitle {
-    font-size: 0.78rem;
-    letter-spacing: 0.35em;
-    color: var(--smoke);
-    text-align: center;
-    margin-bottom: 3rem;
-    text-transform: uppercase;
-  }
+/* EDITOR */
+#ed-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.CodeMirror{font-family:'Share Tech Mono',monospace!important;font-size:14px;line-height:1.78;height:100%;background:var(--bg0)!important;color:var(--t1)!important;}
+.CodeMirror-scroll{padding-bottom:60px;}
+.CodeMirror-gutters{background:var(--bg1)!important;border-right:1px solid var(--bdr)!important;}
+.CodeMirror-linenumber{color:var(--t3)!important;font-size:11px;padding:0 8px 0 6px;}
+.CodeMirror-activeline-background{background:rgba(0,229,255,.035)!important;}
+.CodeMirror-activeline .CodeMirror-linenumber{color:var(--accd)!important;}
+.CodeMirror-cursor{border-left:2px solid var(--acc)!important;box-shadow:0 0 6px var(--acc);}
+.CodeMirror-selected{background:rgba(0,229,255,.12)!important;}
+.CodeMirror-focused .CodeMirror-selected{background:rgba(0,229,255,.14)!important;}
+.CodeMirror-matchingbracket{color:var(--amb)!important;background:rgba(255,179,0,.14)!important;outline:1px solid var(--ambd);}
 
-  .orb-wrap {
-    position: relative;
-    width: clamp(200px, 50vw, 260px);
-    height: clamp(200px, 50vw, 260px);
-    margin-bottom: 2.8rem;
-    cursor: pointer;
-  }
+/* SYNTAX */
+.cm-s-line30 .cm-kw     {color:var(--sk);font-weight:500;}
+.cm-s-line30 .cm-flow   {color:var(--sf);}
+.cm-s-line30 .cm-comment{color:var(--sc);font-style:italic;}
+.cm-s-line30 .cm-op     {color:var(--so);}
+.cm-s-line30 .cm-logic  {color:var(--sl);font-weight:500;}
+.cm-s-line30 .cm-ref    {color:var(--sr);}
+.cm-s-line30 .cm-hash   {color:var(--sh);}
+.cm-s-line30 .cm-atom   {color:var(--sb);}
+.cm-s-line30 .cm-number {color:var(--sn);}
+.cm-s-line30 .cm-special{color:var(--sp);}
+.cm-s-line30 .cm-builtin{color:var(--su);}
+.cm-s-line30 .cm-escape {color:var(--se);}
+.cm-s-line30 .cm-label  {color:var(--slb);}
+.cm-s-line30 .cm-gochain{color:var(--sgo);font-weight:700;}
+.cm-s-line30 .cm-tag    {color:#ffa726;}
+.cm-s-line30 .cm-not    {color:var(--snot);font-weight:700;}
 
-  .orb {
-    width: 100%; height: 100%;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 32%,
-      #6b4e2a 0%,
-      #2c1a08 45%,
-      #0d0704 100%);
-    box-shadow:
-      0 0 0 2px var(--gold),
-      0 0 0 5px rgba(184,134,11,0.15),
-      0 0 40px rgba(184,134,11,0.12),
-      inset 0 -8px 32px rgba(0,0,0,0.6),
-      inset 0 8px 24px rgba(255,220,120,0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    position: relative;
-    overflow: hidden;
-  }
+/* AUTOCOMPLETE */
+.CodeMirror-hints{background:#111820!important;border:1px solid var(--bdrg)!important;border-radius:5px!important;box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 20px rgba(0,229,255,.05)!important;font-family:'Share Tech Mono',monospace!important;font-size:13px!important;padding:4px 0!important;max-height:260px!important;z-index:9999!important;}
+.CodeMirror-hint{color:var(--t2)!important;padding:5px 12px!important;}
+.CodeMirror-hint-active{background:var(--accg)!important;color:var(--acc)!important;}
+.h-k{color:var(--sk);} .h-f{color:var(--sf);} .h-l{color:var(--sl);}
+.h-p{color:var(--sp);} .h-u{color:var(--su);} .h-e{color:var(--se);}
+.h-b{color:var(--sb);} .h-lb{color:var(--slb);} .h-go{color:var(--sgo);}
+.h-op{color:var(--so);}
 
-  .orb::before {
-    content: '';
-    position: absolute;
-    top: 12%; left: 20%;
-    width: 28%; height: 18%;
-    background: radial-gradient(ellipse, rgba(255,240,180,0.18), transparent);
-    border-radius: 50%;
-    transform: rotate(-20deg);
-    pointer-events: none;
-  }
+/* QUICK BAR (mobile) */
+#quickbar{background:var(--bg1);border-top:1px solid var(--bdr);display:flex;align-items:center;gap:4px;padding:5px 8px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+#quickbar::-webkit-scrollbar{display:none;}
+.qt{background:var(--bg2);border:1px solid var(--bdr);color:var(--t2);font-family:'Share Tech Mono',monospace;font-size:11px;padding:3px 8px;border-radius:3px;cursor:pointer;white-space:nowrap;flex-shrink:0;touch-action:manipulation;transition:all .12s;}
+.qt:active,.qt:hover{background:var(--bg3);border-color:var(--bdrg);color:var(--t1);}
+.qt.ck{color:var(--sk);border-color:rgba(0,229,255,.2);}
+.qt.cf{color:var(--sf);border-color:rgba(255,145,0,.2);}
+.qt.cl{color:var(--sl);border-color:rgba(240,98,146,.2);}
+.qt.cp{color:var(--sp);border-color:rgba(206,147,216,.2);}
+.qt.cu{color:var(--su);border-color:rgba(128,203,196,.2);}
+.qt.ce{color:var(--se);border-color:rgba(255,138,101,.2);}
+.qt.cgo{color:var(--sgo);border-color:rgba(100,255,218,.2);}
+.qt.clb{color:var(--slb);border-color:rgba(255,167,38,.2);}
+.qt.cb{color:var(--sb);border-color:rgba(79,195,247,.2);}
+.qsep{width:1px;height:16px;background:var(--bdr);flex-shrink:0;margin:0 2px;}
 
-  .orb-mist {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: conic-gradient(
-      from 0deg,
-      transparent 0%,
-      rgba(184,134,11,0.04) 20%,
-      transparent 40%,
-      rgba(184,134,11,0.06) 60%,
-      transparent 80%
-    );
-    animation: swirl 8s linear infinite;
-    pointer-events: none;
-  }
-  @keyframes swirl { to { transform: rotate(360deg); } }
+/* STATUS */
+#statusbar{background:var(--bg1);border-top:1px solid var(--bdr);height:24px;display:flex;align-items:center;padding:0 12px;gap:16px;font-size:10.5px;font-family:'Share Tech Mono',monospace;color:var(--t3);flex-shrink:0;}
+.sv{color:var(--t2);}
+.slang{margin-left:auto;color:var(--accd);letter-spacing:1px;}
 
-  .orb-symbol {
-    font-size: clamp(2.8rem, 10vw, 4rem);
-    color: rgba(232,201,106,0.7);
-    user-select: none;
-    position: relative;
-    z-index: 2;
-    transition: opacity 0.3s;
-  }
+/* RIGHT PANEL */
+#rpanel{width:190px;background:var(--bg1);border-left:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;font-size:11px;}
+.rp-hd{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);padding:10px 11px 6px;border-bottom:1px solid var(--bdr);font-weight:600;}
+.rp-blk{border-bottom:1px solid var(--bdr);padding:7px 11px;}
+.rp-t{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:4px;}
+.chip{display:inline-block;padding:1px 5px;border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:10.5px;margin:2px 2px 2px 0;cursor:pointer;transition:filter .1s;border:1px solid transparent;}
+.chip:hover{filter:brightness(1.3);}
+.chip.k{background:rgba(0,229,255,.09);color:var(--sk);border-color:rgba(0,229,255,.18);}
+.chip.f{background:rgba(255,145,0,.09);color:var(--sf);border-color:rgba(255,145,0,.18);}
+.chip.l{background:rgba(240,98,146,.09);color:var(--sl);border-color:rgba(240,98,146,.18);}
+.chip.p{background:rgba(206,147,216,.09);color:var(--sp);border-color:rgba(206,147,216,.18);}
+.chip.u{background:rgba(128,203,196,.09);color:var(--su);border-color:rgba(128,203,196,.18);}
+.chip.e{background:rgba(255,138,101,.09);color:var(--se);border-color:rgba(255,138,101,.18);}
+.chip.b{background:rgba(79,195,247,.09);color:var(--sb);border-color:rgba(79,195,247,.18);}
+.chip.c{background:rgba(61,122,85,.12);color:var(--sc);border-color:rgba(61,122,85,.22);}
+.chip.go{background:rgba(100,255,218,.09);color:var(--sgo);border-color:rgba(100,255,218,.18);}
+.chip.lb{background:rgba(255,167,38,.09);color:var(--slb);border-color:rgba(255,167,38,.18);}
+.chip.op{background:rgba(255,64,129,.09);color:var(--so);border-color:rgba(255,64,129,.18);}
+.rp-mono{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);line-height:1.65;}
 
-  .orb-wrap:hover .orb {
-    transform: scale(1.03);
-    box-shadow:
-      0 0 0 2px var(--gold2),
-      0 0 0 6px rgba(184,134,11,0.25),
-      0 0 60px rgba(184,134,11,0.22),
-      inset 0 -8px 32px rgba(0,0,0,0.6),
-      inset 0 8px 24px rgba(255,220,120,0.10);
-  }
-  .orb-wrap:active .orb { transform: scale(0.97); }
+/* DRAWER OVERLAY */
+#drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;backdrop-filter:blur(2px);}
 
-  .orb-ripple {
-    position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    border: 2px solid var(--gold2);
-    opacity: 0;
-    pointer-events: none;
-  }
-  .orb-wrap.pulse .orb-ripple {
-    animation: ripple 0.7s ease-out forwards;
-  }
-  @keyframes ripple {
-    0%   { transform: scale(0.9); opacity: 0.7; }
-    100% { transform: scale(1.2); opacity: 0; }
-  }
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg1);}
+::-webkit-scrollbar-thumb{background:var(--bdrg);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accd);}
 
-  .scroll {
-    position: relative;
-    width: min(440px, 92vw);
-    min-height: 90px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.4rem 2.2rem;
-    margin-bottom: 2rem;
-  }
-  .scroll::before, .scroll::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  }
-  .scroll::before { top: 0; }
-  .scroll::after  { bottom: 0; }
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.055) 2px,rgba(0,0,0,.055) 4px);}
 
-  .answer {
-    font-size: clamp(1rem, 3.5vw, 1.25rem);
-    text-align: center;
-    line-height: 1.6;
-    letter-spacing: 0.04em;
-    color: var(--ink);
-    min-height: 2em;
-    transition: opacity 0.4s ease;
-  }
-  .answer.hidden { opacity: 0; }
+.si-action{cursor:pointer;}
+.sb-file-row{display:flex;align-items:center;gap:4px;padding:4px 13px 6px;}
+#filename{background:var(--bg3);border:1px solid var(--bdr);border-radius:3px;outline:none;color:var(--t1);font-family:'Share Tech Mono',monospace;font-size:12px;padding:3px 7px;flex:1;min-width:0;}
+#filename:focus{border-color:var(--accd);}
+.sb-fext{color:var(--accd);font-family:'Share Tech Mono',monospace;font-size:12px;flex-shrink:0;}
+.tbtn.run{background:rgba(0,230,118,.08);border-color:rgba(0,230,118,.3);color:#00e676;}
+.tbtn.run:hover,.tbtn.run:active{background:rgba(0,230,118,.18);border-color:#00e676;box-shadow:0 0 10px rgba(0,230,118,.2);}
+.tbtn.run.disabled{opacity:.35;cursor:not-allowed;}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(0,229,255,.7);}100%{box-shadow:0 0 0 12px rgba(0,229,255,0);}}
+.do-flash{animation:flash .4s ease-out;}
 
-  .hint {
-    font-size: 0.72rem;
-    letter-spacing: 0.3em;
-    color: var(--smoke);
-    text-align: center;
-    text-transform: uppercase;
-    margin-bottom: 1.8rem;
-  }
+/* MOBILE */
+@media(max-width:700px){
+  #hambtn{display:flex;}
+  #sidebar{position:fixed;left:0;top:46px;bottom:0;transform:translateX(-100%);z-index:300;width:230px;box-shadow:4px 0 24px rgba(0,0,0,.5);}
+  #sidebar.open{transform:translateX(0);}
+  #drawer-overlay.open{display:block;}
+  #rpanel{display:none;}
+  #fszbtns{display:none;}
+  .vsep,.hide-m{display:none;}
+  #logo{font-size:15px;letter-spacing:3px;}
+  #filename-wrap{max-width:130px;}
+  .CodeMirror{font-size:13px;}
+}
+@media(min-width:701px){
+  #quickbar{display:none;}
+}
 
-  .rule-bottom { margin-top: 0.6rem; }
+/* ── CONSOLE PANEL ─────────────────────────────── */
+#console-wrap{
+  display:flex;flex-direction:column;
+  background:var(--bg0);
+  border-top:2px solid var(--bdr);
+  flex-shrink:0;
+  height:0;overflow:hidden;
+  transition:height .22s ease;
+  position:relative;
+}
+#console-wrap.open{ height:220px; }
+#console-wrap.open.tall{ height:380px; }
+
+#console-resize{
+  position:absolute;top:0;left:0;right:0;height:4px;
+  cursor:row-resize;z-index:10;
+  background:transparent;
+}
+#console-resize:hover{ background:var(--accd); }
+
+#console-titlebar{
+  display:flex;align-items:center;gap:8px;
+  padding:0 12px;height:30px;
+  background:var(--bg1);border-bottom:1px solid var(--bdr);
+  flex-shrink:0;
+}
+#console-title{
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--t3);font-weight:600;flex:1;
+}
+.con-btn{
+  background:none;border:1px solid var(--bdr);color:var(--t3);
+  font-family:'Rajdhani',sans-serif;font-weight:600;font-size:10px;
+  letter-spacing:1px;text-transform:uppercase;
+  padding:0 8px;height:20px;border-radius:3px;cursor:pointer;
+  transition:all .12s;touch-action:manipulation;
+}
+.con-btn:hover{background:var(--bg3);color:var(--t1);border-color:var(--bdrg);}
+.con-btn.danger:hover{color:var(--pink);border-color:var(--pink);}
+#console-status{
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  padding:0 8px;border-radius:10px;
+  background:transparent;color:var(--t3);
+}
+#console-status.running{
+  background:rgba(0,230,118,.1);color:#00e676;
+  border:1px solid rgba(0,230,118,.3);
+  animation: pulse-run 1.2s ease-in-out infinite;
+}
+#console-status.done{ background:rgba(0,229,255,.08);color:var(--accd);border:1px solid var(--bdr); }
+#console-status.error{ background:rgba(255,64,129,.1);color:var(--pink);border:1px solid rgba(255,64,129,.3); }
+@keyframes pulse-run{ 0%,100%{opacity:1} 50%{opacity:.5} }
+
+#console-output{
+  flex:1;overflow-y:auto;padding:10px 14px 4px;
+  font-family:'Share Tech Mono',monospace;font-size:13px;
+  line-height:1.7;color:var(--t1);
+  white-space:pre-wrap;word-break:break-word;
+}
+.con-line-out{ color:var(--t1); }
+.con-line-err{ color:var(--pink); }
+.con-line-sys{ color:var(--t3);font-style:italic; }
+.con-line-inp{ color:var(--amb); }
+
+#console-input-row{
+  display:none;align-items:center;gap:8px;
+  padding:6px 12px;border-top:1px solid var(--bdr);
+  background:var(--bg1);flex-shrink:0;
+}
+#console-input-row.visible{ display:flex; }
+#console-prompt{
+  color:var(--acc);font-family:'Share Tech Mono',monospace;
+  font-size:13px;white-space:nowrap;
+}
+#console-input{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--amb);font-family:'Share Tech Mono',monospace;
+  font-size:13px;caret-color:var(--amb);
+}
+#console-send{
+  background:none;border:1px solid var(--accd);color:var(--acc);
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  padding:2px 10px;border-radius:3px;cursor:pointer;
+  touch-action:manipulation;
+}
+#console-send:hover{background:var(--accg);}
 </style>
 </head>
 <body>
 
-<div class="rule">
-  <span></span>
-  <div class="rule-diamond"></div>
-  <div class="rule-diamond"></div>
-  <div class="rule-diamond"></div>
-  <span></span>
-</div>
-
-<h1>L'Oracolo</h1>
-<p class="subtitle">Interroga il mistero</p>
-
-<div class="orb-wrap" id="orb" title="Consulta l'oracolo">
-  <div class="orb">
-    <div class="orb-mist"></div>
-    <div class="orb-symbol">✦</div>
+<div id="topbar">
+  <button id="hambtn" title="Menu">☰</button>
+  <div id="logo">LINE<span>3.0</span></div>
+  <div id="fszbtns">
+    <div class="fszbtn" id="fsz-dn" title="Riduci font">−</div>
+    <div class="fszbtn" id="fsz-up" title="Aumenta font">+</div>
   </div>
-  <div class="orb-ripple"></div>
+  <div style="margin-left:auto;display:flex;gap:6px;">
+    <button class="tbtn hide-m" id="btn-copy">COPIA</button>
+    <button class="tbtn hide-m" id="btn-clear">PULISCI</button>
+    <button class="tbtn" id="btn-run" title="Esegui (richiede interpreter.js)">▶ ESEGUI</button>
+    <button class="tbtn pri" id="btn-save">SALVA</button>
+  </div>
+  <input type="file" id="file-input" accept=".line,.txt" style="display:none">
 </div>
 
-<div class="scroll">
-  <p class="answer hidden" id="answer">…</p>
+<div id="layout">
+
+  <div id="sidebar">
+    <div class="sb-sec sb-file">
+      <div class="sb-hd">File</div>
+      <div class="sb-file-row">
+        <input id="filename" type="text" value="programma" spellcheck="false" maxlength="40" placeholder="nome file" title="Nome file">
+        <span class="sb-fext">.line</span>
+      </div>
+      <div class="si si-action" id="btn-open"><span class="dot k"></span>Apri .line<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">I/O Console</div>
+      <div class="si" data-ins="TALK "><span class="dot k"></span>TALK<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="OUT "><span class="dot k"></span>OUT<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="INP "><span class="dot k"></span>INP<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="SCREAM "><span class="dot k"></span>SCREAM<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="TALK:V "><span class="dot lb"></span>TALK:V<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="TALK:F"><span class="dot lb"></span>TALK:F<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">Variabili</div>
+      <div class="si" data-ins="STAY "><span class="dot f"></span>STAY<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="IF "><span class="dot f"></span>IF<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="RET "><span class="dot f"></span>RET<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="DEFRET\n"><span class="dot f"></span>DEFRET<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="TEMP "><span class="dot f"></span>TEMP<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">Funzioni</div>
+      <div class="si" data-ins="FUN nome()\n  \n  FEND"><span class="dot f"></span>FUN…FEND<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="THEN nome\n  \n  THEND"><span class="dot f"></span>THEN…THEND<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="return "><span class="dot f"></span>return<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">Controllo</div>
+      <div class="si" data-ins="GO @cond @funzione"><span class="dot f"></span>GO<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" & @cond2 @fun2"><span class="dot go"></span>&amp; (elif)<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" && @fun3"><span class="dot go"></span>&amp;&amp; (else)<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="GO @{V} @{\n  \n  }"><span class="dot go"></span>GO inline<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="FOR @lista #[;;] = @funzione()"><span class="dot f"></span>FOR<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">Gestione Errori</div>
+      <div class="si" data-ins="TRY nome\n  \n  TREND"><span class="dot p"></span>TRY…TREND<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="SHOW nome @try\n  \n  SEND"><span class="dot p"></span>SHOW…SEND<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="YET @try\n  \n  YEND"><span class="dot p"></span>YET…YEND<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">Liste</div>
+      <div class="si" data-ins="lista = [val1 ; val2]"><span class="dot l"></span>[ ; ]<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="lista = [tag | val]"><span class="dot l"></span>[tag | val]<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="ADD lista AT  = "><span class="dot l"></span>ADD<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="CANC lista AT "><span class="dot l"></span>CANC<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">Etichette</div>
+      <div class="si" data-ins="TALK:etichetta "><span class="dot lb"></span>KW:label<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="*etichetta"><span class="dot lb"></span>*richiama<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">Conversioni</div>
+      <div class="si" data-ins="n:"><span class="dot u"></span>n: (numero)<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="s:"><span class="dot u"></span>s: (stringa)<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="b:"><span class="dot u"></span>b: (booleano)<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">Op. Incrementali</div>
+      <div class="si" data-ins=" += "><span class="dot l"></span>+=<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" -= "><span class="dot l"></span>-=<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" *= "><span class="dot l"></span>*=<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" /= "><span class="dot l"></span>/=<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" ^= "><span class="dot l"></span>^=<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" //= "><span class="dot l"></span>//=<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" %= "><span class="dot l"></span>%=<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">Commenti</div>
+      <div class="si" data-ins=">> "><span class="dot c"></span>&gt;&gt; linea<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="<* \n*>"><span class="dot c"></span>&lt;* blocco *&gt;<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">Moduli</div>
+      <div class="si" data-ins="TAKE "><span class="dot k"></span>TAKE<span class="si-arr">↵</span></div>
+    </div>
+  </div>
+
+  <div id="ed-wrap"><textarea id="editor"></textarea></div>
+
+  <div id="rpanel">
+    <div class="rp-hd">Riferimento rapido</div>
+    <div class="rp-blk"><div class="rp-t">I/O</div>
+      <span class="chip k">TALK</span><span class="chip k">OUT</span><span class="chip k">INP</span><span class="chip k">SCREAM</span><span class="chip k">TAKE</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Etichette speciali</div>
+      <span class="chip lb">TALK:V</span><span class="chip lb">TALK:F</span><span class="chip lb">KW:label</span><span class="chip lb">*label</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Variabili</div>
+      <span class="chip f">STAY</span><span class="chip f">IF</span><span class="chip f">RET</span><span class="chip f">TEMP</span><span class="chip f">DEFRET</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Funzioni</div>
+      <span class="chip f">FUN</span><span class="chip f">FEND</span><span class="chip f">THEN</span><span class="chip f">THEND</span><span class="chip f">return</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Controllo</div>
+      <span class="chip f">GO</span><span class="chip go">&amp;</span><span class="chip go">&amp;&amp;</span><span class="chip f">FOR</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Errori</div>
+      <span class="chip p">TRY</span><span class="chip p">TREND</span><span class="chip p">SHOW</span><span class="chip p">SEND</span><span class="chip p">YET</span><span class="chip p">YEND</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Liste</div>
+      <span class="chip l">ADD</span><span class="chip l">CANC</span><span class="chip l">AT</span><span class="chip l">BY</span><span class="chip l">IS</span><span class="chip l">IN</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Logica</div>
+      <span class="chip l">ET</span><span class="chip l">VEL</span><span class="chip l">AUT</span><span class="chip op">!</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Booleani</div>
+      <span class="chip b">V</span><span class="chip b">F</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Conversioni</div>
+      <span class="chip u">n:</span><span class="chip u">s:</span><span class="chip u">b:</span><span class="chip e">\t</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Escape</div>
+      <span class="chip e">\n</span><span class="chip e">\%</span><span class="chip e">\@</span><span class="chip e">\|</span><span class="chip e">\;</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Speciali</div>
+      <span class="chip p">ONITEM</span><span class="chip p">ONINDEX</span><span class="chip p">ONTAG</span><span class="chip p">THISGO</span><span class="chip p">ASKED</span><span class="chip p">NUMBERS</span><span class="chip p">ERRCODE</span><span class="chip p">ERRMSG</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Op. incrementali</div>
+      <span class="chip op">+=</span><span class="chip op">-=</span><span class="chip op">*=</span><span class="chip op">/=</span><span class="chip op">^=</span><span class="chip op">//=</span><span class="chip op">%=</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Commenti</div>
+      <span class="chip c">&gt;&gt;</span><span class="chip c">&lt;* *&gt;</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">FOR sintassi</div>
+      <div class="rp-mono">FOR @lista #[start;end;step]<br>= @funzione()</div>
+    </div>
+    <div class="rp-blk"><div class="rp-t">GO chain</div>
+      <div class="rp-mono">GO @if1 @fun1 #n<br>&amp; @if2 @fun2<br>&amp;&amp; @fun3</div>
+    </div>
+    <div class="rp-blk"><div class="rp-t">GO inline</div>
+      <div class="rp-mono">GO @{cond} @{<br>  ...<br>  } #ripetizioni</div>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Accesso lista</div>
+      <div class="rp-mono">lista[#0]<br>lista[tag]<br>lista[tag1;tag2]</div>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Tasti</div>
+      <div class="rp-mono" style="line-height:2.1">
+        <b style="color:var(--t2)">Ctrl+Space</b> autocomplete<br>
+        <b style="color:var(--t2)">Ctrl+/</b> commenta riga<br>
+        <b style="color:var(--t2)">Tab</b> indenta
+      </div>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+
+<!-- QUICK BAR mobile -->
+<div id="quickbar">
+  <span class="qt ck" data-ins="TALK ">TALK</span>
+  <span class="qt ck" data-ins="OUT ">OUT</span>
+  <span class="qt ck" data-ins="INP ">INP</span>
+  <span class="qsep"></span>
+  <span class="qt cf" data-ins="IF ">IF</span>
+  <span class="qt cf" data-ins="STAY ">STAY</span>
+  <span class="qt cf" data-ins="FUN nome()\n  \n  FEND">FUN</span>
+  <span class="qt cf" data-ins="THEN nome\n  \n  THEND">THEN</span>
+  <span class="qt cf" data-ins="GO @cond @fun">GO</span>
+  <span class="qt cgo" data-ins=" & "> &amp; </span>
+  <span class="qt cgo" data-ins=" && "> &amp;&amp; </span>
+  <span class="qt cf" data-ins="FOR @lista #[;;] = @fun()">FOR</span>
+  <span class="qsep"></span>
+  <span class="qt cp" data-ins="TRY nome\n  \n  TREND">TRY</span>
+  <span class="qt cp" data-ins="SHOW nome @try\n  \n  SEND">SHOW</span>
+  <span class="qt cp" data-ins="YET @try\n  \n  YEND">YET</span>
+  <span class="qsep"></span>
+  <span class="qt cl" data-ins="ET ">ET</span>
+  <span class="qt cl" data-ins="VEL ">VEL</span>
+  <span class="qt cl" data-ins="AUT ">AUT</span>
+  <span class="qt cl" data-ins="!">!</span>
+  <span class="qsep"></span>
+  <span class="qt cb" data-ins="V">V</span>
+  <span class="qt cb" data-ins="F">F</span>
+  <span class="qsep"></span>
+  <span class="qt cu" data-ins="n:">n:</span>
+  <span class="qt cu" data-ins="s:">s:</span>
+  <span class="qt cu" data-ins="b:">b:</span>
+  <span class="qsep"></span>
+  <span class="qt ce" data-ins="@">@</span>
+  <span class="qt ce" data-ins="#">#</span>
+  <span class="qt clb" data-ins="*">*</span>
+  <span class="qt" data-ins=">> ">»</span>
 </div>
 
-<p class="hint" id="hint">Tocca la sfera per consultare l'oracolo</p>
-
-<div class="rule rule-bottom">
-  <span></span>
-  <div class="rule-diamond"></div>
-  <div class="rule-diamond"></div>
-  <div class="rule-diamond"></div>
-  <span></span>
+<div id="statusbar">
+  <span>Ln <span class="sv" id="s-ln">1</span></span>
+  <span>Col <span class="sv" id="s-co">1</span></span>
+  <span>Righe <span class="sv" id="s-li">1</span></span>
+  <span>Char <span class="sv" id="s-ch">0</span></span>
+  <span class="slang">LINE 3.0</span>
 </div>
+
+<!-- CONSOLE PANEL -->
+<div id="console-wrap">
+  <div id="console-resize"></div>
+  <div id="console-titlebar">
+    <span id="console-title">Console</span>
+    <span id="console-status"></span>
+    <button class="con-btn" id="con-save" title="Salva output come .txt">SALVA LOG</button>
+    <button class="con-btn" id="con-clear" title="Pulisci console">PULISCI</button>
+    <button class="con-btn danger" id="con-close">✕</button>
+  </div>
+  <div id="console-output"></div>
+  <div id="console-input-row">
+    <span id="console-prompt">&gt;</span>
+    <input id="console-input" type="text" autocomplete="off" spellcheck="false" placeholder="inserisci input…">
+    <button id="console-send">↵</button>
+  </div>
+</div>
+
+<div id="drawer-overlay"></div>
 
 <script>
-const PROGRAMMA = `TAKE rand\nSTAY frasi = [Le stelle tacciono ma sanno. ; Chiedi al vento — lui ricorda tutto. ; La risposta e' gia' dentro di te. ; Il destino sorride a chi osa. ; Nebbia oggi. Chiarezza domani. ; Qualcosa sta per cambiare. ; Non e' il momento. Aspetta. ; Si'. Senza dubbi. ; Il cielo dice: forse. ; Occhio a chi ti sta vicino. ; Meglio non sapere. ; La fortuna ha gia' scelto. ; Torna a chiedere a mezzanotte. ; Il passato suggerisce di si'. ; Lascia andare e vedrai. ; Tre volte si. ; Le acque sono agitate. Attendi. ; Il tuo istinto non sbaglia. ; Qualcuno pensa a te in questo momento. ; La risposta e' no. Ma non per sempre.]\nrisposta = rand_pick(@frasi)\nOUT @risposta`;
+/* ══════════════════════════════════════════
+   LINE 3.0  CodeMirror Mode — Completo
+══════════════════════════════════════════ */
+CodeMirror.defineMode("line30", function() {
+  const KW      = new Set(["TALK","OUT","INP","SCREAM","TAKE"]);
+  const FLOW    = new Set(["STAY","IF","THEN","THEND","FUN","FEND","GO","FOR",
+                           "TRY","SHOW","YET","TREND","SEND","YEND",
+                           "RET","DEFRET","TEMP","return","ADD","CANC"]);
+  const LOGIC   = new Set(["ET","VEL","AUT","IN","AT","BY","IS"]);
+  const SPECIAL = new Set(["ONITEM","ONINDEX","ONTAG","THISGO","ASKED",
+                           "NUMBERS","ERRCODE","ERRMSG"]);
 
-const orb    = document.getElementById('orb');
-const answer = document.getElementById('answer');
-const hint   = document.getElementById('hint');
-let busy = false;
+  return {
+    startState: () => ({ inMulti: false }),
+    token(stream, state) {
 
-async function consulta() {
-  if (busy) return;
-  busy = true;
+      /* ── multiline comment ── */
+      if (state.inMulti) {
+        if (stream.match("*>")) state.inMulti = false; else stream.next();
+        return "comment";
+      }
+      if (stream.match("<*")) { state.inMulti = true; return "comment"; }
 
-  orb.classList.remove('pulse');
-  void orb.offsetWidth;
-  orb.classList.add('pulse');
+      /* ── single-line comment ── */
+      if (stream.match(">>")) { stream.skipToEnd(); return "comment"; }
 
-  answer.classList.add('hidden');
+      if (stream.eatSpace()) return null;
 
-  let risultato = '';
-  await LINE_run(PROGRAMMA, {
-    output: s => { risultato = s; },
-    input:  () => Promise.resolve('')
-  });
+      /* ── escape sequences ── */
+      if (stream.peek() === '\\') {
+        stream.next();
+        if (!stream.eol()) stream.next();
+        return "escape";
+      }
 
-  await new Promise(r => setTimeout(r, 380));
-  answer.textContent = risultato || '…';
-  answer.classList.remove('hidden');
-  hint.textContent = 'Consulta di nuovo';
-  busy = false;
+      /* ── *label recall ── */
+      if (stream.peek() === '*') {
+        stream.next();
+        stream.eatWhile(/\w/);
+        return "label";
+      }
+
+      /* ── @ref or @{inline block} ── */
+      if (stream.peek() === '@') {
+        stream.next();
+        if (stream.peek() === '{') { stream.next(); return "ref"; }
+        stream.eatWhile(/\w/);
+        return "ref";
+      }
+
+      /* ── #var prefix ── */
+      if (stream.peek() === '#') {
+        stream.next();
+        stream.eatWhile(/\w/);
+        return "hash";
+      }
+
+      /* ── ! not (standalone) or != ── */
+      if (stream.peek() === '!') {
+        stream.next();
+        if (stream.peek() === '=') { stream.next(); return "op"; }
+        return "not";
+      }
+
+      /* ── GO chain: && before & ── */
+      if (stream.match("&&")) return "gochain";
+      if (stream.peek() === '&') { stream.next(); return "gochain"; }
+
+      /* ── Multi-char operators (longest match first) ── */
+      if (stream.match("//=")) return "op";
+      if (stream.match("<="))  return "op";
+      if (stream.match(">="))  return "op";
+      if (stream.match("=="))  return "op";
+      if (stream.match("+="))  return "op";
+      if (stream.match("-="))  return "op";
+      if (stream.match("*="))  return "op";
+      if (stream.match("/="))  return "op";
+      if (stream.match("%="))  return "op";
+      if (stream.match("^="))  return "op";
+      if (stream.match("//"))  return "op";
+
+      /* ── single-char math / comparison ── */
+      if ("+-*/^%<>=".indexOf(stream.peek()) !== -1) {
+        stream.next(); return "op";
+      }
+
+      /* ── numbers ── */
+      if (stream.match(/^-?\d+(\.\d+)?/)) return "number";
+
+      /* ── | tag separator ── */
+      if (stream.peek() === '|') { stream.next(); return "tag"; }
+
+      /* ── word tokens ── */
+      const m = stream.match(/^[a-zA-Z_][a-zA-Z0-9_]*/);
+      if (m) {
+        const w = m[0];
+
+        /* conversion: n: s: b: t: — eat the colon too */
+        if (["n","s","b","t"].includes(w) && stream.peek() === ':') {
+          stream.next();
+          return "builtin";
+        }
+
+        /* keywords with optional :label suffix */
+        if (KW.has(w) || FLOW.has(w)) {
+          if (stream.peek() === ':') {
+            stream.next();              // eat ':'
+            stream.eatWhile(/\w/);     // eat label name → styled as same color
+          }
+          return KW.has(w) ? "kw" : "flow";
+        }
+
+        if (LOGIC.has(w))   return "logic";
+        if (SPECIAL.has(w)) return "special";
+        if (w === "V" || w === "F") return "atom";
+        return null;
+      }
+
+      stream.next();
+      return null;
+    },
+    lineComment: ">>",
+    blockCommentStart: "<*",
+    blockCommentEnd: "*>"
+  };
+});
+CodeMirror.defineMIME("text/x-line30","line30");
+
+/* ══════════════════════════════════════════
+   Hint data — tutte le keyword
+══════════════════════════════════════════ */
+const HINTS = [
+  {t:"TALK ",     d:"TALK",     c:"h-k",  i:"output / input"},
+  {t:"TALK:V ",   d:"TALK:V",   c:"h-lb", i:"input persistente"},
+  {t:"TALK:F",    d:"TALK:F",   c:"h-lb", i:"disattiva TALK:V"},
+  {t:"OUT ",      d:"OUT",      c:"h-k",  i:"solo output"},
+  {t:"OUT:",      d:"OUT:label",c:"h-lb", i:"OUT con etichetta"},
+  {t:"INP ",      d:"INP",      c:"h-k",  i:"solo input"},
+  {t:"INP:",      d:"INP:label",c:"h-lb", i:"INP con etichetta"},
+  {t:"SCREAM ",   d:"SCREAM",   c:"h-k",  i:"stampa lista + tag"},
+  {t:"TAKE ",     d:"TAKE",     c:"h-k",  i:"importa modulo"},
+  {t:"STAY ",     d:"STAY",     c:"h-f",  i:"costante"},
+  {t:"IF ",       d:"IF",       c:"h-f",  i:"variabile booleana IF"},
+  {t:"RET ",      d:"RET",      c:"h-f",  i:"variabile globale"},
+  {t:"DEFRET\n",  d:"DEFRET",   c:"h-f",  i:"default globale nel blocco"},
+  {t:"TEMP ",     d:"TEMP",     c:"h-f",  i:"variabile locale forzata"},
+  {t:"FUN ",      d:"FUN",      c:"h-f",  i:"definisce funzione"},
+  {t:"FEND",      d:"FEND",     c:"h-f",  i:"fine FUN"},
+  {t:"THEN ",     d:"THEN",     c:"h-f",  i:"blocco then (no args)"},
+  {t:"THEND",     d:"THEND",    c:"h-f",  i:"fine THEN"},
+  {t:"return ",   d:"return",   c:"h-f",  i:"valore di ritorno"},
+  {t:"GO ",       d:"GO",       c:"h-f",  i:"esegui se condizione"},
+  {t:"GO:",       d:"GO:label", c:"h-lb", i:"GO con etichetta"},
+  {t:" & ",       d:"&",        c:"h-go", i:"GO elif (elif)"},
+  {t:" && ",      d:"&&",       c:"h-go", i:"GO else (else)"},
+  {t:"FOR ",      d:"FOR",      c:"h-f",  i:"ciclo su lista"},
+  {t:"FOR:",      d:"FOR:label",c:"h-lb", i:"FOR con etichetta"},
+  {t:"TRY ",      d:"TRY",      c:"h-p",  i:"blocco try"},
+  {t:"TREND",     d:"TREND",    c:"h-p",  i:"fine TRY"},
+  {t:"SHOW ",     d:"SHOW",     c:"h-p",  i:"gestisci errore"},
+  {t:"SEND",      d:"SEND",     c:"h-p",  i:"fine SHOW"},
+  {t:"YET ",      d:"YET",      c:"h-p",  i:"esegui sempre"},
+  {t:"YEND",      d:"YEND",     c:"h-p",  i:"fine YET"},
+  {t:"ADD ",      d:"ADD",      c:"h-l",  i:"aggiunge a lista"},
+  {t:"CANC ",     d:"CANC",     c:"h-l",  i:"rimuove da lista"},
+  {t:"AT ",       d:"AT",       c:"h-l",  i:"per indice"},
+  {t:"BY ",       d:"BY",       c:"h-l",  i:"per tag / sostituisci"},
+  {t:"IS ",       d:"IS",       c:"h-l",  i:"per valore"},
+  {t:"IN ",       d:"IN",       c:"h-l",  i:"operatore appartenenza"},
+  {t:"ET ",       d:"ET",       c:"h-l",  i:"and logico"},
+  {t:"VEL ",      d:"VEL",      c:"h-l",  i:"or logico"},
+  {t:"AUT ",      d:"AUT",      c:"h-l",  i:"xor logico"},
+  {t:"!",         d:"!",        c:"h-op", i:"not (prefisso)"},
+  {t:"ONITEM",    d:"ONITEM",   c:"h-p",  i:"valore corrente (FOR)"},
+  {t:"ONINDEX",   d:"ONINDEX",  c:"h-p",  i:"indice corrente (FOR)"},
+  {t:"ONTAG",     d:"ONTAG",    c:"h-p",  i:"tag corrente (FOR)"},
+  {t:"THISGO",    d:"THISGO",   c:"h-p",  i:"condizione GO inline"},
+  {t:"ASKED",     d:"ASKED",    c:"h-p",  i:"ultimo input TALK:V"},
+  {t:"NUMBERS",   d:"NUMBERS",  c:"h-p",  i:"lista di tutti i reali"},
+  {t:"ERRCODE",   d:"ERRCODE",  c:"h-p",  i:"codice errore (SHOW)"},
+  {t:"ERRMSG",    d:"ERRMSG",   c:"h-p",  i:"messaggio errore (SHOW)"},
+  {t:"n:",        d:"n:",       c:"h-u",  i:"converti in numero"},
+  {t:"s:",        d:"s:",       c:"h-u",  i:"converti in stringa"},
+  {t:"b:",        d:"b:",       c:"h-u",  i:"converti in booleano"},
+  {t:"\\t",       d:"\\t",      c:"h-e",  i:"tipo variabile"},
+  {t:"\\n",       d:"\\n",      c:"h-e",  i:"a capo"},
+  {t:"\\%",       d:"\\%",      c:"h-e",  i:"stampa %"},
+  {t:"\\@",       d:"\\@",      c:"h-e",  i:"stampa @"},
+  {t:"\\|",       d:"\\|",      c:"h-e",  i:"pipe letterale in lista"},
+  {t:"\\;",       d:"\\;",      c:"h-e",  i:"punto e virgola letterale"},
+  {t:"V",         d:"V",        c:"h-b",  i:"vero (booleano)"},
+  {t:"F",         d:"F",        c:"h-b",  i:"falso (booleano)"},
+  {t:" += ",      d:"+=",       c:"h-op", i:"somma e assegna"},
+  {t:" -= ",      d:"-=",       c:"h-op", i:"sottrai e assegna"},
+  {t:" *= ",      d:"*=",       c:"h-op", i:"moltiplica e assegna"},
+  {t:" /= ",      d:"/=",       c:"h-op", i:"dividi e assegna"},
+  {t:" ^= ",      d:"^=",       c:"h-op", i:"potenza e assegna"},
+  {t:" //= ",     d:"//=",      c:"h-op", i:"div. intera e assegna"},
+  {t:" %= ",      d:"%=",       c:"h-op", i:"resto div. e assegna"},
+];
+
+function line30Hint(cm) {
+  const cur = cm.getCursor();
+  const tok = cm.getTokenAt(cur);
+  let start = tok.start, end = cur.ch;
+  let word = tok.string;
+  if (!word || /^\s+$/.test(word)) { start = end; word = ""; }
+  const lc = word.toLowerCase();
+  const list = HINTS.filter(h => h.d.toLowerCase().startsWith(lc)).map(h => ({
+    text: h.t,
+    displayText: h.d,
+    render(el) {
+      el.style.cssText = "display:flex;align-items:center;gap:10px;padding:5px 12px;";
+      const n = document.createElement("span");
+      n.textContent = h.d; n.className = h.c;
+      n.style.cssText = "font-weight:600;min-width:72px;";
+      const i = document.createElement("span");
+      i.textContent = h.i; i.style.cssText = "color:#1e3048;font-size:10.5px;";
+      el.appendChild(n); el.appendChild(i);
+    },
+    hint(cm) { cm.replaceRange(h.t, {line:cur.line,ch:start}, {line:cur.line,ch:end}); }
+  }));
+  return { list, from: CodeMirror.Pos(cur.line,start), to: CodeMirror.Pos(cur.line,end) };
 }
 
-orb.addEventListener('click', consulta);
+/* ══════════════════════════════════════════
+   Auto-close map
+══════════════════════════════════════════ */
+const AUTO_CLOSE = {
+  "FUN":  "FEND",
+  "THEN": "THEND",
+  "TRY":  "TREND",
+  "SHOW": "SEND",
+  "YET":  "YEND"
+};
+
+/* Smart Enter — semplice e robusto */
+function handleEnter(cm) {
+  if (cm.somethingSelected()) {
+    cm.replaceSelection("\n", "end");
+    return;
+  }
+  const cur           = cm.getCursor();
+  const lineText      = cm.getLine(cur.line);
+  const currentIndent = lineText.match(/^(\s*)/)[1];
+  const trimmed       = lineText.slice(0, cur.ch).trim();
+  const innerIndent   = currentIndent + "  ";
+
+  /* Keyword di apertura blocco all'inizio della riga */
+  const kwMatch = trimmed.match(/^([A-Z]+)/);
+  const kw = kwMatch ? kwMatch[1] : null;
+
+  if (kw && AUTO_CLOSE[kw]) {
+    cm.operation(() => {
+      cm.replaceRange("\n" + innerIndent + "\n" + currentIndent + AUTO_CLOSE[kw], cur);
+      cm.setCursor({ line: cur.line + 1, ch: innerIndent.length });
+    });
+    return;
+  }
+
+  /* Qualsiasi altro caso: vai a capo mantenendo l'indentazione corrente */
+  cm.operation(() => {
+    cm.replaceRange("\n" + currentIndent, cur);
+    cm.setCursor({ line: cur.line + 1, ch: currentIndent.length });
+  });
+}
+
+/* Smart Backspace: rimuove l'intero indent unit (2 spazi) in un colpo */
+function handleBackspace(cm) {
+  if (cm.somethingSelected()) { cm.execCommand("delCharBefore"); return; }
+  const cur  = cm.getCursor();
+  const line = cm.getLine(cur.line);
+  const before = line.slice(0, cur.ch);
+
+  /* Se siamo a inizio riga (solo spazi prima del cursore), rimuovi fino alla riga precedente */
+  if (cur.ch === 0) { cm.execCommand("delCharBefore"); return; }
+
+  /* Se ci sono esattamente N spazi multipli di 2 prima del cursore (indentazione pura) */
+  if (/^ +$/.test(before) && before.length % 2 === 0) {
+    cm.operation(() => {
+      cm.replaceRange("", { line: cur.line, ch: cur.ch - 2 }, cur);
+    });
+    return;
+  }
+
+  cm.execCommand("delCharBefore");
+}
+
+/* ══════════════════════════════════════════
+   Init editor
+══════════════════════════════════════════ */
+const editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+  mode: "line30",
+  theme: "line30",
+  lineNumbers: true,
+  matchBrackets: true,
+  autoCloseBrackets: true,
+  styleActiveLine: true,
+  indentWithTabs: false,
+  indentUnit: 2,
+  tabSize: 2,
+  extraKeys: {
+    "Ctrl-Space":  cm => cm.showHint({hint:line30Hint, completeSingle:false}),
+    "Ctrl-/":      "toggleComment",
+    "Enter":       handleEnter,
+    "Backspace":   handleBackspace,
+    "Tab": cm => {
+      if (cm.somethingSelected()) cm.indentSelection("add");
+      else cm.replaceSelection("  ", "end");
+    },
+    "Shift-Tab": cm => cm.indentSelection("subtract")
+  }
+});
+editor.setValue("");
+editor.setSize("100%","100%");
+
+let hintTimer;
+editor.on("change",(cm,ch) => {
+  clearTimeout(hintTimer);
+  if (ch.origin === "+input") {
+    const tok = cm.getTokenAt(cm.getCursor());
+    if (tok.string.trim().length >= 1 && /[A-Za-z\\&!n]/.test(tok.string)) {
+      hintTimer = setTimeout(() => {
+        if (!cm.state.completionActive)
+          cm.showHint({hint:line30Hint, completeSingle:false});
+      }, 320);
+    }
+  }
+  updateStatus();
+});
+editor.on("cursorActivity", updateStatus);
+
+function updateStatus() {
+  const c = editor.getCursor(), v = editor.getValue();
+  document.getElementById("s-ln").textContent = c.line+1;
+  document.getElementById("s-co").textContent = c.ch+1;
+  document.getElementById("s-li").textContent = editor.lineCount();
+  document.getElementById("s-ch").textContent = v.length;
+}
+updateStatus();
+
+/* Font size */
+let fontSize = 14;
+document.getElementById("fsz-up").onclick = () => {
+  fontSize = Math.min(22,fontSize+1);
+  document.querySelector(".CodeMirror").style.fontSize = fontSize+"px";
+};
+document.getElementById("fsz-dn").onclick = () => {
+  fontSize = Math.max(10,fontSize-1);
+  document.querySelector(".CodeMirror").style.fontSize = fontSize+"px";
+};
+
+/* Buttons */
+document.getElementById("btn-save").onclick = function(){
+  const name = document.getElementById("filename").value.trim() || "programma";
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([editor.getValue()],{type:"text/plain"}));
+  a.download = name+".line"; a.click(); URL.revokeObjectURL(a.href);
+  this.classList.add("do-flash");
+  setTimeout(()=>this.classList.remove("do-flash"),500);
+};
+document.getElementById("btn-copy").onclick = function(){
+  navigator.clipboard.writeText(editor.getValue()).then(()=>{
+    const o=this.textContent; this.textContent="✓ OK";
+    setTimeout(()=>this.textContent=o,1200);
+  });
+};
+document.getElementById("btn-clear").onclick = ()=>{
+  if(confirm("Svuotare l'editor?")){ editor.setValue(""); editor.focus(); }
+};
+
+/* Insert snippet helper */
+function insertSnippet(raw){
+  const s = raw.replace(/\\n/g,"\n");
+  editor.getDoc().replaceRange(s, editor.getCursor());
+  editor.focus();
+}
+
+/* Sidebar items */
+document.querySelectorAll(".si[data-ins]").forEach(el=>
+  el.addEventListener("click",()=>{ insertSnippet(el.dataset.ins); closeSidebar(); })
+);
+
+/* Quickbar (mobile) */
+document.querySelectorAll(".qt[data-ins]").forEach(el=>
+  el.addEventListener("click",()=>insertSnippet(el.dataset.ins))
+);
+
+/* Right panel chips */
+document.querySelectorAll(".chip").forEach(chip=>
+  chip.addEventListener("click",()=>{
+    const map={">>":">> ","<* *>":"<* \n*>","&":"& ","&&":"&& "};
+    const t = chip.textContent.trim();
+    insertSnippet(map[t] || (t+" "));
+  })
+);
+
+/* Mobile drawer */
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("drawer-overlay");
+document.getElementById("hambtn").onclick = ()=>{
+  sidebar.classList.toggle("open");
+  overlay.classList.toggle("open");
+};
+function closeSidebar(){
+  sidebar.classList.remove("open");
+  overlay.classList.remove("open");
+}
+overlay.onclick = closeSidebar;
+
+/* ── APRI file .line ── */
+const fileInput = document.getElementById("file-input");
+document.getElementById("btn-open").onclick = () => { fileInput.click(); closeSidebar(); };
+fileInput.onchange = function() {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    editor.setValue(e.target.result);
+    editor.setCursor({line:0,ch:0});
+    editor.focus();
+    document.getElementById("filename").value = file.name.replace(/\.line$/i,"");
+  };
+  reader.readAsText(file);
+  this.value = "";
+};
+
+/* ══════════════════════════════════════════
+   CONSOLE PANEL
+══════════════════════════════════════════ */
+const conWrap   = document.getElementById("console-wrap");
+const conOut    = document.getElementById("console-output");
+const conStatus = document.getElementById("console-status");
+const conInpRow = document.getElementById("console-input-row");
+const conInp    = document.getElementById("console-input");
+const conSend   = document.getElementById("console-send");
+
+let inputResolve = null; // Promise resolver per input asincrono
+
+function conOpen() {
+  conWrap.classList.add("open");
+}
+function conClose() {
+  conWrap.classList.remove("open","tall");
+}
+function conAppend(text, cls = "con-line-out") {
+  const lines = String(text).split("\n");
+  lines.forEach(line => {
+    const div = document.createElement("div");
+    div.className = cls;
+    div.textContent = line;
+    conOut.appendChild(div);
+  });
+  conOut.scrollTop = conOut.scrollHeight;
+}
+function conSetStatus(state, text) {
+  conStatus.className = "con-status " + state;
+  conStatus.textContent = text;
+}
+function conClear() {
+  conOut.innerHTML = "";
+}
+function conShowInput(prompt) {
+  document.getElementById("console-prompt").textContent = prompt ? prompt + " >" : ">";
+  conInpRow.classList.add("visible");
+  conInp.value = "";
+  conInp.focus();
+}
+function conHideInput() {
+  conInpRow.classList.remove("visible");
+  conInp.value = "";
+}
+
+function submitInput() {
+  if (!inputResolve) return;
+  const val = conInp.value;
+  conAppend((document.getElementById("console-prompt").textContent || ">") + " " + val, "con-line-inp");
+  conHideInput();
+  const res = inputResolve;
+  inputResolve = null;
+  res(val);
+}
+
+conSend.onclick = submitInput;
+conInp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); submitInput(); } });
+
+document.getElementById("con-close").onclick = conClose;
+document.getElementById("con-clear").onclick = conClear;
+document.getElementById("con-save").onclick = () => {
+  const lines = [...conOut.querySelectorAll("div")].map(d => d.textContent).join("\n");
+  const name  = (document.getElementById("filename").value.trim() || "output") + "_log.txt";
+  const a     = document.createElement("a");
+  a.href      = URL.createObjectURL(new Blob([lines], {type:"text/plain"}));
+  a.download  = name; a.click(); URL.revokeObjectURL(a.href);
+};
+
+/* Resize drag */
+(function(){
+  const handle = document.getElementById("console-resize");
+  let dragging = false, startY = 0, startH = 0;
+  handle.addEventListener("mousedown", e => {
+    dragging = true; startY = e.clientY;
+    startH = conWrap.offsetHeight; e.preventDefault();
+  });
+  document.addEventListener("mousemove", e => {
+    if (!dragging) return;
+    const delta = startY - e.clientY;
+    const h = Math.max(80, Math.min(600, startH + delta));
+    conWrap.style.height = h + "px";
+    conWrap.classList.add("open");
+  });
+  document.addEventListener("mouseup", () => { dragging = false; });
+})();
+
+/* ── ESEGUI ────────────────────────────────────── */
+const runBtn = document.getElementById("btn-run");
+
+function checkInterpreter() {
+  if (typeof LINE_run === "function") {
+    runBtn.classList.add("run");
+    runBtn.title = "Esegui programma";
+  } else {
+    runBtn.style.opacity = "0.4";
+    runBtn.title = "interpreter.js non trovato";
+  }
+}
+checkInterpreter();
+
+runBtn.onclick = async function() {
+  if (typeof LINE_run !== "function") {
+    alert("interpreter.js non trovato.\nMetti interpreter.js nella stessa cartella dell'editor e ricarica.");
+    return;
+  }
+
+  conOpen();
+  conClear();
+  conHideInput();
+  conSetStatus("running", "● in esecuzione");
+
+  const startTime = Date.now();
+
+  try {
+    await LINE_run(editor.getValue(), {
+      output(text) {
+        conAppend(text, "con-line-out");
+      },
+      async input(prompt) {
+        conShowInput(prompt || "");
+        return new Promise(resolve => { inputResolve = resolve; });
+      }
+    });
+    const ms = Date.now() - startTime;
+    conSetStatus("done", `✓ terminato (${ms}ms)`);
+    conAppend(`\n── fine esecuzione (${ms}ms) ──`, "con-line-sys");
+  } catch(e) {
+    conSetStatus("error", "✕ errore");
+    conAppend("ERRORE: " + e.message, "con-line-err");
+    console.error("[LINE]", e);
+  } finally {
+    conHideInput();
+  }
+};
+
+setTimeout(()=>editor.focus(),80);
 </script>
+
+<script src="interpreter.js" onerror="/* interpreter.js non trovato */"></script>
 </body>
 </html>
