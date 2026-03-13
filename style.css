@@ -99,6 +99,12 @@ code {
   color: var(--ink);
 }
 
+/* ── code inline dentro il quiz (sfondo scuro) ── */
+.quiz-section code {
+  background: rgba(255,255,255,.1);
+  color: #e8dcc8;
+}
+
 /* ── Blocchi di codice ── */
 .codeblock {
   background: var(--code-bg);
@@ -451,4 +457,4 @@ code {
   transition: border-color .2s, color .2s;
 }
 .q-ide-submit:hover:not(:disabled) { border-color: #e8854a; color: #e8854a; }
-.q-ide-submit:disabled { opacity: .4; cursor: default; } 
+.q-ide-submit:disabled { opacity: .4; cursor: default; }
