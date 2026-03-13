@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sezione 3 — LINE 3.0</title>
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="index.html" class="topbar-brand"><img src="favicon.png" alt="LINE" class="topbar-favicon"></a>
+  <div class="topbar-nav">
+    <a href="index.html">Home</a>
+    <a href="sezione2.html">Sezione 2</a>
+    <a class="current">Sezione 3</a>
+    <a href="sezione4.html" style="opacity:.35">Sezione 4 →</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <p class="section-tag">Sezione 03 / 07</p>
+  <h1 class="section-title">La Console</h1>
+  <p class="section-desc">Come il programma interagisce con l'utente: mostrare testo, leggere input e il comportamento speciale di <code>@</code> su variabili inesistenti.</p>
+
+  <!-- 3.1 TALK -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">3.1</span> TALK</h2>
+    <p><code>TALK</code> è la parola chiave principale per interagire con la console. Tutto quello che segue viene mostrato nell'output. Per includere il valore di una variabile si usa <code>@</code> davanti al nome.</p>
+    <div class="codeblock"><span class="codeblock-label">sintassi</span><span class="kw">TALK</span> testo @variabile altro testo</div>
+    <div class="codeblock"><span class="codeblock-label">esempio</span>nome = Mario
+<span class="kw">TALK</span> Ciao, @nome!
+<span class="cmt">&lt;* Output:
+Ciao, Mario! *&gt;</span></div>
+
+    <p>Il "potere" di <code>@</code> si interrompe al primo carattere non ammesso in un nome di variabile. Caratteri come <code>!</code>, <code>,</code>, spazio terminano il riferimento:</p>
+    <div class="codeblock">nome = Mario
+<span class="kw">TALK</span> @nome, benvenuto!
+<span class="cmt">&lt;* Output: Mario, benvenuto! *&gt;</span>
+
+<span class="kw">TALK</span> @nome%extra
+<span class="cmt">&lt;* % è invisibile in TALK, quindi: Marioextra *&gt;</span></div>
+
+    <p>Per stampare una <code>@</code> letterale si usa l'escape <code>\@</code>:</p>
+    <div class="codeblock"><span class="kw">TALK</span> Scrivi \@nome per riferirsi a una variabile
+<span class="cmt">&lt;* Output: Scrivi @nome per riferirsi a una variabile *&gt;</span></div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 3.2 Input implicito -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">3.2</span> Input implicito con <code>@</code></h2>
+    <p>Se <code>@</code> fa riferimento ad una variabile che <strong>non esiste ancora</strong>, la console chiede automaticamente un input all'utente e lo salva in quella variabile. L'esecuzione si blocca finché l'utente non preme invio.</p>
+    <div class="codeblock"><span class="codeblock-label">esempio</span><span class="kw">TALK</span> Ciao, @nome!
+<span class="cmt">&lt;* "nome" non esiste → la console chiede input
+   Utente scrive: Mario
+   Output: Ciao, Mario! *&gt;</span></div>
+
+    <p>Questo vale per tutto il testo del <code>TALK</code>, nell'ordine in cui appaiono le variabili. Se ne metti più d'una sulla stessa riga e nessuna esiste, verranno chieste in sequenza:</p>
+    <div class="codeblock"><span class="kw">TALK</span> Ciao @nome @cognome, hai @eta anni.
+<span class="cmt">&lt;* Chiede input per nome, poi cognome, poi eta *&gt;</span></div>
+
+    <div class="callout">
+      <strong>Nota:</strong> una volta che la variabile esiste (perché è già stata dichiarata o perché l'utente ha risposto), non verrà chiesto di nuovo.
+    </div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 3.3 OUT e INP -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">3.3</span> OUT e INP</h2>
+    <p>Esistono due varianti di <code>TALK</code> che sono considerate <strong>zucchero sintattico</strong> — ossia scorciatoie comode ma non indispensabili, e per questo deprecabili:</p>
+
+    <table class="table">
+      <tr><th>Parola chiave</th><th>Comportamento</th></tr>
+      <tr><td>OUT</td><td>Come TALK ma solo output: con variabili inesistenti dà errore invece di chiedere input</td></tr>
+      <tr><td>INP</td><td>Come TALK ma richiede almeno un input: deve avere almeno una variabile inesistente</td></tr>
+    </table>
+
+    <div class="callout">
+      <strong>Consiglio:</strong> usa sempre <code>TALK</code>. <code>OUT</code> e <code>INP</code> possono tornare utili per chiarezza in certi contesti, ma <code>TALK</code> fa tutto quello che fanno loro.
+    </div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 3.4 TALK:V e ASKED -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">3.4</span> Etichette speciali: <code>TALK:V</code> e <code>TALK:F</code></h2>
+    <p>Le etichette in LINE si usano per dare un nome ad una riga di codice e richiamarla (verranno trattate in dettaglio più avanti). <code>TALK</code> però ha due etichette speciali con un comportamento fisso:</p>
+    <p><code>TALK:V</code> attiva un <strong>input persistente</strong> che appare sempre alla fine dell'output in console, con una domanda personalizzabile. Rimane attivo finché non viene disattivato.</p>
+    <p>L'input inserito dall'utente viene salvato automaticamente nella variabile speciale <code>ASKED</code>.</p>
+
+    <div class="codeblock"><span class="codeblock-label">esempio</span><span class="kw">TALK:V</span> Inserisci un comando:
+<span class="cmt">&lt;* Ora alla fine di ogni output appare:
+   Inserisci un comando: _  *&gt;</span>
+
+<span class="kw">TALK</span> Hai scritto: @ASKED
+
+<span class="kw">TALK:V</span> Nuova domanda:
+<span class="cmt">&lt;* Sovrascrive la domanda precedente *&gt;</span>
+
+<span class="kw">TALK:F</span>
+<span class="cmt">&lt;* Disattiva l'input persistente *&gt;</span>
+
+<span class="kw">TALK:V</span>
+<span class="cmt">&lt;* Riattiva senza domanda *&gt;</span></div>
+
+    <div class="callout">
+      <strong>Attenzione:</strong> se nel flusso del codice non viene mai letto <code>@ASKED</code>, oppure viene attivato un altro input con <code>TALK</code> o <code>INP</code>, <code>TALK:V</code> si disattiva automaticamente.
+    </div>
+  </div>
+
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-section">
+  <div class="quiz-header">
+    <h2>Quiz — Sezione 3</h2>
+    <p>5 domande · serve l'80% per passare alla sezione 4</p>
+  </div>
+  <div class="quiz-inner" id="quiz">
+
+    <!-- Q1 -->
+    <div class="q-block" data-q="0" data-type="mc">
+      <p class="q-num">Domanda 01</p>
+      <p class="q-text">Cosa produce questo codice?</p>
+      <div class="q-code">citta = Roma
+TALK Abito a @citta!</div>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Abito a @citta!</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Abito a Roma!</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Errore: @ non è valido in TALK</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Abito a Roma !</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="q-block" data-q="1" data-type="mc">
+      <p class="q-num">Domanda 02</p>
+      <p class="q-text">Cosa succede se scrivi <code>TALK @nome</code> e la variabile <code>nome</code> non esiste?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Errore VAR_NOT_FOUND</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Stampa il testo "@nome" letteralmente</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>La console chiede un input all'utente e lo salva in <code>nome</code></div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Stampa una stringa vuota</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <!-- Q3: completamento IDE -->
+    <div class="q-block" data-q="2" data-type="ide">
+      <p class="q-num">Domanda 03 — Completamento</p>
+      <p class="q-text">Completa il codice per stampare: <code>Ciao, @utente! Benvenuto.</code> (la @ deve apparire letteralmente, non come riferimento a variabile)</p>
+      <div class="q-ide">
+        <div class="ide-line"><span class="ide-lnum">1</span><span class="ide-kw">TALK</span>&nbsp;<input class="ide-blank" data-answer="Ciao, \@utente! Benvenuto." placeholder="…" spellcheck="false" autocomplete="off" style="min-width:240px"></div>
+      </div>
+      <button class="q-ide-submit">Verifica</button>
+      <div class="q-feedback"></div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="q-block" data-q="3" data-type="mc">
+      <p class="q-num">Domanda 04</p>
+      <p class="q-text">Qual è la differenza principale tra <code>OUT</code> e <code>TALK</code>?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>OUT stampa in maiuscolo, TALK in minuscolo</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>OUT dà errore su variabili inesistenti invece di chiedere input</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>OUT non può stampare variabili, solo testo fisso</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>OUT è più veloce di TALK</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="q-block" data-q="4" data-type="mc">
+      <p class="q-num">Domanda 05</p>
+      <p class="q-text">In quale variabile speciale viene salvato l'input inserito dall'utente quando è attivo <code>TALK:V</code>?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span><code>INPUT</code></div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span><code>REPLY</code></div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span><code>ASKED</code></div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span><code>LAST</code></div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="quiz-result" id="quiz-result">
+      <div class="result-score" id="result-score"></div>
+      <p class="result-msg" id="result-msg"></p>
+      <a href="sezione4.html" class="btn-next" id="btn-avanti">Sezione 4 →</a>
+      <button class="btn-retry" id="btn-retry">↺ Riprova</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { type:'mc', correct:1, feedback:['No. @ davanti a una variabile esistente viene sostituito con il suo valore.','Esatto! @citta viene sostituito con "Roma", e ! ferma il riferimento perché non è un carattere ammesso nei nomi.','No. @ in TALK è perfettamente valido ed è proprio il modo per stampare variabili.','No. Non c\'è spazio aggiunto prima di !, il risultato è "Roma!".'] },
+  { type:'mc', correct:2, feedback:['No. OUT darebbe errore, ma TALK gestisce le variabili inesistenti chiedendo input.','No. @ non viene stampato letteralmente, viene interpretato come riferimento.','Esatto! TALK chiede automaticamente un input all\'utente e salva la risposta nella variabile inesistente.','No. TALK non stampa niente di silenzioso: si aspetta input.'] },
+  { type:'ide', answers:['Ciao, \\@utente! Benvenuto.'], feedback:['Esatto! \\@ stampa la @ letteralmente senza interpretarla come riferimento a variabile.','Sbagliato. Per stampare @ letteralmente devi usare l\'escape \\@. La risposta è: Ciao, \\@utente! Benvenuto.'] },
+  { type:'mc', correct:1, feedback:['No. Non c\'è nessuna differenza nel formato del testo.','Esatto! OUT è solo output puro: se incontra una variabile inesistente dà errore, non chiede input.','No. OUT può stampare variabili normalmente.','No. Non c\'è differenza di velocità.'] },
+  { type:'mc', correct:2, feedback:['No.','No.','Esatto! L\'input inserito quando TALK:V è attivo viene sempre salvato in ASKED.','No.'] }
+];
+
+const PASS = 0.8;
+let answered = new Array(QUESTIONS.length).fill(false);
+let score = 0;
+
+function checkResult() {
+  if (!answered.every(Boolean)) return;
+  const el  = document.getElementById('quiz-result');
+  const pct = score / QUESTIONS.length;
+  document.getElementById('result-score').textContent = score + ' / ' + QUESTIONS.length;
+  document.getElementById('result-msg').textContent =
+    pct >= PASS ? 'Ottimo! Puoi passare alla sezione 4.' : 'Rileggi la sezione e riprova — servono almeno l\'80%.';
+  document.getElementById('btn-avanti').style.display = pct >= PASS ? '' : 'none';
+  el.classList.add('show');
+  el.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+document.querySelectorAll('.q-block[data-type="mc"]').forEach(block => {
+  const qi = parseInt(block.dataset.q);
+  block.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (answered[qi]) return;
+      answered[qi] = true;
+      const chosen  = parseInt(opt.dataset.i);
+      const correct = QUESTIONS[qi].correct;
+      const fb = block.querySelector('.q-feedback');
+      block.querySelectorAll('.opt').forEach(o => {
+        o.classList.add('disabled');
+        if (parseInt(o.dataset.i) === correct) o.classList.add('correct');
+      });
+      if (chosen === correct) { opt.classList.add('correct'); score++; fb.className = 'q-feedback show ok'; }
+      else                    { opt.classList.add('wrong');   fb.className = 'q-feedback show err'; }
+      fb.textContent = QUESTIONS[qi].feedback[chosen];
+      checkResult();
+    });
+  });
+});
+
+document.querySelectorAll('.q-block[data-type="ide"]').forEach(block => {
+  const qi  = parseInt(block.dataset.q);
+  const btn = block.querySelector('.q-ide-submit');
+  const inp = block.querySelector('.ide-blank');
+  const fb  = block.querySelector('.q-feedback');
+
+  function verify() {
+    if (answered[qi]) return;
+    answered[qi] = true;
+    btn.disabled = true;
+    inp.disabled = true;
+    const val     = inp.value.trim();
+    const answers = QUESTIONS[qi].answers;
+    const ok      = answers.some(a => val === a);
+    if (ok) { inp.classList.add('correct'); score++; fb.className = 'q-feedback show ok'; fb.textContent = QUESTIONS[qi].feedback[0]; }
+    else    { inp.classList.add('wrong');   fb.className = 'q-feedback show err'; fb.textContent = QUESTIONS[qi].feedback[1]; }
+    checkResult();
+  }
+
+  btn.addEventListener('click', verify);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
+});
+
+document.getElementById('btn-retry').addEventListener('click', () => {
+  answered = new Array(QUESTIONS.length).fill(false);
+  score = 0;
+  document.querySelectorAll('.q-block').forEach(b => {
+    b.querySelectorAll('.opt').forEach(o => o.className = 'opt');
+    b.querySelector('.q-feedback').className = 'q-feedback';
+    const inp = b.querySelector('.ide-blank');
+    if (inp) { inp.className = 'ide-blank'; inp.disabled = false; inp.value = ''; }
+    const btn = b.querySelector('.q-ide-submit');
+    if (btn) btn.disabled = false;
+  });
+  document.getElementById('quiz-result').classList.remove('show');
+  document.querySelector('.quiz-section').scrollIntoView({ behavior:'smooth' });
+});
+</script>
+
+</body>
+</html>
