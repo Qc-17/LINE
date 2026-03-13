@@ -451,4 +451,4 @@ code {
   transition: border-color .2s, color .2s;
 }
 .q-ide-submit:hover:not(:disabled) { border-color: #e8854a; color: #e8854a; }
-.q-ide-submit:disabled { opacity: .4; cursor: default; }
+.q-ide-submit:disabled { opacity: .4; cursor: default; } 
