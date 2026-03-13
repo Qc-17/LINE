@@ -380,19 +380,26 @@ footer {
 <script type="text/line" trigger="calcola" replace body-class="tema">
   TAKE math
 
-  >> Converto gli input in numerici
-  #e  = @entrata
-  #a  = @affitto
-  #ci = @cibo
-  #tr = @trasporti
-  #bo = @bollette
-  #sv = @svago
-  #al = @altro
+  >> Forzo conversione numerica: sottrarre 0 costringe LINE a trattare
+  >> il valore stringa iniettato da LINE-DOM come numero
+  #e  = @entrata - 0
+  #a  = @affitto - 0
+  #ci = @cibo - 0
+  #tr = @trasporti - 0
+  #bo = @bollette - 0
+  #sv = @svago - 0
+  #al = @altro - 0
 
   >> Calcolo le uscite totali e il disponibile
-  #tot  = #a + #ci + #tr + #bo + #sv + #al
-  #rim  = #e - #tot
-  #perc = math_round(#tot * 100 / #e)
+  #tot = #a + #ci + #tr + #bo + #sv + #al
+  #rim = #e - #tot
+
+  >> Percentuale: evito divisione per zero se entrata è 0
+  #perc = 0
+  IF ha-entrata = #e > 0
+  GO @ha-entrata @{
+    #perc = math_round(#tot * 100 / #e)
+  }
 
   >> Scrivo i tre valori nei card
   <tot-out>TALK € @tot</tot-out>
