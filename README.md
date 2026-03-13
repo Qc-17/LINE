@@ -2,6 +2,8 @@
 
 LINE è un linguaggio di programmazione interpretato, scritto in JavaScript, con sintassi in italiano.
 
+Qui per la pagina: **<a href="https://qc-17.github.io/LINE>index</a>**
+
 Progettato per essere leggibile, espressivo e facilmente integrabile in pagine web tramite **LINE-DOM**.
 
 ---
