@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sezione 7 — LINE 3.0</title>
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="topbar">
+  <a href="index.html" class="topbar-brand"><img src="favicon.png" alt="LINE" class="topbar-favicon"></a>
+  <div class="topbar-nav">
+    <a href="index.html">Home</a>
+    <a href="sezione6.html">Sezione 6</a>
+    <a class="current">Sezione 7</a>
+    <a href="sezione8.html" style="opacity:.35">Sezione 8 →</a>
+  </div>
+</nav>
+<div class="page">
+
+  <p class="section-tag">Sezione 07 / 08</p>
+  <h1 class="section-title">Scope, Etichette,<br>Errori e Moduli</h1>
+  <p class="section-desc">Visibilità delle variabili, etichette, gestione degli errori con TRY/SHOW/YET e l'uso dei moduli.</p>
+
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">7.1</span> Scope delle variabili</h2>
+    <p>Per default, le variabili dichiarate dentro un blocco (FUN, THEN, corpo GO) sono <strong>locali</strong> — non accessibili dall'esterno.</p>
+    <p>Per renderle globali si usa il prefisso <code>RET</code>:</p>
+    <div class="codeblock"><span class="kw">FUN</span> calcola()
+  <span class="kw">RET</span> <span class="num">#risultato</span> = 42   <span class="cmt">>> accessibile ovunque</span>
+  locale = ciao        <span class="cmt">>> solo dentro questa funzione</span>
+  <span class="kw">FEND</span>
+calcola()
+<span class="kw">TALK</span> @risultato   <span class="cmt">>> 42</span></div>
+
+    <p>Per invertire il comportamento di default — tutte globali di default — si mette <code>DEFRET</code> all'inizio del blocco. Poi si usa <code>TEMP</code> per rendere una variabile locale:</p>
+    <div class="codeblock"><span class="kw">FUN</span> esempio()
+  DEFRET
+  <span class="num">#due</span> = 2         <span class="cmt">>> globale (DEFRET)</span>
+  <span class="kw">TEMP</span> <span class="num">#quattro</span> = 4  <span class="cmt">>> locale</span>
+  <span class="kw">FEND</span></div>
+  </div>
+
+  <div class="sep"></div>
+
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">7.2</span> Etichette</h2>
+    <p>Qualsiasi istruzione può ricevere un'etichetta con la sintassi <code>parola_chiave:etichetta</code>. Per rieseguire l'istruzione associata all'etichetta si usa <code>*etichetta</code>.</p>
+    <div class="codeblock"><span class="kw">TALK</span>:saluto Ciao!
+*saluto   <span class="cmt">>> riesegue il TALK:saluto</span></div>
+    <p>Se a una stessa etichetta vengono assegnate più istruzioni, <code>*etichetta</code> esegue l'ultima.</p>
+    <p>Le due etichette speciali di <code>TALK</code> già viste nella sezione 3 — <code>:V</code> e <code>:F</code> — seguono questo stesso meccanismo.</p>
+  </div>
+
+  <div class="sep"></div>
+
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">7.3</span> Gestione errori: TRY / SHOW / YET</h2>
+    <p>LINE gestisce gli errori senza interrompere il programma tramite tre blocchi:</p>
+    <div class="codeblock"><span class="kw">TRY</span> nome_try
+  <span class="cmt">>> codice che potrebbe dare errore</span>
+  <span class="kw">TREND</span>
+
+<span class="kw">SHOW</span> nome_show @nome_try
+  <span class="cmt">>> eseguito se c'è stato un errore</span>
+  <span class="kw">TALK</span> @ERRCODE
+  <span class="kw">TALK</span> @ERRMSG
+  <span class="kw">SEND</span>
+
+<span class="kw">YET</span> @nome_try
+  <span class="cmt">>> eseguito sempre (con o senza errore)</span>
+  <span class="kw">YEND</span></div>
+
+    <p><code>SHOW</code> e <code>YET</code> sono facoltativi. Dentro lo <code>SHOW</code> sono disponibili le variabili speciali <code>ERRCODE</code> (numerale) e <code>ERRMSG</code> (stringa). Esistono solo lì.</p>
+
+    <div class="callout">
+      <strong>Regole:</strong> TRY non può essere annidato. Ogni TRY può avere al massimo un SHOW e un YET.
+    </div>
+
+    <p>Se un errore avviene dentro un TRY senza SHOW, LINE stampa ERRMSG e termina l'esecuzione. Lista degli errori principali:</p>
+    <table class="table">
+      <tr><th>Codice</th><th>Causa</th></tr>
+      <tr><td>VAR_NOT_FOUND</td><td>Variabile inesistente (con OUT)</td></tr>
+      <tr><td>TYPE_ERROR</td><td>Tipo di dato non valido</td></tr>
+      <tr><td>CONST_MODIFY</td><td>Tentativo di modifica di una STAY</td></tr>
+      <tr><td>DIV_BY_ZERO</td><td>Divisione per zero</td></tr>
+      <tr><td>LIST_OUT_OF_RANGE</td><td>Indice fuori dai limiti della lista</td></tr>
+      <tr><td>FUNC_NOT_FOUND</td><td>Funzione inesistente</td></tr>
+      <tr><td>SYNTAX_ERROR</td><td>Errore di sintassi</td></tr>
+    </table>
+  </div>
+
+  <div class="sep"></div>
+
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">7.4</span> Moduli</h2>
+    <p>I moduli sono collezioni di funzioni pronte all'uso. Si importano con <code>TAKE</code>:</p>
+    <div class="codeblock"><span class="kw">TAKE</span> math
+<span class="num">#r</span> = math_sqrt(9)
+<span class="kw">TALK</span> @r   <span class="cmt">>> 3</span></div>
+    <p>Le funzioni di un modulo si chiamano con il formato <code>nomemodulo_nomefunzione()</code>.</p>
+    <p>Per vedere l'elenco di tutti i moduli disponibili, esegui <code>.MODS</code> in un file vuoto. Per vedere le funzioni di un modulo specifico, usa <code>.MATH</code>, <code>.STR</code>, ecc.</p>
+
+    <table class="table">
+      <tr><th>Modulo</th><th>Contenuto</th></tr>
+      <tr><td>math</td><td>Funzioni matematiche (sqrt, abs, floor, ceil…)</td></tr>
+      <tr><td>str</td><td>Manipolazione stringhe (len, sub, upper, lower…)</td></tr>
+      <tr><td>list</td><td>Operazioni su liste (len, has, shuffle…)</td></tr>
+      <tr><td>rand</td><td>Casualità (int, pick, shuffle…)</td></tr>
+      <tr><td>io</td><td>Input/output avanzato (time, file…)</td></tr>
+      <tr><td>type</td><td>Verifica e conversione di tipi</td></tr>
+      <tr><td>conv</td><td>Conversioni di unità e formati</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-header">
+    <h2>Quiz — Sezione 7</h2>
+    <p>6 domande · serve l'80% per passare alla sezione 8</p>
+  </div>
+  <div class="quiz-inner" id="quiz">
+
+    <div class="q-block" data-q="0" data-type="mc">
+      <p class="q-num">Domanda 01</p>
+      <p class="q-text">Una variabile dichiarata dentro una FUN senza nessun prefisso è…</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Globale</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Locale al blocco</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Costante</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Dipende dal tipo di dato</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="1" data-type="ide">
+      <p class="q-num">Domanda 02 — Completamento</p>
+      <p class="q-text">Dichiara la variabile <code>totale</code> come globale dentro una funzione.</p>
+      <div class="q-ide">
+        <div class="ide-line"><span class="ide-lnum">1</span><input class="ide-blank" data-answer="RET totale = 0" placeholder="…" spellcheck="false" autocomplete="off"></div>
+      </div>
+      <button class="q-ide-submit">Verifica</button>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="2" data-type="mc">
+      <p class="q-num">Domanda 03</p>
+      <p class="q-text">Quale blocco viene <em>sempre</em> eseguito, sia in caso di errore sia in caso di successo?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>TRY</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>SHOW</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>YET</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>FEND</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="3" data-type="mc">
+      <p class="q-num">Domanda 04</p>
+      <p class="q-text">Dove esistono le variabili <code>ERRCODE</code> e <code>ERRMSG</code>?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Ovunque nel programma dopo un errore</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Solo dentro il blocco SHOW</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Solo dentro il blocco YET</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Dentro TRY e SHOW</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="4" data-type="ide">
+      <p class="q-num">Domanda 05 — Completamento</p>
+      <p class="q-text">Importa il modulo <code>rand</code>.</p>
+      <div class="q-ide">
+        <div class="ide-line"><span class="ide-lnum">1</span><input class="ide-blank" data-answer="TAKE rand" placeholder="…" spellcheck="false" autocomplete="off"></div>
+      </div>
+      <button class="q-ide-submit">Verifica</button>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="5" data-type="mc">
+      <p class="q-num">Domanda 06</p>
+      <p class="q-text">Come si chiama una funzione del modulo <code>str</code> che si chiama <code>upper</code>?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span><code>upper()</code></div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span><code>str.upper()</code></div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span><code>str_upper()</code></div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span><code>TAKE str.upper()</code></div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="quiz-result" id="quiz-result">
+      <div class="result-score" id="result-score"></div>
+      <p class="result-msg" id="result-msg"></p>
+      <a href="sezione8.html" class="btn-next" id="btn-avanti">Sezione 8 →</a>
+      <button class="btn-retry" id="btn-retry">↺ Riprova</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { type:'mc', correct:1, feedback:['No. Senza prefisso speciale le variabili nei blocchi sono locali.','Esatto! Per default le variabili nei blocchi sono locali. Per renderle globali si usa RET.','No. STAY rende costante, non locale.','No. Il tipo non influenza lo scope.'] },
+  { type:'ide', answers:['RET totale = 0','RET #totale = 0'], feedback:['Esatto!','Sbagliato. Per rendere una variabile globale da dentro un blocco usa RET: RET totale = 0'] },
+  { type:'mc', correct:2, feedback:['No. TRY contiene il codice da monitorare.','No. SHOW viene eseguito solo in caso di errore.','Esatto! YET viene sempre eseguito, sia che ci sia stato un errore sia che l\'esecuzione sia andata a buon fine.','No. FEND chiude una FUN.'] },
+  { type:'mc', correct:1, feedback:['No. Le variabili di errore non persistono globalmente.','Esatto! ERRCODE e ERRMSG esistono solo dentro il blocco SHOW.','No. YET non ha accesso alle variabili di errore.','No. Solo SHOW le ha disponibili.'] },
+  { type:'ide', answers:['TAKE rand'], feedback:['Esatto!','Sbagliato. Per importare un modulo usa TAKE: TAKE rand'] },
+  { type:'mc', correct:2, feedback:['No. Bisogna specificare il modulo.','No. LINE non usa la notazione col punto.','Esatto! Le funzioni dei moduli si chiamano con nomemodulo_nomefunzione(): str_upper()','No. TAKE serve per importare il modulo, non per chiamare le funzioni.'] }
+];
+const PASS = 0.8;
+let answered = new Array(QUESTIONS.length).fill(false), score = 0;
+function checkResult() {
+  if (!answered.every(Boolean)) return;
+  const pct = score / QUESTIONS.length;
+  document.getElementById('result-score').textContent = score + ' / ' + QUESTIONS.length;
+  document.getElementById('result-msg').textContent = pct >= PASS ? 'Ottimo! Puoi passare alla sezione finale.' : 'Rileggi la sezione e riprova — servono almeno l\'80%.';
+  document.getElementById('btn-avanti').style.display = pct >= PASS ? '' : 'none';
+  document.getElementById('quiz-result').classList.add('show');
+  document.getElementById('quiz-result').scrollIntoView({behavior:'smooth',block:'center'});
+}
+document.querySelectorAll('.q-block[data-type="mc"]').forEach(block => {
+  const qi = parseInt(block.dataset.q);
+  block.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (answered[qi]) return; answered[qi] = true;
+      const chosen = parseInt(opt.dataset.i), correct = QUESTIONS[qi].correct, fb = block.querySelector('.q-feedback');
+      block.querySelectorAll('.opt').forEach(o => { o.classList.add('disabled'); if (parseInt(o.dataset.i) === correct) o.classList.add('correct'); });
+      if (chosen === correct) { opt.classList.add('correct'); score++; fb.className = 'q-feedback show ok'; } else { opt.classList.add('wrong'); fb.className = 'q-feedback show err'; }
+      fb.textContent = QUESTIONS[qi].feedback[chosen]; checkResult();
+    });
+  });
+});
+document.querySelectorAll('.q-block[data-type="ide"]').forEach(block => {
+  const qi = parseInt(block.dataset.q), btn = block.querySelector('.q-ide-submit'), inp = block.querySelector('.ide-blank'), fb = block.querySelector('.q-feedback');
+  function verify() {
+    if (answered[qi]) return; answered[qi] = true; btn.disabled = true; inp.disabled = true;
+    const ok = QUESTIONS[qi].answers.some(a => inp.value.trim() === a);
+    inp.classList.add(ok ? 'correct' : 'wrong'); if (ok) score++;
+    fb.className = 'q-feedback show ' + (ok ? 'ok' : 'err'); fb.textContent = QUESTIONS[qi].feedback[ok ? 0 : 1]; checkResult();
+  }
+  btn.addEventListener('click', verify); inp.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
+});
+document.getElementById('btn-retry').addEventListener('click', () => {
+  answered = new Array(QUESTIONS.length).fill(false); score = 0;
+  document.querySelectorAll('.q-block').forEach(b => {
+    b.querySelectorAll('.opt').forEach(o => o.className = 'opt'); b.querySelector('.q-feedback').className = 'q-feedback';
+    const inp = b.querySelector('.ide-blank'); if (inp) { inp.className = 'ide-blank'; inp.disabled = false; inp.value = ''; }
+    const btn = b.querySelector('.q-ide-submit'); if (btn) btn.disabled = false;
+  });
+  document.getElementById('quiz-result').classList.remove('show');
+  document.querySelector('.quiz-section').scrollIntoView({behavior:'smooth'});
+});
+</script>
+</body>
+</html>
