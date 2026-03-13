@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sezione 2 — LINE 3.0</title>
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="index.html" class="topbar-brand"><img src="favicon.png" alt="LINE" class="topbar-favicon"></a>
+  <div class="topbar-nav">
+    <a href="index.html">Home</a>
+    <a href="sezione1.html">Sezione 1</a>
+    <a class="current">Sezione 2</a>
+    <a href="sezione3.html" style="opacity:.35">Sezione 3 →</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <p class="section-tag">Sezione 02 / 07</p>
+  <h1 class="section-title">Variabili e<br>Tipi di Dato</h1>
+  <p class="section-desc">Come si dichiarano le variabili, i tre tipi di dato, i tre tipi di variabile e come si riferisce ad esse nel codice.</p>
+
+  <!-- 2.1 Struttura di una variabile -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">2.1</span> Struttura di una variabile</h2>
+    <p>In LINE una variabile è una scatola con un nome che immagazzina un dato. La dichiarazione segue sempre questa forma:</p>
+    <div class="codeblock"><span class="codeblock-label">sintassi</span>TIPO_VARIABILE nome = dato</div>
+    <p>Il <strong>nome</strong> può contenere solo lettere, numeri (non in prima posizione) e il trattino basso <code>_</code>. Non sono ammessi spazi o altri caratteri speciali.</p>
+    <p>Per riferirsi al <strong>valore</strong> di una variabile in un altro punto del codice si usa il simbolo <code>@</code> davanti al nome:</p>
+    <div class="codeblock"><span class="codeblock-label">riferimento</span>nome = Mario
+<span class="cmt">>> @nome vale "Mario"</span>
+<span class="cmt">>> Il "potere" di @ finisce al primo carattere non ammesso nel nome</span></div>
+    <div class="callout">
+      <strong>Nota:</strong> <code>TIPO_VARIABILE</code> per ora lascialo vuoto — viene spiegato nel capitolo 2.3. La maggior parte delle variabili si dichiara senza prefisso.
+    </div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 2.2 Tipi di dato -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">2.2</span> Tipi di dato</h2>
+    <p>In LINE esistono tre tipi di dato:</p>
+
+    <table class="table">
+      <tr><th>Tipo</th><th>Prefisso</th><th>Descrizione</th></tr>
+      <tr><td>Stringa</td><td>(nessuno)</td><td>Immagazzina il dato così com'è, come testo</td></tr>
+      <tr><td>Numerale</td><td><code>#</code></td><td>Immagazzina un valore numerico</td></tr>
+      <tr><td>Booleano</td><td><code>#</code></td><td>Solo due valori: <code>V</code> (vero) o <code>F</code> (falso)</td></tr>
+    </table>
+
+    <p>Il prefisso <code>#</code> davanti al nome dichiara che la variabile contiene un numerale o un booleano. Senza prefisso è sempre una stringa.</p>
+
+    <div class="codeblock"><span class="codeblock-label">esempi</span>var = 8      <span class="cmt">>> stringa: immagazzina il testo "8"</span>
+<span class="num">#var</span> = 8     <span class="cmt">>> numerale: immagazzina il numero 8</span>
+var = V      <span class="cmt">>> stringa: immagazzina il testo "V"</span>
+<span class="num">#var</span> = V     <span class="cmt">>> booleano: immagazzina il valore vero</span></div>
+
+    <div class="callout">
+      <strong>Attenzione:</strong> <code>V</code> e <code>F</code> vengono letti come booleani solo dentro variabili con <code>#</code>. Altrimenti sono semplici stringhe. Un <code>5</code> numerico è diverso da un <code>5</code> stringa — i due tipi non sono intercambiabili.
+    </div>
+
+    <p>Se dentro una variabile con <code>#</code> inserisci qualcosa che non può essere né numero né booleano, il programma darà un errore di tipo.</p>
+
+    <h3 style="font-size:1rem;font-weight:700;margin:1.5rem 0 .6rem;">Conversioni di tipo</h3>
+    <p>Si può cambiare il tipo di una variabile già dichiarata con questi comandi:</p>
+
+    <table class="table">
+      <tr><th>Comando</th><th>Effetto</th></tr>
+      <tr><td>n:</td><td>Converte in numerale. Se la stringa è un numero usa quel valore, altrimenti vale 1. Stringa vuota → 0.</td></tr>
+      <tr><td>b:</td><td>Converte in booleano. Stringa vuota o "F" → F, tutto il resto → V. Da numero: 0 → F, qualsiasi altro → V.</td></tr>
+      <tr><td>s:</td><td>Converte in stringa. Il valore diventa testo leggibile.</td></tr>
+    </table>
+
+    <div class="codeblock"><span class="codeblock-label">conversioni</span>var = 8
+n:var        <span class="cmt">>> ora var è il numerale 8</span>
+
+<span class="num">#n</span> = 0
+b:n          <span class="cmt">>> ora n è il booleano F</span>
+
+<span class="num">#n</span> = 5
+s:n          <span class="cmt">>> ora n è la stringa "5"</span></div>
+
+    <p>Per sapere il tipo attuale di una variabile si usa l'escape <code>\t</code> seguito dal nome (senza <code>@</code>). Il risultato è una stringa: <code>string</code>, <code>number</code> o <code>bool</code>.</p>
+
+    <div class="codeblock"><span class="codeblock-label">\t — tipo di una variabile</span><span class="num">#eta</span> = 25
+\teta        <span class="cmt">>> produce: number</span>
+
+nome = Mario
+\tnome       <span class="cmt">>> produce: string</span></div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 2.3 Tipi di variabile -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">2.3</span> Tipi di variabile</h2>
+    <p>Esistono tre tipi di variabile, che si distinguono per il comportamento del valore nel tempo:</p>
+
+    <h3 style="font-size:1rem;font-weight:700;margin:1.2rem 0 .5rem;">Standard (nessun prefisso)</h3>
+    <p>La variabile più comune. Il valore può essere cambiato manualmente con una <strong>riassegnazione</strong> — che ha la stessa sintassi della dichiarazione:</p>
+    <div class="codeblock">var = Buongiorno   <span class="cmt">>> dichiarazione</span>
+var = Arrivederci  <span class="cmt">>> riassegnazione: ora vale "Arrivederci"</span></div>
+    <p>Si può anche cambiare tipo durante la riassegnazione:</p>
+    <div class="codeblock">var = Ciao    <span class="cmt">>> stringa</span>
+<span class="num">#var</span> = V      <span class="cmt">>> riassegnata come booleano</span></div>
+    <div class="callout">
+      <strong>Importante:</strong> se assegni ad una variabile il valore di un'altra variabile e quella successivamente cambia, la prima <em>non cambierà</em>. Il valore viene copiato al momento dell'assegnazione.
+    </div>
+    <div class="codeblock"><span class="num">#a</span> = 5
+var = @a    <span class="cmt">>> var vale 5 (copia di a)</span>
+<span class="num">#a</span> = 6    <span class="cmt">>> a cambia, ma var rimane 5</span></div>
+
+    <h3 style="font-size:1rem;font-weight:700;margin:1.5rem 0 .5rem;">STAY — costante</h3>
+    <p>Anteponi <code>STAY</code> alla dichiarazione. Il valore non può essere cambiato in nessun modo: qualsiasi tentativo di riassegnazione darà un errore.</p>
+    <div class="codeblock"><span class="kw">STAY</span> <span class="num">#pi</span> = 3.14
+<span class="kw">STAY</span> lingua = italiano</div>
+
+    <h3 style="font-size:1rem;font-weight:700;margin:1.5rem 0 .5rem;">IF — reattiva</h3>
+    <p>Anteponi <code>IF</code>. Queste variabili possono contenere solo booleani o operazioni che producono booleani. Il prefisso <code>#</code> non è necessario.</p>
+    <div class="codeblock"><span class="kw">IF</span> vero = V          <span class="cmt">>> corretto</span>
+<span class="kw">IF</span> errore = 5        <span class="cmt">>> ERRORE: 5 non è un booleano</span></div>
+    <p>La caratteristica che le rende speciali: se una variabile IF è posta uguale ad un'altra variabile e quella cambia, <strong>anche la IF cambia di conseguenza</strong>.</p>
+    <div class="codeblock"><span class="num">#a</span> = V
+<span class="kw">IF</span> cond = @a
+<span class="num">#a</span> = F    <span class="cmt">>> adesso anche cond vale F</span></div>
+    <p>Questo le rende ideali per condizioni che devono aggiornarsi automaticamente. Le variabili IF vengono usate intensamente con il costrutto <code>GO</code>, che verrà trattato in una sezione successiva.</p>
+  </div>
+
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-section">
+  <div class="quiz-header">
+    <h2>Quiz — Sezione 2</h2>
+    <p>7 domande · serve l'80% per passare alla sezione 3</p>
+  </div>
+  <div class="quiz-inner" id="quiz">
+
+    <!-- Q1: scelta multipla -->
+    <div class="q-block" data-q="0" data-type="mc">
+      <p class="q-num">Domanda 01</p>
+      <p class="q-text">Quale di questi nomi di variabile è valido in LINE?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span><code>2cose</code></div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span><code>mia variabile</code></div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span><code>valore_finale</code></div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span><code>costo-totale</code></div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <!-- Q2: completamento IDE -->
+    <div class="q-block" data-q="1" data-type="ide">
+      <p class="q-num">Domanda 02 — Completamento</p>
+      <p class="q-text">Dichiara una variabile numerica chiamata <code>eta</code> con valore <code>30</code>.</p>
+      <div class="q-ide">
+        <div class="ide-line"><span class="ide-lnum">1</span><input class="ide-blank" data-answer="#eta = 30" placeholder="…" spellcheck="false" autocomplete="off"></div>
+      </div>
+      <button class="q-ide-submit">Verifica</button>
+      <div class="q-feedback"></div>
+    </div>
+
+    <!-- Q3: scelta multipla -->
+    <div class="q-block" data-q="2" data-type="mc">
+      <p class="q-num">Domanda 03</p>
+      <p class="q-text">Cosa contiene la variabile <code>x</code> dopo questo codice?</p>
+      <div class="q-code">#x = V</div>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>La stringa "V"</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Il booleano vero</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Il numerale 1</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Un errore, perché V non è un numero</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <!-- Q4: scelta multipla -->
+    <div class="q-block" data-q="3" data-type="mc">
+      <p class="q-num">Domanda 04</p>
+      <p class="q-text">Quale tipo ha <code>n</code> dopo questo codice?</p>
+      <div class="q-code">n = ciao
+n:n</div>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>string — la conversione non è avvenuta perché "ciao" non è un numero</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>number — vale 1, perché "ciao" non è convertibile ma n: assegna 1 in quel caso</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>bool — "ciao" è non vuoto quindi diventa V</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Errore: non si può convertire una stringa in numero</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <!-- Q5: scelta multipla -->
+    <div class="q-block" data-q="4" data-type="mc">
+      <p class="q-num">Domanda 05</p>
+      <p class="q-text">Cosa succede dopo questo codice?</p>
+      <div class="q-code">#a = 10
+b = @a
+#a = 99</div>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span><code>b</code> vale 99 — si è aggiornata insieme ad <code>a</code></div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span><code>b</code> vale 10 — il valore viene copiato al momento dell'assegnazione</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Errore: non si può assegnare un numerale a una variabile stringa</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span><code>b</code> vale "10" come stringa, poi diventa "99"</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <!-- Q6: completamento IDE -->
+    <div class="q-block" data-q="5" data-type="ide">
+      <p class="q-num">Domanda 06 — Completamento</p>
+      <p class="q-text">Dichiara la costante <code>pi</code> con valore <code>3.14</code>.</p>
+      <div class="q-ide">
+        <div class="ide-line"><span class="ide-lnum">1</span><input class="ide-blank" data-answer="STAY #pi = 3.14" placeholder="…" spellcheck="false" autocomplete="off"></div>
+      </div>
+      <button class="q-ide-submit">Verifica</button>
+      <div class="q-feedback"></div>
+    </div>
+
+    <!-- Q7: scelta multipla -->
+    <div class="q-block" data-q="6" data-type="mc">
+      <p class="q-num">Domanda 07</p>
+      <p class="q-text">Quale differenza c'è tra una variabile standard e una variabile IF?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Le variabili IF non possono contenere numeri, quelle standard sì</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Le variabili IF si aggiornano automaticamente se cambia la variabile da cui dipendono; quelle standard no</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Le variabili IF sono costanti come STAY</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Le variabili IF possono contenere qualsiasi tipo, quelle standard solo stringhe</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="quiz-result" id="quiz-result">
+      <div class="result-score" id="result-score"></div>
+      <p class="result-msg" id="result-msg"></p>
+      <a href="sezione3.html" class="btn-next" id="btn-avanti">Sezione 3 →</a>
+      <button class="btn-retry" id="btn-retry">↺ Riprova</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { type:'mc', correct:2, feedback:['No. Un nome non può iniziare con un numero.','No. Gli spazi non sono permessi nei nomi.','Esatto! Lettere, numeri (non in prima posizione) e _ sono gli unici caratteri ammessi.','No. Il trattino - non è ammesso; usa il trattino basso _.'] },
+  { type:'ide', answers:['#eta = 30'], feedback:['Esatto!','Sbagliato. Ricorda: per dichiarare un numerale il nome va preceduto da #, e il formato è: #nome = valore.'] },
+  { type:'mc', correct:1, feedback:['No. Il # fa sì che V venga interpretato come booleano, non come stringa.','Esatto! Con # davanti al nome, V viene interpretato come il booleano vero.','No. La conversione automatica non avviene in fase di dichiarazione.','No. V è un valore booleano valido per una variabile con #.'] },
+  { type:'mc', correct:1, feedback:['No. n: converte sempre, anche se la stringa non è numerica.','Esatto! n: su una stringa non numerica produce il numerale 1.','No. n: converte in numero, non in booleano. Per booleano si usa b:.','No. n: non dà errore, produce 1 se la stringa non è convertibile.'] },
+  { type:'mc', correct:1, feedback:['No. Solo le variabili IF si aggiornano automaticamente.','Esatto! Le variabili standard copiano il valore al momento dell\'assegnazione e non cambiano se cambia la sorgente.','No. LINE eredita il tipo da a, quindi b sarà un numerale — ma il valore resta 10.','No. b eredita il tipo numerale da a e resta 10.'] },
+  { type:'ide', answers:['STAY #pi = 3.14'], feedback:['Esatto!','Sbagliato. Le costanti si dichiarano con STAY davanti, e poiché è numerica serve #: STAY #pi = 3.14'] },
+  { type:'mc', correct:1, feedback:['No. Nessuno dei due può contenere numeri arbitrari — le IF contengono solo booleani.','Esatto! Le IF si aggiornano automaticamente, le standard no.','No. Le IF si possono riassegnare.','No. Le IF contengono solo booleani; quelle standard possono contenere qualsiasi tipo.'] }
+];
+
+const PASS = 0.8;
+let answered = new Array(QUESTIONS.length).fill(false);
+let score = 0;
+
+function checkResult() {
+  if (!answered.every(Boolean)) return;
+  const el  = document.getElementById('quiz-result');
+  const pct = score / QUESTIONS.length;
+  document.getElementById('result-score').textContent = score + ' / ' + QUESTIONS.length;
+  document.getElementById('result-msg').textContent =
+    pct >= PASS ? 'Ottimo! Puoi passare alla sezione 3.' : 'Rileggi la sezione e riprova — servono almeno l\'80%.';
+  document.getElementById('btn-avanti').style.display = pct >= PASS ? '' : 'none';
+  el.classList.add('show');
+  el.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+// Scelta multipla
+document.querySelectorAll('.q-block[data-type="mc"]').forEach(block => {
+  const qi = parseInt(block.dataset.q);
+  block.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (answered[qi]) return;
+      answered[qi] = true;
+      const chosen  = parseInt(opt.dataset.i);
+      const correct = QUESTIONS[qi].correct;
+      const fb = block.querySelector('.q-feedback');
+      block.querySelectorAll('.opt').forEach(o => {
+        o.classList.add('disabled');
+        if (parseInt(o.dataset.i) === correct) o.classList.add('correct');
+      });
+      if (chosen === correct) { opt.classList.add('correct'); score++; fb.className = 'q-feedback show ok'; }
+      else                    { opt.classList.add('wrong');   fb.className = 'q-feedback show err'; }
+      fb.textContent = QUESTIONS[qi].feedback[chosen];
+      checkResult();
+    });
+  });
+});
+
+// Completamento IDE
+document.querySelectorAll('.q-block[data-type="ide"]').forEach(block => {
+  const qi  = parseInt(block.dataset.q);
+  const btn = block.querySelector('.q-ide-submit');
+  const inp = block.querySelector('.ide-blank');
+  const fb  = block.querySelector('.q-feedback');
+
+  function verify() {
+    if (answered[qi]) return;
+    answered[qi] = true;
+    btn.disabled = true;
+    inp.disabled = true;
+    const val     = inp.value.trim();
+    const answers = QUESTIONS[qi].answers;
+    const ok      = answers.some(a => val.toLowerCase().replace(/\s+/g,' ') === a.toLowerCase().replace(/\s+/g,' '));
+    if (ok) { inp.classList.add('correct'); score++; fb.className = 'q-feedback show ok'; fb.textContent = QUESTIONS[qi].feedback[0]; }
+    else    { inp.classList.add('wrong');   fb.className = 'q-feedback show err'; fb.textContent = QUESTIONS[qi].feedback[1]; }
+    checkResult();
+  }
+
+  btn.addEventListener('click', verify);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
+});
+
+document.getElementById('btn-retry').addEventListener('click', () => {
+  answered = new Array(QUESTIONS.length).fill(false);
+  score = 0;
+  document.querySelectorAll('.q-block').forEach(b => {
+    b.querySelectorAll('.opt').forEach(o => o.className = 'opt');
+    b.querySelector('.q-feedback').className = 'q-feedback';
+    const inp = b.querySelector('.ide-blank');
+    if (inp) { inp.className = 'ide-blank'; inp.disabled = false; inp.value = ''; }
+    const btn = b.querySelector('.q-ide-submit');
+    if (btn) btn.disabled = false;
+  });
+  document.getElementById('quiz-result').classList.remove('show');
+  document.querySelector('.quiz-section').scrollIntoView({ behavior:'smooth' });
+});
+</script>
+
+</body>
+</html>
