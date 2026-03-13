@@ -368,20 +368,25 @@ code {
 .copyright a:hover { color: var(--acc); }
 
 /* ── Logo hero ── */
+.hero-logo-wrap {
+  background: #fff;
+  border-radius: 12px;
+  padding: .6rem 1.6rem;
+  margin-bottom: 2rem;
+  display: inline-block;
+}
 .hero-logo {
-  height: clamp(60px, 10vw, 100px);
+  height: clamp(48px, 8vw, 80px);
   width: auto;
-  margin-bottom: 1.2rem;
-  /* Il logo è su sfondo bianco — lo invertiamo per il tema scuro */
-  filter: brightness(0) invert(1);
+  display: block;
   object-fit: contain;
 }
 
-/* ── Favicon topbar (top-right) ── */
-.topbar-favicon {
-  height: 28px;
-  width: 28px;
+/* ── Favicon topbar (sinistra, cliccabile) ── */
+.topbar-brand .topbar-favicon {
+  height: 32px;
+  width: 32px;
   object-fit: contain;
-  border-radius: 5px;
-  flex-shrink: 0;
+  border-radius: 6px;
+  display: block;
 }
