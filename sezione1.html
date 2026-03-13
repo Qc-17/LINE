@@ -100,7 +100,7 @@ Sconto del 10\%
 <div class="quiz-section">
   <div class="quiz-header">
     <h2>Quiz — Sezione 1</h2>
-    <p>3 domande · rispondi per proseguire</p>
+    <p>3 domande · serve l'80% per passare alla sezione 2</p>
   </div>
   <div class="quiz-inner" id="quiz">
 
@@ -210,7 +210,7 @@ function showResult() {
   const el  = document.getElementById('quiz-result');
   const pct = score / QUESTIONS.length;
   document.getElementById('result-score').textContent = score + ' / ' + QUESTIONS.length;
-  document.getElementById('result-msg').textContent   = pct === 1 ? 'Perfetto!' : pct >= .6 ? 'Bene! Puoi andare avanti.' : 'Rileggi la sezione e riprova.';
+  document.getElementById('result-msg').textContent   = pct === 1 ? 'Perfetto!' : pct >= .8 ? 'Bene! Puoi andare avanti.' : 'Rileggi la sezione e riprova — servono almeno l\'80%.';
   el.classList.add('show');
   el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
