@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sezione 6 — LINE 3.0</title>
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="topbar">
+  <a href="index.html" class="topbar-brand"><img src="favicon.png" alt="LINE" class="topbar-favicon"></a>
+  <div class="topbar-nav">
+    <a href="index.html">Home</a>
+    <a href="sezione5.html">Sezione 5</a>
+    <a class="current">Sezione 6</a>
+    <a href="sezione7.html" style="opacity:.35">Sezione 7 →</a>
+  </div>
+</nav>
+<div class="page">
+
+  <p class="section-tag">Sezione 06 / 08</p>
+  <h1 class="section-title">Liste, IN e FOR</h1>
+  <p class="section-desc">Come creare collezioni di valori, accedervi per indice o tag, modificarle e iterarle.</p>
+
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">6.1</span> Liste</h2>
+    <p>Una lista immagazzina più valori in una sola variabile. I valori sono separati da <code>;</code> e racchiusi tra <code>[]</code>.</p>
+    <div class="codeblock">frutta = [mela ; pera ; banana]</div>
+    <p>Ogni elemento ha un <strong>indice</strong> che parte da 0. Gli indici negativi partono da destra: -1 è l'ultimo elemento.</p>
+    <p>Si possono aggiungere <strong>tag</strong> agli elementi con <code>|</code>:</p>
+    <div class="codeblock">rubrica = [lavoro | 02-1234 ; casa | 02-5678]
+<span class="cmt">>> "lavoro" e "casa" sono tag</span></div>
+    <p>Per accedere a un elemento:</p>
+    <div class="codeblock">frutta[#0]        <span class="cmt">>> "mela" (per indice)</span>
+rubrica[lavoro]   <span class="cmt">>> "02-1234" (per tag)</span></div>
+    <p>I valori nelle liste sono sempre stringhe. Per stampare tag e valori insieme si usa <code>SCREAM</code> invece di <code>TALK</code>:</p>
+    <div class="codeblock">lista = [tag | valore]
+<span class="kw">TALK</span> @lista    <span class="cmt">>> [valore]</span>
+SCREAM @lista  <span class="cmt">>> [tag | valore]</span></div>
+    <p>Le liste possono contenere altre liste come elementi:</p>
+    <div class="codeblock">dati = [nomi | [Mario ; Luigi] ; eta | [30 ; 25]]</div>
+  </div>
+
+  <div class="sep"></div>
+
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">6.2</span> Modificare una lista</h2>
+    <p><strong>Aggiungere</strong> un elemento con <code>ADD</code>:</p>
+    <div class="codeblock"><span class="cmt">>> AT: inserisce spostando gli altri avanti</span>
+ADD lista AT 1 = buongiorno   <span class="cmt">>> inserisce a indice 1</span>
+ADD lista AT = buongiorno     <span class="cmt">>> appende in fondo</span>
+
+<span class="cmt">>> BY: sostituisce l'elemento a quell'indice</span>
+ADD lista BY 1 = buongiorno</div>
+
+    <p><strong>Rimuovere</strong> un elemento con <code>CANC</code>:</p>
+    <div class="codeblock">CANC lista AT 0      <span class="cmt">>> per indice</span>
+CANC lista BY tag    <span class="cmt">>> per tag</span>
+CANC lista IS valore <span class="cmt">>> per valore</span>
+CANC lista IN [tag1 ; tag2]  <span class="cmt">>> per più tag</span></div>
+    <div class="callout">
+      <strong>Attenzione:</strong> se più elementi hanno lo stesso tag o lo stesso valore, <code>CANC</code> li rimuove tutti.
+    </div>
+  </div>
+
+  <div class="sep"></div>
+
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">6.3</span> Operatore IN</h2>
+    <p><code>IN</code> verifica se un valore è presente in una lista. Produce un booleano.</p>
+    <div class="codeblock">lista = [ciao ; salve]
+<span class="kw">IF</span> esiste = ciao IN lista   <span class="cmt">>> V</span>
+<span class="kw">IF</span> manca  = arrivederci IN lista  <span class="cmt">>> F</span></div>
+  </div>
+
+  <div class="sep"></div>
+
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">6.4</span> Ciclo FOR</h2>
+    <p>FOR itera gli elementi di una lista eseguendo una funzione per ciascuno.</p>
+    <div class="codeblock"><span class="codeblock-label">sintassi</span><span class="kw">FOR</span> @lista #[inizio ; fine ; salto] = @funzione()</div>
+    <p>Tutti e tre i valori tra <code>#[]</code> sono opzionali: inizio default 0, fine default -1 (fine lista), salto default 1.</p>
+    <p>All'interno della funzione sono disponibili tre variabili speciali:</p>
+    <table class="table">
+      <tr><th>Variabile</th><th>Contenuto</th></tr>
+      <tr><td>ONITEM</td><td>Il valore dell'elemento corrente</td></tr>
+      <tr><td>ONINDEX</td><td>L'indice dell'elemento corrente</td></tr>
+      <tr><td>ONTAG</td><td>Il/i tag dell'elemento corrente</td></tr>
+    </table>
+    <div class="codeblock"><span class="codeblock-label">esempio</span>numeri = [10 ; 20 ; 30]
+<span class="kw">FOR</span> @numeri = @{<span class="kw">TALK</span> @ONINDEX: @ONITEM}
+<span class="cmt">&lt;* Output:
+0: 10
+1: 20
+2: 30 *&gt;</span>
+
+<span class="cmt">>> Iterazione al contrario</span>
+<span class="kw">FOR</span> @numeri #[;; -1] = @{<span class="kw">TALK</span> @ONITEM}
+<span class="cmt">&lt;* Output: 30 / 20 / 10 *&gt;</span></div>
+
+    <p>Esiste anche la lista speciale <code>NUMBERS</code> che contiene tutti i numeri reali, dove ogni numero ha se stesso come indice. Utile per iterare range numerici:</p>
+    <div class="codeblock"><span class="kw">FOR</span> @NUMBERS #[1 ; 5] = @{<span class="kw">TALK</span> @ONITEM}
+<span class="cmt">&lt;* Output: 1 / 2 / 3 / 4 / 5 *&gt;</span></div>
+  </div>
+
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-header">
+    <h2>Quiz — Sezione 6</h2>
+    <p>8 domande · serve l'80% per passare alla sezione 7</p>
+  </div>
+  <div class="quiz-inner" id="quiz">
+
+    <div class="q-block" data-q="0" data-type="mc">
+      <p class="q-num">Domanda 01</p>
+      <p class="q-text">Quale indice ha l'ultimo elemento di una lista con 4 elementi?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>4</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>3 oppure -1</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>-1 soltanto</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>0</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="1" data-type="ide">
+      <p class="q-num">Domanda 02 — Completamento</p>
+      <p class="q-text">Accedi all'elemento con tag <code>nome</code> dalla lista <code>persona</code>.</p>
+      <div class="q-ide">
+        <div class="ide-line"><span class="ide-lnum">1</span>var =&nbsp;<input class="ide-blank" data-answer="persona[nome]" placeholder="…" spellcheck="false" autocomplete="off"></div>
+      </div>
+      <button class="q-ide-submit">Verifica</button>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="2" data-type="mc">
+      <p class="q-num">Domanda 03</p>
+      <p class="q-text">Cosa fa <code>ADD lista AT = x</code>?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Sostituisce il primo elemento con x</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Aggiunge x in cima alla lista</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Aggiunge x in fondo alla lista</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Errore: manca l'indice</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="3" data-type="mc">
+      <p class="q-num">Domanda 04</p>
+      <p class="q-text">Cosa produce <code>IF r = ciao IN [ciao ; salve]</code>?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>F</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>V</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Errore: IN funziona solo con variabili lista</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>"ciao"</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="4" data-type="mc">
+      <p class="q-num">Domanda 05</p>
+      <p class="q-text">Quale variabile speciale nel FOR contiene il valore dell'elemento corrente?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>ONINDEX</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>CURRENT</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>ONITEM</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>ITEM</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="5" data-type="ide">
+      <p class="q-num">Domanda 06 — Completamento</p>
+      <p class="q-text">Itera la lista <code>colori</code> stampando ogni elemento.</p>
+      <div class="q-ide">
+        <div class="ide-line"><span class="ide-lnum">1</span><input class="ide-blank" data-answer="FOR @colori = @{ TALK @ONITEM }" placeholder="…" spellcheck="false" autocomplete="off" style="min-width:260px"></div>
+      </div>
+      <button class="q-ide-submit">Verifica</button>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="6" data-type="mc">
+      <p class="q-num">Domanda 07</p>
+      <p class="q-text">Cosa fa <code>ADD lista BY 2 = nuovo</code>?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Inserisce "nuovo" all'indice 2, spostando gli altri</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Sostituisce l'elemento all'indice 2 con "nuovo"</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Aggiunge "nuovo" due volte in fondo</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Errore</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="7" data-type="mc">
+      <p class="q-num">Domanda 08</p>
+      <p class="q-text">A cosa serve la lista speciale <code>NUMBERS</code>?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Contiene i numeri da 0 a 100</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>È una lista di tutti i numeri reali dove ogni numero ha se stesso come indice — utile per iterare range con FOR</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Contiene i numeri inseriti dall'utente durante l'esecuzione</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Non esiste</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="quiz-result" id="quiz-result">
+      <div class="result-score" id="result-score"></div>
+      <p class="result-msg" id="result-msg"></p>
+      <a href="sezione7.html" class="btn-next" id="btn-avanti">Sezione 7 →</a>
+      <button class="btn-retry" id="btn-retry">↺ Riprova</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { type:'mc', correct:1, feedback:['No. Gli indici partono da 0, quindi una lista con 4 elementi ha indici 0,1,2,3.','Esatto! L\'ultimo elemento ha indice 3 (4-1) oppure -1 (il primo da destra).','No. -1 è corretto ma anche 3 lo è.','No. 0 è il primo elemento.'] },
+  { type:'ide', answers:['persona[nome]'], feedback:['Esatto!','Sbagliato. Per accedere per tag: nomeLista[nomeTag] → persona[nome]'] },
+  { type:'mc', correct:2, feedback:['No. AT senza indice aggiunge in fondo, non in cima.','No. Per aggiungere in cima useresti AT 0.','Esatto! Quando l\'indice in AT è omesso, l\'elemento viene aggiunto alla fine.','No. L\'indice è opzionale in AT.'] },
+  { type:'mc', correct:1, feedback:['No. "ciao" è presente nella lista.','Esatto! IN verifica la presenza e restituisce V perché "ciao" è nella lista.','No. IN funziona anche con liste letterali.','No. IN restituisce sempre un booleano.'] },
+  { type:'mc', correct:2, feedback:['No. ONINDEX contiene l\'indice corrente.','No. CURRENT non esiste in LINE.','Esatto! ONITEM contiene il valore dell\'elemento corrente nell\'iterazione.','No. ITEM non esiste in LINE.'] },
+  { type:'ide', answers:['FOR @colori = @{ TALK @ONITEM }'], feedback:['Esatto!','Sbagliato. Usa FOR con corpo inline: FOR @colori = @{ TALK @ONITEM }'] },
+  { type:'mc', correct:1, feedback:['No. AT inserisce spostando gli altri. BY sostituisce.','Esatto! BY sostituisce l\'elemento all\'indice indicato.','No.','No.'] },
+  { type:'mc', correct:1, feedback:['No. NUMBERS non è limitata.','Esatto! NUMBERS è la lista speciale di tutti i numeri reali con indice uguale al valore, perfetta per iterazioni numeriche con FOR.','No.','No. NUMBERS esiste ed è documentata.'] }
+];
+const PASS = 0.8;
+let answered = new Array(QUESTIONS.length).fill(false), score = 0;
+function checkResult() {
+  if (!answered.every(Boolean)) return;
+  const pct = score / QUESTIONS.length;
+  document.getElementById('result-score').textContent = score + ' / ' + QUESTIONS.length;
+  document.getElementById('result-msg').textContent = pct >= PASS ? 'Ottimo! Puoi passare alla sezione 7.' : 'Rileggi la sezione e riprova — servono almeno l\'80%.';
+  document.getElementById('btn-avanti').style.display = pct >= PASS ? '' : 'none';
+  document.getElementById('quiz-result').classList.add('show');
+  document.getElementById('quiz-result').scrollIntoView({behavior:'smooth',block:'center'});
+}
+document.querySelectorAll('.q-block[data-type="mc"]').forEach(block => {
+  const qi = parseInt(block.dataset.q);
+  block.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (answered[qi]) return; answered[qi] = true;
+      const chosen = parseInt(opt.dataset.i), correct = QUESTIONS[qi].correct, fb = block.querySelector('.q-feedback');
+      block.querySelectorAll('.opt').forEach(o => { o.classList.add('disabled'); if (parseInt(o.dataset.i) === correct) o.classList.add('correct'); });
+      if (chosen === correct) { opt.classList.add('correct'); score++; fb.className = 'q-feedback show ok'; } else { opt.classList.add('wrong'); fb.className = 'q-feedback show err'; }
+      fb.textContent = QUESTIONS[qi].feedback[chosen]; checkResult();
+    });
+  });
+});
+document.querySelectorAll('.q-block[data-type="ide"]').forEach(block => {
+  const qi = parseInt(block.dataset.q), btn = block.querySelector('.q-ide-submit'), inp = block.querySelector('.ide-blank'), fb = block.querySelector('.q-feedback');
+  function verify() {
+    if (answered[qi]) return; answered[qi] = true; btn.disabled = true; inp.disabled = true;
+    const ok = QUESTIONS[qi].answers.some(a => inp.value.trim() === a);
+    inp.classList.add(ok ? 'correct' : 'wrong'); if (ok) score++;
+    fb.className = 'q-feedback show ' + (ok ? 'ok' : 'err'); fb.textContent = QUESTIONS[qi].feedback[ok ? 0 : 1]; checkResult();
+  }
+  btn.addEventListener('click', verify); inp.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
+});
+document.getElementById('btn-retry').addEventListener('click', () => {
+  answered = new Array(QUESTIONS.length).fill(false); score = 0;
+  document.querySelectorAll('.q-block').forEach(b => {
+    b.querySelectorAll('.opt').forEach(o => o.className = 'opt'); b.querySelector('.q-feedback').className = 'q-feedback';
+    const inp = b.querySelector('.ide-blank'); if (inp) { inp.className = 'ide-blank'; inp.disabled = false; inp.value = ''; }
+    const btn = b.querySelector('.q-ide-submit'); if (btn) btn.disabled = false;
+  });
+  document.getElementById('quiz-result').classList.remove('show');
+  document.querySelector('.quiz-section').scrollIntoView({behavior:'smooth'});
+});
+</script>
+</body>
+</html>
