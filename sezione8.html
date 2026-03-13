@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sezione 8 — LINE 3.0</title>
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Badge finale */
+  .finale-banner {
+    background: var(--acc);
+    color: #fff;
+    text-align: center;
+    padding: 1rem 2rem;
+    font-size: .75rem;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    font-family: 'Syne Mono', monospace;
+  }
+  /* Congrats box */
+  .congrats {
+    background: var(--ink);
+    color: #fff;
+    text-align: center;
+    padding: 5rem 2rem;
+  }
+  .congrats h2 { font-size: clamp(2rem,6vw,3.5rem); font-weight: 800; margin-bottom: .8rem; }
+  .congrats h2 span { color: var(--acc); }
+  .congrats p { color: rgba(255,255,255,.5); max-width: 500px; margin: 0 auto 2rem; font-size: 1rem; line-height: 1.7; }
+  .congrats-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<div class="finale-banner">Sezione finale</div>
+
+<nav class="topbar">
+  <a href="index.html" class="topbar-brand"><img src="favicon.png" alt="LINE" class="topbar-favicon"></a>
+  <div class="topbar-nav">
+    <a href="index.html">Home</a>
+    <a href="sezione7.html">Sezione 7</a>
+    <a class="current">Sezione 8</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <p class="section-tag">Sezione 08 / 08</p>
+  <h1 class="section-title">LINE-DOM</h1>
+  <p class="section-desc">Come integrare LINE direttamente in una pagina HTML: scrivere su elementi, leggere input, reagire a click e usare localStorage — tutto senza scrivere JavaScript.</p>
+
+  <!-- 8.1 Cos'è LINE-DOM -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">8.1</span> Cos'è LINE-DOM</h2>
+    <p>LINE-DOM è un layer JavaScript che permette di usare LINE come linguaggio per controllare il DOM di una pagina HTML. Si include con un singolo file <code>line-dom.js</code>.</p>
+    <p>Una volta incluso, si scrive codice LINE direttamente dentro tag <code>&lt;script&gt;</code> con <code>type="text/line"</code>. LINE-DOM si occupa di compilare ed eseguire il codice, collegandolo agli elementi HTML.</p>
+    <div class="codeblock"><span class="codeblock-label">inclusione</span><span class="cmt">&lt;!-- Interprete LINE --&gt;</span>
+&lt;script src=<span class="str">"interpreter.js"</span>&gt;&lt;/script&gt;
+<span class="cmt">&lt;!-- Bridge DOM --&gt;</span>
+&lt;script src=<span class="str">"line-dom.js"</span>&gt;&lt;/script&gt;</div>
+
+    <div class="callout">
+      <strong>Regola fondamentale:</strong> nei tag <code>&lt;script type="text/line"&gt;</code> va <em>solo</em> codice LINE. Zero JavaScript inline. Tutta la logica di bridge sta in <code>line-dom.js</code>.
+    </div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 8.2 Attributi del tag script -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">8.2</span> Attributi del tag script</h2>
+    <p>Il tag <code>&lt;script type="text/line"&gt;</code> accetta attributi speciali che controllano quando e come viene eseguito:</p>
+
+    <table class="table">
+      <tr><th>Attributo</th><th>Effetto</th></tr>
+      <tr><td>trigger="id"</td><td>Esegue il codice al click sull'elemento con quell'id</td></tr>
+      <tr><td>autorun</td><td>Esegue il codice al caricamento della pagina</td></tr>
+      <tr><td>replace</td><td>Sovrascrive il contenuto dell'elemento target invece di aggiungerlo in fondo</td></tr>
+      <tr><td>counter="id"</td><td>Inietta la variabile speciale <code>__N__</code> con il numero di esecuzioni, e scrive il contatore nell'elemento indicato</td></tr>
+      <tr><td>body-class="id"</td><td>Osserva l'elemento indicato e applica il suo testo come <code>className</code> del body</td></tr>
+    </table>
+
+    <div class="codeblock"><span class="codeblock-label">esempio</span>&lt;script type=<span class="str">"text/line"</span> trigger=<span class="str">"btn-invia"</span> replace&gt;
+  risposta = Hai cliccato!
+  &lt;risultato&gt;<span class="kw">TALK</span> @risposta&lt;/risultato&gt;
+&lt;/script&gt;
+
+&lt;button id=<span class="str">"btn-invia"</span>&gt;Invia&lt;/button&gt;
+&lt;div id=<span class="str">"risultato"</span>&gt;&lt;/div&gt;</div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 8.3 Scrivere su elementi HTML -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">8.3</span> Scrivere su elementi HTML</h2>
+    <p>Per inviare testo a un elemento HTML si racchiude il codice LINE tra tag con l'id dell'elemento:</p>
+
+    <table class="table">
+      <tr><th>Sintassi</th><th>Effetto</th></tr>
+      <tr><td><code>&lt;id&gt;TALK testo&lt;/id&gt;</code></td><td>Sostituisce o aggiunge il testo nell'elemento</td></tr>
+      <tr><td><code>&lt;id=after&gt;TALK testo&lt;/id&gt;</code></td><td>Appende in fondo al contenuto esistente</td></tr>
+      <tr><td><code>&lt;id=before&gt;TALK testo&lt;/id&gt;</code></td><td>Inserisce all'inizio del contenuto esistente</td></tr>
+      <tr><td><code>&lt;.classe&gt;TALK testo&lt;/.classe&gt;</code></td><td>Scrive su tutti gli elementi con quella classe CSS</td></tr>
+    </table>
+
+    <p>Il carattere <code>\n</code> dentro i tag DOM diventa automaticamente un <code>&lt;br&gt;</code> nell'HTML (non vale per gli input).</p>
+
+    <div class="codeblock"><span class="codeblock-label">esempio</span>&lt;output id=<span class="str">"log"</span>&gt;&lt;/output&gt;
+
+&lt;script type=<span class="str">"text/line"</span> trigger=<span class="str">"btn"</span>&gt;
+  &lt;log=after&gt;<span class="kw">TALK</span> Nuova riga\n&lt;/log&gt;
+  &lt;.stato&gt;<span class="kw">TALK</span> aggiornato&lt;/.stato&gt;
+&lt;/script&gt;</div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 8.4 Leggere input HTML -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">8.4</span> Leggere input HTML</h2>
+    <p>LINE-DOM inietta automaticamente il valore di ogni <code>&lt;input&gt;</code>, <code>&lt;textarea&gt;</code> e <code>&lt;select&gt;</code> che ha un <code>id</code> come variabile LINE prima di ogni esecuzione.</p>
+    <p>Basta che l'elemento esista nella pagina — il valore è già disponibile con <code>@id</code>:</p>
+
+    <div class="codeblock"><span class="codeblock-label">html</span>&lt;input id=<span class="str">"nome"</span> type=<span class="str">"text"</span>&gt;
+&lt;button id=<span class="str">"btn"</span>&gt;Saluta&lt;/button&gt;
+&lt;div id=<span class="str">"output"</span>&gt;&lt;/div&gt;
+
+&lt;script type=<span class="str">"text/line"</span> trigger=<span class="str">"btn"</span> replace&gt;
+  &lt;output&gt;<span class="kw">TALK</span> Ciao, @nome!&lt;/output&gt;
+&lt;/script&gt;</div>
+    <p>Non serve dichiarare <code>nome</code> — LINE-DOM lo prepende automaticamente prima di eseguire il codice.</p>
+    <p>Gli input hidden funzionano come memoria persistente tra un'esecuzione e l'altra: il loro valore viene iniettato ad ogni run, quindi possono conservare lo stato.</p>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 8.5 Onclick da LINE -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">8.5</span> Gestire click da codice LINE</h2>
+    <p>È possibile registrare click su elementi HTML direttamente nella sintassi LINE, senza uscire dallo script:</p>
+
+    <table class="table">
+      <tr><th>Sintassi</th><th>Significato</th></tr>
+      <tr><td><code>THEN:btn-id</code></td><td>Il blocco THEN viene eseguito al click su quell'id</td></tr>
+      <tr><td><code>GO:btn-id @{cond} @{...}</code></td><td>GO inline eseguito al click</td></tr>
+    </table>
+
+    <div class="codeblock"><span class="codeblock-label">esempio</span>&lt;script type=<span class="str">"text/line"</span> autorun&gt;
+  <span class="kw">THEN</span>:btn-maiuscolo
+    &lt;output&gt;<span class="kw">TALK</span> CIAO&lt;/output&gt;
+    <span class="kw">THEND</span>
+
+  <span class="kw">GO</span>:btn-conta @{V} @{
+    &lt;contatore=after&gt;<span class="kw">TALK</span> •&lt;/contatore&gt;
+    }
+&lt;/script&gt;</div>
+
+    <div class="callout">
+      <strong>Nota:</strong> i tag <code>&lt;id&gt;</code> dentro un corpo <code>@{...}</code> inline non funzionano — il preprocessore non li gestisce in quel contesto. Per blocchi che scrivono su elementi, usa sempre un THEN con nome.
+    </div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 8.6 LocalStorage -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">8.6</span> LocalStorage</h2>
+    <p>LINE-DOM aggiunge il supporto al localStorage del browser tramite un tag speciale. I dati sopravvivono al ricaricamento della pagina.</p>
+    <div class="codeblock"><span class="codeblock-label">sintassi</span>&lt;ls&gt;nomevar = valore&lt;/ls&gt;</div>
+    <p>Salva <code>valore</code> nel localStorage con chiave <code>line_nomevar</code>. Ad ogni esecuzione successiva, LINE-DOM inietta automaticamente il valore salvato come variabile LINE — esattamente come fa con gli input HTML.</p>
+
+    <div class="codeblock"><span class="codeblock-label">esempio — nome che persiste tra ricaricamenti</span>&lt;input id=<span class="str">"nome"</span>&gt;
+&lt;button id=<span class="str">"btn-salva"</span>&gt;Salva&lt;/button&gt;
+&lt;div id=<span class="str">"benvenuto"</span>&gt;&lt;/div&gt;
+
+&lt;script type=<span class="str">"text/line"</span> autorun&gt;
+  &lt;benvenuto&gt;<span class="kw">TALK</span> Ciao, @nome!&lt;/benvenuto&gt;
+&lt;/script&gt;
+
+&lt;script type=<span class="str">"text/line"</span> trigger=<span class="str">"btn-salva"</span>&gt;
+  &lt;ls&gt;nome = @nome&lt;/ls&gt;
+&lt;/script&gt;</div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 8.7 body-class per temi -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">8.7</span> Temi dinamici con body-class</h2>
+    <p>L'attributo <code>body-class</code> su uno script crea un MutationObserver: osserva l'elemento indicato e applica automaticamente il suo testo come classe del <code>&lt;body&gt;</code>. Combinato con variabili CSS, permette di cambiare tema senza JavaScript.</p>
+
+    <div class="codeblock"><span class="codeblock-label">esempio</span><span class="cmt">&lt;!-- Elemento nascosto che contiene il tema attivo --&gt;</span>
+&lt;span id=<span class="str">"tema"</span> hidden&gt;&lt;/span&gt;
+
+&lt;script type=<span class="str">"text/line"</span> trigger=<span class="str">"btn"</span>
+        replace body-class=<span class="str">"tema"</span>&gt;
+  &lt;tema&gt;<span class="kw">TALK</span> dark&lt;/tema&gt;
+&lt;/script&gt;
+
+<span class="cmt">/* CSS */</span>
+body.dark  { --bg: #111; --fg: #eee; }
+body.light { --bg: #fff; --fg: #111; }</div>
+  </div>
+
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-section">
+  <div class="quiz-header">
+    <h2>Quiz — Sezione 8</h2>
+    <p>6 domande · serve l'80% per completare il manuale</p>
+  </div>
+  <div class="quiz-inner" id="quiz">
+
+    <div class="q-block" data-q="0" data-type="mc">
+      <p class="q-num">Domanda 01</p>
+      <p class="q-text">Come si specifica che uno script LINE deve essere eseguito al caricamento della pagina?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span><code>trigger="load"</code></div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span><code>autorun</code></div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span><code>onload="true"</code></div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Si esegue sempre da solo</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="1" data-type="ide">
+      <p class="q-num">Domanda 02 — Completamento</p>
+      <p class="q-text">Scrivi il tag che appende il testo "fatto" all'elemento con id <code>log</code>.</p>
+      <div class="q-ide">
+        <div class="ide-line"><span class="ide-lnum">1</span><input class="ide-blank" data-answer="&lt;log=after&gt;TALK fatto&lt;/log&gt;" placeholder="…" spellcheck="false" autocomplete="off" style="min-width:260px"></div>
+      </div>
+      <button class="q-ide-submit">Verifica</button>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="2" data-type="mc">
+      <p class="q-num">Domanda 03</p>
+      <p class="q-text">Un <code>&lt;input id="eta"&gt;</code> è presente nella pagina. Come si usa il suo valore nel codice LINE?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Bisogna dichiarare <code>eta = document.getElementById('eta').value</code></div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Con <code>@eta</code> — LINE-DOM lo inietta automaticamente</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Con <code>INP @eta</code></div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Non è possibile leggere input HTML da LINE</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="3" data-type="mc">
+      <p class="q-num">Domanda 04</p>
+      <p class="q-text">Cosa fa <code>&lt;ls&gt;punteggio = 100&lt;/ls&gt;</code>?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Crea una variabile LINE chiamata punteggio che vale 100</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Salva il valore 100 nel localStorage con chiave line_punteggio, disponibile ad ogni run successivo</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Scrive "100" nell'elemento con id "punteggio"</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Errore di sintassi</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="4" data-type="ide">
+      <p class="q-num">Domanda 05 — Completamento</p>
+      <p class="q-text">Scrivi un blocco THEN che si attiva al click su <code>btn-reset</code> e scrive "0" nell'elemento <code>score</code>.</p>
+      <div class="q-ide">
+        <div class="ide-line"><span class="ide-lnum">1</span><input class="ide-blank" data-answer="THEN:btn-reset" placeholder="prima riga…" spellcheck="false" autocomplete="off" style="min-width:200px"></div>
+        <div class="ide-line"><span class="ide-lnum">2</span>&nbsp;&nbsp;<input class="ide-blank" data-answer="&lt;score&gt;TALK 0&lt;/score&gt;" placeholder="corpo…" spellcheck="false" autocomplete="off" style="min-width:200px"></div>
+        <div class="ide-line"><span class="ide-lnum">3</span><input class="ide-blank" data-answer="THEND" placeholder="chiusura…" spellcheck="false" autocomplete="off" style="min-width:80px"></div>
+      </div>
+      <button class="q-ide-submit">Verifica</button>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="5" data-type="mc">
+      <p class="q-num">Domanda 06</p>
+      <p class="q-text">A cosa serve l'attributo <code>body-class="id"</code> su uno script LINE-DOM?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Aggiunge una classe CSS al body quando lo script viene caricato</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Osserva l'elemento indicato e applica il suo testo come className del body, permettendo temi dinamici via CSS</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Applica la classe dell'elemento al body una sola volta</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>È un alias di trigger</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="quiz-result" id="quiz-result">
+      <div class="result-score" id="result-score"></div>
+      <p class="result-msg" id="result-msg"></p>
+      <button class="btn-retry" id="btn-retry">↺ Riprova</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONGRATS -->
+<div class="congrats" id="congrats" style="display:none">
+  <h2>Manuale <span>completato</span>.</h2>
+  <p>Conosci ora tutti i fondamenti di LINE 3.0 — dalla sintassi base all'integrazione con il DOM. È il momento di scrivere qualcosa.</p>
+  <div class="congrats-links">
+    <a href="https://qc-17.github.io/LINE/ide.html" class="btn-primary" target="_blank">⌨ Apri l'IDE</a>
+    <a href="index.html" class="btn-next" style="background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);">Torna all'inizio</a>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { type:'mc', correct:1, feedback:['No. "load" non è un valore speciale per trigger.','Esatto! L\'attributo autorun fa eseguire lo script al caricamento della pagina.','No.','No. Senza trigger o autorun lo script non viene mai eseguito.'] },
+  { type:'ide', answers:['<log=after>TALK fatto</log>'], feedback:['Esatto!','Sbagliato. Per appendere usa =after: <log=after>TALK fatto</log>'] },
+  { type:'mc', correct:1, feedback:['No. In LINE-DOM non si scrive JavaScript inline.','Esatto! LINE-DOM scansiona tutti gli input con id prima di ogni run e inietta il valore come variabile LINE — basta usare @eta.','No. INP serve per la console, non per leggere elementi HTML.','No. È esattamente quello che LINE-DOM fa automaticamente.'] },
+  { type:'mc', correct:1, feedback:['No. <ls> non crea una variabile LINE temporanea, la salva nel localStorage.','Esatto! <ls> salva nel localStorage con chiave line_punteggio. Ad ogni run successivo, il valore viene iniettato automaticamente come variabile @punteggio.','No. Quello si fa con <punteggio>TALK 100</punteggio>.','No. È sintassi valida di LINE-DOM.'] },
+  {
+    type:'ide-multi',
+    answers: [['THEN:btn-reset','<score>TALK 0</score>','THEND']],
+    feedback:['Esatto!','Sbagliato. La struttura è: THEN:btn-reset / <score>TALK 0</score> / THEND']
+  },
+  { type:'mc', correct:1, feedback:['No. Non aggiunge una classe fissa: osserva dinamicamente il contenuto dell\'elemento.','Esatto! body-class crea un MutationObserver: ogni volta che il testo dell\'elemento cambia, quel testo diventa la className del body — perfetto per temi CSS dinamici.','No. Rimane in ascolto di ogni modifica tramite MutationObserver.','No.'] }
+];
+
+const PASS = 0.8;
+let answered = new Array(QUESTIONS.length).fill(false), score = 0;
+
+function checkResult() {
+  if (!answered.every(Boolean)) return;
+  const pct = score / QUESTIONS.length;
+  document.getElementById('result-score').textContent = score + ' / ' + QUESTIONS.length;
+  const passed = pct >= PASS;
+  document.getElementById('result-msg').textContent = passed
+    ? 'Perfetto! Hai completato il manuale di LINE 3.0.'
+    : 'Rileggi la sezione e riprova — servono almeno l\'80%.';
+  document.getElementById('quiz-result').classList.add('show');
+  document.getElementById('quiz-result').scrollIntoView({behavior:'smooth',block:'center'});
+  if (passed) setTimeout(() => {
+    document.getElementById('congrats').style.display = 'block';
+    document.getElementById('congrats').scrollIntoView({behavior:'smooth'});
+  }, 800);
+}
+
+document.querySelectorAll('.q-block[data-type="mc"]').forEach(block => {
+  const qi = parseInt(block.dataset.q);
+  block.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (answered[qi]) return; answered[qi] = true;
+      const chosen = parseInt(opt.dataset.i), correct = QUESTIONS[qi].correct, fb = block.querySelector('.q-feedback');
+      block.querySelectorAll('.opt').forEach(o => { o.classList.add('disabled'); if (parseInt(o.dataset.i) === correct) o.classList.add('correct'); });
+      if (chosen === correct) { opt.classList.add('correct'); score++; fb.className = 'q-feedback show ok'; }
+      else { opt.classList.add('wrong'); fb.className = 'q-feedback show err'; }
+      fb.textContent = QUESTIONS[qi].feedback[chosen]; checkResult();
+    });
+  });
+});
+
+// IDE singolo
+document.querySelectorAll('.q-block[data-type="ide"]').forEach(block => {
+  const qi = parseInt(block.dataset.q), btn = block.querySelector('.q-ide-submit'), inp = block.querySelector('.ide-blank'), fb = block.querySelector('.q-feedback');
+  function verify() {
+    if (answered[qi]) return; answered[qi] = true; btn.disabled = true; inp.disabled = true;
+    const ok = QUESTIONS[qi].answers.some(a => inp.value.trim() === a);
+    inp.classList.add(ok ? 'correct' : 'wrong'); if (ok) score++;
+    fb.className = 'q-feedback show ' + (ok ? 'ok' : 'err'); fb.textContent = QUESTIONS[qi].feedback[ok ? 0 : 1]; checkResult();
+  }
+  btn.addEventListener('click', verify); inp.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
+});
+
+// IDE multi-riga (domanda 05)
+document.querySelectorAll('.q-block[data-type="ide-multi"]').forEach(block => {
+  const qi = parseInt(block.dataset.q), btn = block.querySelector('.q-ide-submit'), inputs = block.querySelectorAll('.ide-blank'), fb = block.querySelector('.q-feedback');
+  function verify() {
+    if (answered[qi]) return; answered[qi] = true; btn.disabled = true;
+    inputs.forEach(i => i.disabled = true);
+    const vals = Array.from(inputs).map(i => i.value.trim());
+    const ok = QUESTIONS[qi].answers.some(ans => ans.every((a,i) => vals[i] === a));
+    inputs.forEach(i => i.classList.add(ok ? 'correct' : 'wrong'));
+    if (ok) score++;
+    fb.className = 'q-feedback show ' + (ok ? 'ok' : 'err'); fb.textContent = QUESTIONS[qi].feedback[ok ? 0 : 1]; checkResult();
+  }
+  btn.addEventListener('click', verify);
+  inputs.forEach(inp => inp.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); }));
+});
+
+document.getElementById('btn-retry').addEventListener('click', () => {
+  answered = new Array(QUESTIONS.length).fill(false); score = 0;
+  document.querySelectorAll('.q-block').forEach(b => {
+    b.querySelectorAll('.opt').forEach(o => o.className = 'opt');
+    b.querySelector('.q-feedback').className = 'q-feedback';
+    b.querySelectorAll('.ide-blank').forEach(i => { i.className = 'ide-blank'; i.disabled = false; i.value = ''; });
+    const btn = b.querySelector('.q-ide-submit'); if (btn) btn.disabled = false;
+  });
+  document.getElementById('quiz-result').classList.remove('show');
+  document.getElementById('congrats').style.display = 'none';
+  document.querySelector('.quiz-section').scrollIntoView({behavior:'smooth'});
+});
+</script>
+</body>
+</html>
