@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sezione 5 — LINE 3.0</title>
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="index.html" class="topbar-brand"><img src="favicon.png" alt="LINE" class="topbar-favicon"></a>
+  <div class="topbar-nav">
+    <a href="index.html">Home</a>
+    <a href="sezione4.html">Sezione 4</a>
+    <a class="current">Sezione 5</a>
+    <a href="sezione6.html" style="opacity:.35">Sezione 6 →</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <p class="section-tag">Sezione 05 / 08</p>
+  <h1 class="section-title">Funzioni e<br>GO Block</h1>
+  <p class="section-desc">Come definire blocchi di codice riutilizzabili con FUN e THEN, e come eseguirli condizionatamente o in loop con GO.</p>
+
+  <!-- 5.1 FUN -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">5.1</span> Funzioni con FUN</h2>
+    <p>Una funzione è un blocco di codice che viene <em>descritto</em> senza essere eseguito. Si esegue solo quando viene chiamata.</p>
+    <div class="codeblock"><span class="codeblock-label">sintassi</span><span class="kw">FUN</span> nome(parametri)
+  ...
+  return valore
+  <span class="kw">FEND</span></div>
+    <p><strong>Parametri:</strong> variabili esterne da passare alla funzione, separati da virgola. Possono essere zero.</p>
+    <p><strong>return:</strong> facoltativo. Se incluso deve stare alla fine del corpo. Il valore di ritorno può essere salvato o stampato. Una sola istruzione return per funzione.</p>
+    <div class="codeblock"><span class="codeblock-label">chiamata</span>nome()             <span class="cmt">>> esegue la funzione</span>
+var = nome()       <span class="cmt">>> salva il valore di ritorno</span></div>
+
+    <div class="codeblock"><span class="codeblock-label">esempio</span><span class="kw">FUN</span> saluta(nome)
+  <span class="kw">TALK</span> Ciao, @nome!
+  <span class="kw">FEND</span>
+saluta(Mario)
+
+<span class="kw">FUN</span> doppio(n)
+  <span class="num">#r</span> = @n * 2
+  return @r
+  <span class="kw">FEND</span>
+<span class="num">#x</span> = doppio(5)
+<span class="kw">TALK</span> @x   <span class="cmt">&lt;* Output: 10 *&gt;</span></div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 5.2 THEN -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">5.2</span> Blocchi con THEN</h2>
+    <p><code>THEN</code> è una forma semplificata di funzione: non accetta parametri e non può avere return. Si chiude con <code>THEND</code>.</p>
+    <div class="codeblock"><span class="kw">THEN</span> nome
+  ...
+  <span class="kw">THEND</span></div>
+    <p>Equivale esattamente a <code>FUN nome()</code> senza return. Viene usato principalmente con il GO block per gestire condizioni.</p>
+    <div class="callout">
+      <strong>Nota:</strong> i blocchi THEN possono essere chiamati <em>solo</em> all'interno di un GO block. Le funzioni FUN invece si chiamano direttamente con <code>nome()</code>.
+    </div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- 5.3 GO -->
+  <div class="chapter">
+    <h2 class="chapter-title"><span class="chapter-num">5.3</span> GO Block</h2>
+    <p>GO esegue una funzione o un blocco THEN in base ad una condizione booleana, con una ripetizione opzionale.</p>
+    <div class="codeblock"><span class="codeblock-label">sintassi completa</span><span class="kw">GO</span> @condizione @blocco #ripetizioni</div>
+
+    <p><strong>condizione:</strong> variabile IF (o qualsiasi booleano) — il blocco viene eseguito solo se è V.</p>
+    <p><strong>ripetizioni:</strong> quante volte eseguire il blocco. Se 1 si può omettere. Il valore speciale <code>#c</code> ripete finché la condizione rimane V.</p>
+
+    <div class="codeblock"><span class="codeblock-label">esempi</span><span class="kw">IF</span> cond = V
+<span class="kw">THEN</span> stampa
+  <span class="kw">TALK</span> Evviva!
+  <span class="kw">THEND</span>
+<span class="kw">GO</span> @cond @stampa          <span class="cmt">>> esegue una volta</span>
+<span class="kw">GO</span> @cond @stampa #3       <span class="cmt">>> esegue 3 volte</span>
+
+<span class="num">#i</span> = 0
+<span class="kw">IF</span> loop = @i < 3
+<span class="kw">THEN</span> conta
+  <span class="kw">TALK</span> @i
+  <span class="num">#i</span> += 1
+  <span class="kw">THEND</span>
+<span class="kw">GO</span> @loop @conta #c        <span class="cmt">>> ripete finché i < 3</span></div>
+
+    <h3 style="font-size:1rem;font-weight:700;margin:1.5rem 0 .5rem;">Catene: & e &&</h3>
+    <p>Dopo un GO si possono aggiungere rami alternativi con <code>&</code> (elif) e <code>&&</code> (else). Solo una condizione può essere vera alla volta.</p>
+    <div class="codeblock"><span class="kw">GO</span> @cond1 @blocco1 & @cond2 @blocco2 && @blocco3
+<span class="cmt">>> se cond1 → blocco1
+>> altrimenti se cond2 → blocco2
+>> altrimenti → blocco3</span></div>
+
+    <h3 style="font-size:1rem;font-weight:700;margin:1.5rem 0 .5rem;">Corpo inline con @{}</h3>
+    <p>Invece di definire un THEN separato, si può scrivere il corpo direttamente nel GO con la sintassi <code>@{...}</code>. La condizione si può anch'essa definire inline:</p>
+    <div class="codeblock"><span class="kw">GO</span> @{@n > 0} @{
+  <span class="kw">TALK</span> positivo
+} && @{
+  <span class="kw">TALK</span> non positivo
+}</div>
+    <p>All'interno di un corpo inline, la variabile speciale <code>THISGO</code> contiene la condizione corrente e può essere modificata per interrompere il loop:</p>
+    <div class="codeblock"><span class="kw">GO</span> @{V} @{
+  <span class="kw">TALK</span> @ASKED
+  <span class="kw">IF</span> stop = @ASKED == fine
+  <span class="kw">GO</span> @stop @{ @THISGO = F }
+}</div>
+  </div>
+
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-section">
+  <div class="quiz-header">
+    <h2>Quiz — Sezione 5</h2>
+    <p>8 domande · serve l'80% per passare alla sezione 6</p>
+  </div>
+  <div class="quiz-inner" id="quiz">
+
+    <div class="q-block" data-q="0" data-type="mc">
+      <p class="q-num">Domanda 01</p>
+      <p class="q-text">Qual è la differenza tra FUN e THEN?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>FUN può accettare parametri e avere return; THEN no</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>THEN è più veloce di FUN</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>FUN viene eseguito subito, THEN no</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Non c'è differenza, sono sinonimi</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="1" data-type="mc">
+      <p class="q-num">Domanda 02</p>
+      <p class="q-text">Cosa stampa questo codice?</p>
+      <div class="q-code">FUN raddoppia(n)
+  #r = @n * 2
+  return @r
+  FEND
+#x = raddoppia(7)
+TALK @x</div>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>7</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>14</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Errore: return non è consentito</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>raddoppia(7)</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="2" data-type="ide">
+      <p class="q-num">Domanda 03 — Completamento</p>
+      <p class="q-text">Esegui il blocco <code>azione</code> solo se <code>cond</code> è vera, per 3 volte.</p>
+      <div class="q-ide">
+        <div class="ide-line"><span class="ide-lnum">1</span><input class="ide-blank" data-answer="GO @cond @azione #3" placeholder="…" spellcheck="false" autocomplete="off" style="min-width:220px"></div>
+      </div>
+      <button class="q-ide-submit">Verifica</button>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="3" data-type="mc">
+      <p class="q-num">Domanda 04</p>
+      <p class="q-text">Cosa significa <code>#c</code> come valore di ripetizioni nel GO?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Esegue 100 volte</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Esegue finché la condizione rimane vera</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Esegue una sola volta e poi controlla la condizione</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>È una variabile chiamata c</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="4" data-type="mc">
+      <p class="q-num">Domanda 05</p>
+      <p class="q-text">In un GO con più rami, cosa fa <code>&&</code>?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Aggiunge un altro ramo condizionale (elif)</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Introduce un ramo eseguito solo se tutte le condizioni precedenti erano false (else)</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>È l'operatore AND logico</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Interrompe il GO</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="5" data-type="mc">
+      <p class="q-num">Domanda 06</p>
+      <p class="q-text">Quante volte viene stampato "ciao" con questo codice?</p>
+      <div class="q-code">IF sempre = V
+THEN saluta
+  TALK ciao
+  THEND
+GO @sempre @saluta #4</div>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>1</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>4</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>0 — la condizione non viene mai valutata</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Infinito</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="6" data-type="ide">
+      <p class="q-num">Domanda 07 — Completamento</p>
+      <p class="q-text">Scrivi un GO inline che stampa "positivo" se <code>n</code> è maggiore di zero, "negativo" altrimenti.</p>
+      <div class="q-ide">
+        <div class="ide-line"><span class="ide-lnum">1</span><input class="ide-blank" data-answer="GO @{@n > 0} @{ TALK positivo } && @{ TALK negativo }" placeholder="…" spellcheck="false" autocomplete="off" style="min-width:300px"></div>
+      </div>
+      <button class="q-ide-submit">Verifica</button>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="q-block" data-q="7" data-type="mc">
+      <p class="q-num">Domanda 08</p>
+      <p class="q-text">A cosa serve la variabile <code>THISGO</code>?</p>
+      <div class="options">
+        <div class="opt" data-i="0"><span class="opt-letter">A</span>Contiene il nome del blocco in esecuzione</div>
+        <div class="opt" data-i="1"><span class="opt-letter">B</span>Contiene la condizione del GO corrente e può essere modificata per interrompere il loop</div>
+        <div class="opt" data-i="2"><span class="opt-letter">C</span>Conta le iterazioni del GO</div>
+        <div class="opt" data-i="3"><span class="opt-letter">D</span>Non esiste, è un errore</div>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+
+    <div class="quiz-result" id="quiz-result">
+      <div class="result-score" id="result-score"></div>
+      <p class="result-msg" id="result-msg"></p>
+      <a href="sezione6.html" class="btn-next" id="btn-avanti">Sezione 6 →</a>
+      <button class="btn-retry" id="btn-retry">↺ Riprova</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { type:'mc', correct:0, feedback:['Esatto! FUN accetta parametri e può restituire un valore con return. THEN è una versione semplificata senza parametri né return.','No.','No. Né FUN né THEN vengono eseguiti al momento della definizione.','No. THEN è una scorciatoia per FUN senza parametri e senza return.'] },
+  { type:'mc', correct:1, feedback:['No. Il parametro passato è 7, ma viene raddoppiato.','Esatto! raddoppia(7) calcola 7*2=14, lo salva in r e lo restituisce.','No. return è valido in FUN.','No. La chiamata con () esegue la funzione.'] },
+  { type:'ide', answers:['GO @cond @azione #3'], feedback:['Esatto!','Sbagliato. La sintassi è: GO @condizione @blocco #ripetizioni → GO @cond @azione #3'] },
+  { type:'mc', correct:1, feedback:['No.','Esatto! #c è il valore speciale che significa "continua" — il GO ripete finché la condizione resta vera.','No. #c non esegue solo una volta.','No. #c è un valore speciale riservato, non una variabile chiamata c.'] },
+  { type:'mc', correct:1, feedback:['No. & aggiunge un ramo condizionale (elif). && è diverso.','Esatto! && introduce il ramo "else": viene eseguito solo se tutte le condizioni precedenti erano false.','No. ET è l\'AND logico. && nel GO è l\'else.','No.'] },
+  { type:'mc', correct:1, feedback:['No. #4 significa 4 ripetizioni.','Esatto! #4 esegue il blocco 4 volte, purché la condizione sia vera — e qui lo è sempre.','No. La condizione viene valutata.','No. Per loop infinito servirebbe #c con condizione sempre vera.'] },
+  { type:'ide', answers:['GO @{@n > 0} @{ TALK positivo } && @{ TALK negativo }'], feedback:['Esatto!','Sbagliato. Usa @{} per condizione e corpo inline, e && per l\'else: GO @{@n > 0} @{ TALK positivo } && @{ TALK negativo }'] },
+  { type:'mc', correct:1, feedback:['No.','Esatto! THISGO contiene la condizione del GO in esecuzione. Impostandola a F si interrompe il loop.','No.','No. THISGO esiste ed è una variabile speciale accessibile nei corpi inline.'] }
+];
+const PASS = 0.8;
+let answered = new Array(QUESTIONS.length).fill(false), score = 0;
+function checkResult() {
+  if (!answered.every(Boolean)) return;
+  const pct = score / QUESTIONS.length;
+  document.getElementById('result-score').textContent = score + ' / ' + QUESTIONS.length;
+  document.getElementById('result-msg').textContent = pct >= PASS ? 'Ottimo! Puoi passare alla sezione 6.' : 'Rileggi la sezione e riprova — servono almeno l\'80%.';
+  document.getElementById('btn-avanti').style.display = pct >= PASS ? '' : 'none';
+  document.getElementById('quiz-result').classList.add('show');
+  document.getElementById('quiz-result').scrollIntoView({behavior:'smooth',block:'center'});
+}
+document.querySelectorAll('.q-block[data-type="mc"]').forEach(block => {
+  const qi = parseInt(block.dataset.q);
+  block.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (answered[qi]) return; answered[qi] = true;
+      const chosen = parseInt(opt.dataset.i), correct = QUESTIONS[qi].correct, fb = block.querySelector('.q-feedback');
+      block.querySelectorAll('.opt').forEach(o => { o.classList.add('disabled'); if (parseInt(o.dataset.i) === correct) o.classList.add('correct'); });
+      if (chosen === correct) { opt.classList.add('correct'); score++; fb.className = 'q-feedback show ok'; } else { opt.classList.add('wrong'); fb.className = 'q-feedback show err'; }
+      fb.textContent = QUESTIONS[qi].feedback[chosen]; checkResult();
+    });
+  });
+});
+document.querySelectorAll('.q-block[data-type="ide"]').forEach(block => {
+  const qi = parseInt(block.dataset.q), btn = block.querySelector('.q-ide-submit'), inp = block.querySelector('.ide-blank'), fb = block.querySelector('.q-feedback');
+  function verify() {
+    if (answered[qi]) return; answered[qi] = true; btn.disabled = true; inp.disabled = true;
+    const ok = QUESTIONS[qi].answers.some(a => inp.value.trim() === a);
+    inp.classList.add(ok ? 'correct' : 'wrong'); if (ok) score++;
+    fb.className = 'q-feedback show ' + (ok ? 'ok' : 'err'); fb.textContent = QUESTIONS[qi].feedback[ok ? 0 : 1]; checkResult();
+  }
+  btn.addEventListener('click', verify); inp.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
+});
+document.getElementById('btn-retry').addEventListener('click', () => {
+  answered = new Array(QUESTIONS.length).fill(false); score = 0;
+  document.querySelectorAll('.q-block').forEach(b => {
+    b.querySelectorAll('.opt').forEach(o => o.className = 'opt'); b.querySelector('.q-feedback').className = 'q-feedback';
+    const inp = b.querySelector('.ide-blank'); if (inp) { inp.className = 'ide-blank'; inp.disabled = false; inp.value = ''; }
+    const btn = b.querySelector('.q-ide-submit'); if (btn) btn.disabled = false;
+  });
+  document.getElementById('quiz-result').classList.remove('show');
+  document.querySelector('.quiz-section').scrollIntoView({behavior:'smooth'});
+});
+</script>
+</body>
+</html>
