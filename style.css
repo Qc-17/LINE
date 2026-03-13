@@ -390,3 +390,65 @@ code {
   border-radius: 6px;
   display: block;
 }
+
+/* ── Quiz: domanda completamento (IDE simulato) ── */
+.q-ide {
+  background: #0d0d0d;
+  border: 1px solid rgba(255,255,255,.12);
+  font-family: 'Syne Mono', monospace;
+  font-size: .88rem;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  line-height: 1.9;
+  color: #c8b89a;
+  position: relative;
+}
+.q-ide .ide-line {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.q-ide .ide-lnum {
+  color: rgba(255,255,255,.15);
+  font-size: .72rem;
+  width: 1.4em;
+  text-align: right;
+  flex-shrink: 0;
+  user-select: none;
+}
+.q-ide .ide-kw  { color: #e8854a; font-weight: 700; }
+.q-ide .ide-cmt { color: #7a7060; }
+.q-ide .ide-str { color: #85c17e; }
+.q-ide .ide-num { color: #79aee6; }
+
+.ide-blank {
+  display: inline-block;
+  background: rgba(255,255,255,.07);
+  border: 1px dashed rgba(255,255,255,.25);
+  border-radius: 2px;
+  min-width: 120px;
+  padding: .1rem .5rem;
+  color: #fff;
+  font-family: 'Syne Mono', monospace;
+  font-size: .88rem;
+  outline: none;
+  transition: border-color .2s, background .2s;
+  vertical-align: middle;
+}
+.ide-blank:focus { border-color: #e8854a; background: rgba(232,133,74,.08); }
+.ide-blank.correct { border-color: #2d7a3a; background: rgba(45,122,58,.15); color: #69c97a; }
+.ide-blank.wrong   { border-color: #c0392b; background: rgba(192,57,43,.12); color: #e87070; }
+.ide-blank:disabled { cursor: default; }
+
+.q-ide-submit {
+  margin-top: .8rem;
+  background: none;
+  border: 1px solid rgba(255,255,255,.2);
+  color: rgba(255,255,255,.6);
+  font-family: 'Syne', sans-serif;
+  font-size: .72rem; letter-spacing: .15em; text-transform: uppercase;
+  padding: .45rem 1rem; cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+.q-ide-submit:hover:not(:disabled) { border-color: #e8854a; color: #e8854a; }
+.q-ide-submit:disabled { opacity: .4; cursor: default; }
