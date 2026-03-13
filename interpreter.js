@@ -1,60 +1,20 @@
-/**
- * ═══════════════════════════════════════════════════════════
- *  LINE 3.0  —  Interprete  v0.5
- * ═══════════════════════════════════════════════════════════
- *  await LINE_run(sourceCode, { output(s), async input(prompt) })
- *
- *  ✅ Commenti >> e <* *>
- *  ✅ Variabili: standard, #num, STAY, IF reattiva, RET, TEMP, DEFRET
- *  ✅ Tipo ereditato da @var su assegnazione
- *  ✅ Operatori matematici con priorità corretta
- *  ✅ Operatori incrementali += -= *= /= //= %= ^=
- *  ✅ Comparatori == != < > <= >= (== != rispettano il tipo)
- *  ✅ Logici ET VEL AUT ! IN
- *  ✅ Parentesi nelle espressioni
- *  ✅ TALK / OUT / INP / SCREAM (con tag)
- *  ✅ % invisibile in TALK, escape \n \@ \% \| \; \t
- *  ✅ Input asincrono inline (no prompt())
- *  ✅ TALK:V TALK:F (input persistente)
- *  ✅ FUN…FEND con parametri e return
- *  ✅ THEN…THEND (no args, no return)
- *  ✅ GO @var/@{cond} @fn/@{body} con & elif && else, #n #c #@var
- *  ✅ GO body inline @{...} MULTILINEA
- *  ✅ THISGO nella GO inline
- *  ✅ FOR su liste e su NUMBERS, range #[start;end;step]
- *  ✅ FOR body inline { ... }
- *  ✅ ONITEM ONINDEX ONTAG
- *  ✅ Liste [val;val] con tag [tag|val], annidate
- *  ✅ Accesso lista [#n] [tag] [tag;tag], indici negativi
- *  ✅ ADD CANC (AT/BY/IS/IN)
- *  ✅ TRY…SHOW…YET con ERRCODE ERRMSG
- *  ✅ Scope RET TEMP DEFRET
- *  ✅ Etichette KW:nome *nome
- *  ✅ ASKED NUMBERS
- *  ✅ Chiamate fn come espressione RHS
- *  ✅ TAKE (modulo math built-in)
- * ═══════════════════════════════════════════════════════════
- */
 (function(G) {
 "use strict";
 
-/* ──────────────────────────────────────────────────────────
-   COSTANTI TIPI
-────────────────────────────────────────────────────────── */
+//Defnisco i tipi di variabile
+   
 const TS = "string", TN = "number", TB = "bool";
 const VT = "V", VF = "F";
 
-/* ──────────────────────────────────────────────────────────
-   ERRORI
-────────────────────────────────────────────────────────── */
+//Errori
+   
 class LErr extends Error {
   constructor(code, msg) { super(msg); this.code = code; this.lmsg = msg; }
 }
 function lerr(code, msg) { throw new LErr(code, msg); }
 
-/* ──────────────────────────────────────────────────────────
-   VALORI  { value, type }
-────────────────────────────────────────────────────────── */
+//Valori
+   
 const mkS = v => ({ value: String(v),                       type: TS });
 const mkN = v => ({ value: Number(v),                       type: TN });
 const mkB = v => ({ value: (v === VT || v === true) ? VT : VF, type: TB });
@@ -67,9 +27,8 @@ function truthy(v) {
   return v.value !== "" && v.value !== VF;
 }
 
-/* ──────────────────────────────────────────────────────────
-   LISTA
-────────────────────────────────────────────────────────── */
+//Qui def liste
+   
 class LList {
   constructor(items = []) { this.items = items; }
 
@@ -95,9 +54,8 @@ class LList {
   }
 }
 
-/* ──────────────────────────────────────────────────────────
-   SCOPE
-────────────────────────────────────────────────────────── */
+//Qui def scope variabil. BUG: RET accettato in globale superfluo)!!
+   
 class Scope {
   constructor(parent = null, defret = false) {
     this.vars   = new Map();
@@ -139,7 +97,7 @@ class Scope {
     if (isRET) {
       this._global().vars.set(name, rec);
     } else {
-      // temp o defret → locale; altrimenti va nello scope corrente
+    
       this.vars.set(name, rec);
     }
   }
@@ -148,7 +106,6 @@ class Scope {
     const s = this._find(name);
     if (!s) return null;
     const rec = s.vars.get(name);
-    // IF reattiva: rivaluta l'espressione ad ogni lettura
     if (rec.isIF && rec.expr && interp) {
       const v = interp.evalFull(rec.expr, this);
       const bv = mkB(truthy(v) ? VT : VF);
@@ -162,10 +119,9 @@ class Scope {
     return s ? s.vars.get(name) : null;
   }
 }
-
-/* ══════════════════════════════════════════════════════════
-   STRIP COMMENTS
-══════════════════════════════════════════════════════════ */
+   
+//Rimozione commenti dal codice (>> e <* *>)
+   
 function stripComments(src) {
   const out = [];
   let multi = false;
@@ -186,19 +142,13 @@ function stripComments(src) {
   return out;
 }
 
-/* ══════════════════════════════════════════════════════════
-   PARSER  → AST
-══════════════════════════════════════════════════════════ */
+// Pareser etcetera
+   
 function parse(src) {
   const lines = stripComments(src);
   return assembleBlock(lines, 0, lines.length).nodes;
 }
 
-/**
- * Assembla nodi da lines[from..to).
- * Gestisce blocchi multi-riga: FUN THEN TRY/SHOW/YET
- * GO e FOR con body inline vengono raccordate su riga singola.
- */
 function assembleBlock(lines, from, to) {
   const nodes = [];
   let i = from;
@@ -208,7 +158,7 @@ function assembleBlock(lines, from, to) {
     const t = text.trim();
     if (!t) { i++; continue; }
 
-    /* ── FUN ── */
+    // Funzioni FUN
     if (/^FUN\s/.test(t)) {
       const m = t.match(/^FUN\s+(\w+)\s*\(([^)]*)\)/);
       if (!m) lerr("SYNTAX_ERROR", `FUN non valido riga ${lineNo}`);
@@ -222,7 +172,7 @@ function assembleBlock(lines, from, to) {
     }
     if (t === "FEND") { i++; continue; }
 
-    /* ── THEN ── */
+    // Funzioni THEN
     if (/^THEN\s/.test(t)) {
       const m = t.match(/^THEN\s+(\w+)/);
       i++;
@@ -234,7 +184,8 @@ function assembleBlock(lines, from, to) {
     }
     if (t === "THEND") { i++; continue; }
 
-    /* ── TRY ── */
+    // Blocco TRY 
+     
     if (/^TRY\s/.test(t)) {
       const m = t.match(/^TRY\s+(\w+)/);
       i++;
@@ -268,7 +219,8 @@ function assembleBlock(lines, from, to) {
     }
     if (["TREND", "SEND", "YEND"].includes(t)) { i++; continue; }
 
-    /* ── GO con possibile body @{...} multilinea ── */
+    // GO like a yoyo :-)
+     
     if (/^GO[\s:@{]/.test(t) || t === "GO") {
       const { raw, nextI } = collectGORaw(lines, i, to);
       // Usa parseSingleLine sulla prima riga per preservare label (GO:nome)
@@ -280,7 +232,7 @@ function assembleBlock(lines, from, to) {
       continue;
     }
 
-    /* ── FOR con possibile body {...} multilinea ── */
+    // Blocco FOR
     if (/^FOR\s/.test(t)) {
       const { raw, nextI } = collectMultilineBody(lines, i, to);
       const node = parseSingleLine(raw.replace(/\n/g, " "), lineNo);
@@ -289,7 +241,6 @@ function assembleBlock(lines, from, to) {
       continue;
     }
 
-    /* ── Riga singola ── */
     const node = parseSingleLine(t, lineNo);
     if (node) nodes.push(node);
     i++;
@@ -297,22 +248,19 @@ function assembleBlock(lines, from, to) {
   return { nodes };
 }
 
-/* Trova prima occorrenza di una keyword (riga esatta) */
 function findKw(lines, from, to, kws) {
   for (let i = from; i < to; i++)
     if (kws.includes(lines[i].text.trim())) return i;
   return to;
 }
 
-/* Raccoglie il GO raw unendo le righe finché le { } sono bilanciate
-   e le righe di continuazione & / && sono incluse */
-/* Ritorna true se la riga trimmed finisce con un separatore GO (trailing & / && / alias) */
+// Alias per retrocompabilita (dubbioso)
+   
 function goTrailingSep(line) {
   return /(?:&&|\belse\b(?!\s+if)|\byet\b)\s*$/.test(line) ||
          /(?:&(?!&)|\belse\s+if\b|\belif\b|\bshow\b)\s*$/.test(line);
 }
 
-/* Ritorna true se la riga trimmed inizia con un separatore GO (leading && / & / alias) */
 function goLeadingSep(line) {
   return /^(?:&&?|else\s+if|elif|show|else(?!\s+if)|yet)\b/.test(line);
 }
@@ -327,7 +275,6 @@ function collectGORaw(lines, startI, to) {
     const t = lines[i].text.trim();
     if (!t) { if (depth <= 0) break; i++; continue; }
 
-    // Dentro un blocco { } aperto: raccogli sempre
     if (depth > 0) {
       raw += "\n" + t;
       depth += countBraces(t);
@@ -335,7 +282,7 @@ function collectGORaw(lines, startI, to) {
       i++;
       continue;
     }
-    // Continua se: riga precedente finisce con separatore OPPURE questa inizia con separatore
+    
     if (trailingOpen || goLeadingSep(t)) {
       raw += "\n" + t;
       depth += countBraces(t);
@@ -348,7 +295,7 @@ function collectGORaw(lines, startI, to) {
   return { raw, nextI: i };
 }
 
-/* Raccoglie body multilinea per FOR: unisce finché { } bilanciato */
+
 function collectMultilineBody(lines, startI, to) {
   let raw = lines[startI].text.trim();
   let depth = countBraces(raw);
@@ -367,8 +314,7 @@ function countBraces(s) {
   for (const c of s) { if (c === "{") d++; else if (c === "}") d--; }
   return d;
 }
-
-/* ── Parsifica una riga singola → nodo AST ── */
+/
 function parseSingleLine(text, lineNo) {
   if (!text) return null;
   text = text.trim();
@@ -376,7 +322,7 @@ function parseSingleLine(text, lineNo) {
   // *etichetta
   if (text[0] === "*") return { type: "LABEL_CALL", target: text.slice(1).trim(), lineNo };
 
-  // TALK:V  TALK:F  e altri KW:label
+   
   const kwLbl = text.match(/^(TALK|OUT|INP|GO|FOR|SCREAM):(\w+)\s*(.*)?$/s);
   if (kwLbl) {
     if (kwLbl[1] === "TALK" && kwLbl[2] === "V") return { type: "TALK_V", prompt: kwLbl[3] || "", lineNo };
@@ -390,25 +336,23 @@ function parseSingleLine(text, lineNo) {
   // TAKE
   const takeM = text.match(/^TAKE\s+(\w+)$/);
   if (takeM) return { type: "TAKE", module: takeM[1], lineNo };
-
-  // IO: TALK OUT INP SCREAM
+   
   const ioM = text.match(/^(TALK|OUT|INP|SCREAM)(?:\s+([\s\S]*))?$/s);
   if (ioM) return { type: "IO", kw: ioM[1], tpl: ioM[2] || "", lineNo };
 
-  // return
   if (/^return(\s|$)/.test(text))
     return { type: "RETURN", expr: text.slice(6).trim(), lineNo };
   if (text === "SKIP") return { type: "SKIP", lineNo };
 
-  // ADD lista AT/BY idx = val
+  // ADD lista
   const addM = text.match(/^ADD\s+(\w+)\s+(AT|BY)\s*([^\s=]*)?\s*=\s*([\s\S]+)$/s);
   if (addM) return { type: "ADD", list: addM[1], mode: addM[2], idx: addM[3] || "", val: addM[4].trim(), lineNo };
 
-  // CANC lista AT/BY/IS/IN arg
+  // CANC lista 
   const cancM = text.match(/^CANC\s+(\w+)\s+(AT|BY|IS|IN)\s+([\s\S]+)$/s);
   if (cancM) return { type: "CANC", list: cancM[1], mode: cancM[2], arg: cancM[3].trim(), lineNo };
 
-  // FOR  @list #[s;e;step] = body
+  // FOR 
   const forM = text.match(/^FOR\s+@(\w+)\s+#\[([^;]*);([^;]*);([^\]]*)\]\s*=\s*([\s\S]+)$/s);
   if (forM) return {
     type: "FOR",
@@ -420,18 +364,17 @@ function parseSingleLine(text, lineNo) {
     lineNo
   };
 
-  // GO (raw → parsato a runtime)
+  // GO (here we GO again infatuation touches me...)
   if (/^GO[\s:@{]/.test(text) || text === "GO")
     return { type: "GO_RAW", raw: text, lineNo };
 
-  // Conversioni  n: s: b:
+  // Conversioni  
   const cvM = text.match(/^([nsb]):(\w+)$/);
   if (cvM) return { type: "CONV", op: cvM[1], varN: cvM[2], lineNo };
 
   // DEFRET
   if (text === "DEFRET") return { type: "DEFRET", lineNo };
 
-  // Prefissi STAY IF RET TEMP
   const pfxM = text.match(/^(STAY|IF|RET|TEMP)\s+([\s\S]+)$/s);
   if (pfxM) {
     const inner = parseSingleLine(pfxM[2], lineNo);
@@ -444,7 +387,7 @@ function parseSingleLine(text, lineNo) {
     return inner;
   }
 
-  // Operatori incrementali  #?varname op= expr
+  // Operatori incrementali
   const incM = text.match(/^(#?)(\w+)\s*(\+|-|\*|\/\/|\/|%|\^)=\s*([\s\S]+)$/s);
   if (incM) return {
     type: "ASSIGN_OP",
@@ -455,11 +398,11 @@ function parseSingleLine(text, lineNo) {
     lineNo
   };
 
-  // Riassegnazione  @varname = expr  (senza creare nuova var)
+  // Riassegnazione
   const reAssM = text.match(/^@(\w+)\s*=\s*([\s\S]*)$/s);
   if (reAssM) return { type: "ASSIGN", isNum: false, varName: reAssM[1], expr: reAssM[2].trim(), lineNo, forceReassign: true };
 
-  // Assegnazione  #?varname = expr
+  // Assegnazione
   const assM = text.match(/^(#?)(\w+)\s*=\s*([\s\S]*)$/s);
   if (assM && assM[2] !== "=") return {
     type: "ASSIGN",
@@ -475,25 +418,10 @@ function parseSingleLine(text, lineNo) {
   return { type: "RAW", text, lineNo };
 }
 
-/* ══════════════════════════════════════════════════════════
-   VALUTATORE ESPRESSIONI
-   Priorità (manuale LINE 3.0):
-     1. ^        (potenza, right-assoc)
-     2. * /      (moltiplicazione, divisione)
-     3. //       (divisione intera)
-     4. %        (modulo)
-     5. + -      (addizione/sottrazione, o concatenazione str)
-     6. == !=    (uguaglianza/disuguaglianza — tipo-aware)
-     7. <= >= < > (confronto numerico)
-     8. !        (not unario, prefisso)
-     9. ET VEL AUT (logici — priorità più bassa)
-══════════════════════════════════════════════════════════ */
-
 function evalExpr(expr, scope, interp) {
   expr = String(expr).trim();
   if (!expr) return mkS("");
 
-  // \t tipo
   if (expr.startsWith("\\t")) {
     const nm = expr.slice(2).trim();
     const r  = scope.get(nm, interp);
@@ -504,21 +432,19 @@ function evalExpr(expr, scope, interp) {
   if (expr.startsWith("["))
     return mkL(parseListLit(expr, scope, interp));
 
-  // Accesso lista  nome[key]
   const laM = expr.match(/^(\w+)\[(.+)\]$/);
   if (laM && interp) return interp.listGet(laM[1], laM[2], scope);
 
-  // Chiamata funzione come espressione
   if (/^\w+\(/.test(expr) && interp) {
     return interp.callFnSync(expr, scope) || mkS("");
   }
 
-  // Risolvi @var → valori testuali
+  // Risolvi 
   const resolved = resolveRefs(expr, scope, interp);
   return evalTokens(resolved);
 }
 
-// Marcatori di tipo per preservare il tipo nelle espressioni
+// Marcatori di tipo 
 const _TM = { S: "S:", N: "N:", B: "B:", END: "" };
 const _TM_RE = /([SNB]):([^]*)/g;
 
@@ -535,13 +461,11 @@ function resolveRefs(expr, scope, interp) {
     if (!r) return match;
     const v = r.val;
     if (v.value instanceof LList) return v.value.display(false);
-    // Usa encoding tipato per preservare il tipo
     return encodeTyped(v);
   });
 }
 
 function decodeTyped(s) {
-  // Controlla se è un token tipato
   const m = s.match(/^([SNB]):([^]*)$/);
   if (!m) return null;
   if (m[1] === "N") return mkN(parseFloat(m[2]));
@@ -549,15 +473,12 @@ function decodeTyped(s) {
   return mkS(m[2]);
 }
 
-/* ── Valutazione token con priorità ── */
 function evalTokens(expr) {
   expr = expr.trim();
   if (!expr) return mkS("");
-  // Decodifica token tipato singolo
   const decoded = decodeTyped(expr);
   if (decoded) return decoded;
 
-  // ── 9: ET VEL AUT (associatività sinistra, cerca da destra) ──
   for (const op of [" AUT ", " VEL ", " ET "]) {
     const i = findOpFromRight(expr, op);
     if (i >= 0) {
@@ -570,10 +491,9 @@ function evalTokens(expr) {
     }
   }
 
-  // ── 8: ! not (prefisso) ──
   if (expr[0] === "!") return mkB(truthy(evalTokens(expr.slice(1).trim())) ? VF : VT);
 
-  // ── IN ──
+  // Operation IN (vy) questa è sottile
   {
     const i = findOpFromRight(expr, " IN ");
     if (i >= 0) {
@@ -588,7 +508,6 @@ function evalTokens(expr) {
     }
   }
 
-  // ── 7: <= >= < > ──
   for (const op of ["<=", ">=", "<", ">"]) {
     const i = findOpFromRight(expr, op, true);
     if (i >= 0) {
@@ -602,19 +521,15 @@ function evalTokens(expr) {
     }
   }
 
-  // ── 6: == != (rispetta il tipo) ──
   for (const op of ["==", "!="]) {
     const i = findOpFromRight(expr, op, true);
     if (i >= 0) {
       const L = evalTokens(expr.slice(0, i).trim());
       const R = evalTokens(expr.slice(i + op.length).trim());
-      // tipo string vs type: speciale per \tvar
       const eq = String(L.value) === String(R.value) && L.type === R.type;
       return mkB((op === "==" ? eq : !eq) ? VT : VF);
     }
   }
-
-  // ── 5: + -  (da destra, left-assoc = cerca dal fondo) ──
   for (let i = expr.length - 1; i > 0; i--) {
     const c = expr[i];
     if ((c === "+" || c === "-") && isTopLevel(expr, i)) {
@@ -630,8 +545,6 @@ function evalTokens(expr) {
       if (L.type === TN && R.type === TN)               return mkN(L.value - R.value);
     }
   }
-
-  // ── 4: % ──
   {
     const i = findOpFromRight(expr, "%", true);
     if (i > 0) {
@@ -641,7 +554,6 @@ function evalTokens(expr) {
     }
   }
 
-  // ── 3: // ──
   {
     const i = findLast(expr, "//");
     if (i > 0 && isTopLevel(expr, i)) {
@@ -654,11 +566,11 @@ function evalTokens(expr) {
     }
   }
 
-  // ── 2: * /  (da destra) ──
+
   for (let i = expr.length - 1; i > 0; i--) {
     const c = expr[i];
     if ((c === "*" || c === "/") && isTopLevel(expr, i)) {
-      if (c === "/" && (expr[i - 1] === "/" || expr[i + 1] === "/")) continue; // parte di //
+      if (c === "/" && (expr[i - 1] === "/" || expr[i + 1] === "/")) continue; 
       if (expr[i + 1] === "=") continue; // *= /=
       const left  = expr.slice(0, i).trim();
       const right = expr.slice(i + 1).trim();
@@ -672,7 +584,7 @@ function evalTokens(expr) {
     }
   }
 
-  // ── 1: ^ (right-assoc → cerca la prima occorrenza da sinistra) ──
+ 
   {
     const i = findFirst(expr, "^");
     if (i > 0 && isTopLevel(expr, i)) {
@@ -682,20 +594,17 @@ function evalTokens(expr) {
     }
   }
 
-  // ── Parentesi esterne ──
+  // ()
   if (expr[0] === "(" && matchClose(expr, 0) === expr.length - 1)
     return evalTokens(expr.slice(1, -1).trim());
 
-  // ── Letterali ──
   if (expr === VT) return mkB(VT);
   if (expr === VF) return mkB(VF);
   if (/^-?\d+(\.\d+)?$/.test(expr)) return mkN(parseFloat(expr));
 
-  // ── Stringa residua: applica escape ──
   return mkS(applyEscape(expr));
 }
 
-/* ── Helper ricerca operatori ── */
 function findOpFromRight(expr, op, requireTopLevel = false) {
   for (let i = expr.length - op.length; i >= 0; i--) {
     if (requireTopLevel && !isTopLevel(expr, i)) continue;
@@ -741,15 +650,12 @@ function toNum(s) {
   s = s.trim();
   if (s === VT) return 1;
   if (s === VF) return 0;
-  // Sottoespressione tra parentesi → valuta ricorsivamente
   if (s[0] === "(" && matchClose(s, 0) === s.length - 1) {
     const v = evalTokens(s.slice(1, -1).trim());
     return v.type === TN ? v.value : parseFloat(String(v.value));
   }
-  // Espressione composta → valuta per estrarre il numero
   const simple = /^-?\d+(\.\d+)?$/.test(s);
   if (simple) return parseFloat(s);
-  // Prova evalTokens
   try { const v = evalTokens(s); return v.type === TN ? v.value : parseFloat(String(v.value)); }
   catch(e) { return null; }
 }
@@ -763,7 +669,6 @@ function applyEscape(s) {
     .replace(/\\;/g, ";");
 }
 
-/* ── Liste letterali ── */
 function parseListLit(expr, scope, interp) {
   const inner = expr.trim().replace(/^\[|\]$/g, "").trim();
   if (!inner) return new LList([]);
@@ -785,8 +690,6 @@ function parseListLit(expr, scope, interp) {
   );
 }
 
-/* Divide argomenti di funzione su virgola, rispettando parentesi/liste.
-   NON fa trim() dei singoli argomenti per preservare spazi significativi come separatori. */
 function splitArgs(s) {
   const out = []; let cur = "", d = 0;
   for (let i = 0; i < s.length; i++) {
@@ -797,7 +700,6 @@ function splitArgs(s) {
     cur += c;
   }
   out.push(cur);
-  // Trim solo se l'argomento NON è solo spazio (spazio = separatore voluto)
   return out.map(a => a.trim() === "" && a.length > 0 ? a : a.trim());
 }
 
@@ -827,26 +729,20 @@ function splitPipe(s) {
   return out;
 }
 
-/* ── Template rendering (TALK/OUT/INP) ── */
 function renderTpl(tpl, scope, interp, allowInput) {
-  // Proteggi escape
+  
   tpl = tpl
     .replace(/\\n/g,  "\n")
     .replace(/\\@/g,  "\x00AT\x00")
     .replace(/\\%/g,  "\x00PCT\x00")
     .replace(/\\\|/g, "\x00PIPE\x00")
     .replace(/\\;/g,  "\x00SEMI\x00");
-
-  // % letterale invisibile (solo nel template TALK, non in variabili)
   tpl = tpl.replace(/%/g, "");
-
-  // \t tipo variabile
   tpl = tpl.replace(/\\t(\w+)/g, (_, nm) => {
     const r = scope.get(nm, interp);
     return r ? r.val.type : "undefined";
   });
 
-  // @var[key] accesso lista nei template (gestisce anche valori LList)
   tpl = tpl.replace(/@(\w+)\[([^\]]+)\]/g, (match, name, key) => {
     try {
       const res = interp.listGet(name, key, scope);
@@ -854,8 +750,6 @@ function renderTpl(tpl, scope, interp, allowInput) {
     }
     catch(e) { return match; }
   });
-
-  // @var e @var[key] (accesso lista inline)
   const inputVars = [];
   tpl = tpl.replace(/@(\w+)(?:\[([^\]]+)\])?/g, (match, name, key) => {
     const r = scope.get(name, interp);
@@ -865,7 +759,7 @@ function renderTpl(tpl, scope, interp, allowInput) {
       lerr("VAR_NOT_FOUND", `Variabile '${name}' non trovata`);
     }
     const v = r.val;
-    // Accesso lista con chiave (@lista[#n] o @lista[tag])
+    // Accesso lista 
     if (key && v.value instanceof LList) {
       try {
         const item = key.startsWith("#")
@@ -877,8 +771,6 @@ function renderTpl(tpl, scope, interp, allowInput) {
     }
     return v.value instanceof LList ? v.value.display(false) : String(v.value);
   });
-
-  // Ripristina escape
   tpl = tpl
     .replace(/\x00AT\x00/g,   "@")
     .replace(/\x00PCT\x00/g,  "%")
@@ -888,14 +780,8 @@ function renderTpl(tpl, scope, interp, allowInput) {
   return { text: tpl, inputVars };
 }
 
-/* ══════════════════════════════════════════════════════════
-   MODULO MATH BUILT-IN
-══════════════════════════════════════════════════════════ */
-/* ══════════════════════════════════════════════════════════
-   MODULI BUILT-IN
-   Ogni modulo ha: fns { prefixo_nomefn: (...args_values)=>LVal }
-                  docs { nomefn: "descrizione" }
-══════════════════════════════════════════════════════════ */
+// MODULI SPEMLICIOSI MA LUNGOSI!!
+
 const MODULES = {
 
   math: {
@@ -1006,7 +892,6 @@ const MODULES = {
         return mkL(new LList(parts.map(p => ({ value: p, tags: [] }))));
       },
       str_join:     (a, b)    => {
-        // a deve essere una LList, b il separatore
         if (a instanceof LList) return mkS(a.items.map(i => String(i.value)).join(String(b === undefined ? "" : b)));
         return mkS(String(a));
       },
@@ -1125,7 +1010,7 @@ const MODULES = {
       io_now:  ()  => mkN(Date.now()),
       io_date: ()  => mkS(new Date().toLocaleDateString("it-IT")),
       io_time: ()  => mkS(new Date().toLocaleTimeString("it-IT")),
-      io_wait: (ms)=> mkN(0),  // stub sincrono
+      io_wait: (ms)=> mkN(0),  
     }
   },
 
@@ -1150,7 +1035,6 @@ const MODULES = {
     }
   },
 
-  // ── MODULO RAND ────────────────────────────────────
   rand: {
     docs: {
       int:     "int(a,b) → intero casuale tra a e b (inclusi)",
@@ -1184,7 +1068,7 @@ const MODULES = {
     }
   },
 
-  // ── MODULO NUM ─────────────────────────────────────
+  
   num: {
     docs: {
       fmt:     "fmt(n, dec) → numero formattato con dec decimali",
@@ -1252,7 +1136,6 @@ const MODULES = {
     }
   },
 
-  // ── MODULO TYPE ────────────────────────────────────
   type: {
     docs: {
       isstr:   "isstr(v) → V se v è una stringa",
@@ -1287,25 +1170,18 @@ const MODULES = {
 
 };
 
-// Tabella piatta delle funzioni: prefisso_nome → fn
 const ALL_FNS = {};
 for (const mod of Object.values(MODULES))
   for (const [k, fn] of Object.entries(mod.fns)) ALL_FNS[k] = fn;
 
-// Compatibilità: MATH_MODULE alias
 const MATH_MODULE = MODULES.math.fns;
 
-/* ══════════════════════════════════════════════════════════
-   PARSER GO CHAIN
-══════════════════════════════════════════════════════════ */
+
 function normalizeGORaw(text) {
-  // Trailing && / & alla fine di riga → unisci con la riga successiva mantenendo il separatore inline
   text = text.replace(/&&[ \t]*\n[ \t]*/g, ' && ');
   text = text.replace(/&[ \t]*\n[ \t]*/g,  ' & ');
-  // Alias come separatore all'inizio di riga (con eventuale indentazione)
   text = text.replace(/\n[ \t]*(else\s+if|elif|show)[ \t]*/gi, ' & ');
   text = text.replace(/\n[ \t]*(else|yet)[ \t]*/gi,            ' && ');
-  // Alias inline (tra parti dello stesso ramo): solo se NON già preceduti/seguiti da &
   text = text.replace(/\s+(else\s+if|elif|show)\s+/gi, ' & ');
   text = text.replace(/\s+else\s+(?!if)/gi,             ' && ');
   text = text.replace(/\s+yet\s+/gi,                    ' && ');
@@ -1313,7 +1189,6 @@ function normalizeGORaw(text) {
 }
 
 function parseGOChain(raw) {
-  // Rimuovi "GO" iniziale con eventuale :label
   let text = normalizeGORaw(raw.replace(/^GO\s*(?::\w+\s*)?/, "").trim());
   const parts  = splitGOParts(text);
   const branches = [];
@@ -1326,7 +1201,6 @@ function parseGOChain(raw) {
   return branches;
 }
 
-/* Divide la stringa GO su & e && rispettando la profondità { } */
 function splitGOParts(text) {
   const parts = [];
   let cur = "", d = 0;
@@ -1352,10 +1226,10 @@ function splitGOParts(text) {
 
 function parseGOBranch(text, isElse) {
   const b = {
-    cond:       null,   // nome variabile IF
-    condInline: null,   // espressione inline @{expr}
-    fn:         null,   // nome funzione/then
-    bodyInline: null,   // corpo inline @{...}
+    cond:       null,   
+    condInline: null,   
+    fn:         null,   
+    bodyInline: null,   
     reps:       1,
     repsVar:    null,
     infinite:   false,
@@ -1364,7 +1238,6 @@ function parseGOBranch(text, isElse) {
 
   text = String(text).trim();
 
-  // ── Condizione ──
   if (!isElse) {
     const ci = text.match(/^@\{([^}]*(?:\{[^}]*\}[^}]*)*)\}/);
     if (ci) {
@@ -1376,7 +1249,6 @@ function parseGOBranch(text, isElse) {
     }
   }
 
-  // ── Body: @{...} o @fn o fn ──
   if (text.startsWith("@{") || text.startsWith("{")) {
     const start = text.indexOf("{");
     const end   = findMatchingBrace(text, start);
@@ -1387,7 +1259,6 @@ function parseGOBranch(text, isElse) {
     if (fn) { b.fn = fn[1]; text = text.slice(fn[0].length).trim(); }
   }
 
-  // ── Ripetizioni ──
   const rm = text.match(/^#(c|@?\w+|\d+)/);
   if (rm) {
     const r = rm[1];
@@ -1408,9 +1279,8 @@ function findMatchingBrace(s, open) {
   return s.length - 1;
 }
 
-/* ══════════════════════════════════════════════════════════
-   INTERPRETE  (async)
-══════════════════════════════════════════════════════════ */
+// Interprete con async
+
 class Interpreter {
   constructor({ output, input }) {
     this.out    = output || (s => console.log("[LINE]", s));
@@ -1428,26 +1298,22 @@ class Interpreter {
     this._loaded = new Set(["math"]); // math sempre attivo
   }
 
-  /* ── Esegui lista nodi ── */
   async run(nodes, scope) {
     scope = scope || this.G;
 
-    // Passa 1: registra FUN, THEN, etichette
     for (const n of nodes) {
       if (n.type === "FUN_DEF")  this.fns.set(n.name, n);
       if (n.type === "THEN_DEF") this.thens.set(n.name, n);
       if (n.label && n.type !== "LABEL_CALL") this.labels.set(n.label, n);
     }
 
-    // Passa 2: esegui
     for (const n of nodes) {
       const sig = await this.exec(n, scope);
       if (sig === "RETURN") return "RETURN";
-      if (sig === "SKIP" || this._skipFlag) return "SKIP"; // bolla su
+      if (sig === "SKIP" || this._skipFlag) return "SKIP"; 
     }
   }
 
-  /* ── Dispatch nodi ── */
   async exec(n, scope) {
     if (!n) return;
     switch (n.type) {
@@ -1476,41 +1342,34 @@ class Interpreter {
         return;
       case "LABEL_CALL":  return this.execLabelCall(n.target, scope);
       case "TAKE":        return this.execTAKE(n);
-      case "RAW":         return; // riga non riconosciuta, ignora
+      case "RAW":         return; 
     }
   }
 
-  /* ── evalFull: valuta con accesso al contesto ── */
   evalFull(expr, scope) {
     if (expr === undefined || expr === null || expr === "") return mkS("");
     expr = String(expr).trim();
     if (!expr) return mkS("");
 
-    // \t tipo
     if (expr.startsWith("\\t")) {
       const r = scope.get(expr.slice(2).trim(), this);
       return mkS(r ? r.val.type : "undefined");
     }
 
-    // Lista letterale
     if (expr.startsWith("[")) return mkL(parseListLit(expr, scope, this));
 
-    // Accesso lista  nome[key]
     const laM = expr.match(/^(\w+)\[(.+)\]$/);
     if (laM) return this.listGet(laM[1], laM[2], scope);
 
-    // Chiamata funzione come espressione RHS
     if (/^\w+\(/.test(expr)) {
       return this.callFnSync(expr, scope) || mkS("");
     }
 
-    // Gestione speciale IN con variabili non prefissate (@-less)
     const inIdx = findOpFromRight(expr, " IN ");
     if (inIdx >= 0) {
       const leftE  = expr.slice(0, inIdx).trim();
       const rightE = expr.slice(inIdx + 4).trim();
       const lval = this.evalFull(leftE, scope);
-      // Destra: prova come variabile, altrimenti come espressione
       let rval;
       const rRec = scope.get(rightE, this);
       if (rRec) rval = rRec.val;
@@ -1523,36 +1382,29 @@ class Interpreter {
       return mkB(String(lval.value) === rStr ? VT : VF);
     }
 
-    // Risolvi @var, poi valuta
     const resolved = resolveRefs(expr, scope, this);
     return evalTokens(resolved);
   }
 
-  /* ── ASSIGN ── */
   execAssign(n, scope) {
-    // Caso speciale: EXTGO → condizione del GO padre
     if (n.varName === "EXTGO") {
       const val = this.evalFull(n.expr, scope);
-      // Aggiorna EXTGO nella catena di scope
       let s = scope;
       while (s) {
         if (s.vars.has("EXTGO")) { const rec = s.vars.get("EXTGO"); if (!rec.stay) rec.val = val; }
         s = s.parent;
       }
       if (String(val.value) === VF) {
-        // Ferma il GO padre tramite il suo flag nello stack
         const curFlag = this._thisgoStack.length ? this._thisgoStack[this._thisgoStack.length - 1] : null;
         if (curFlag && curFlag.parentFlag) {
           curFlag.parentFlag.stopped = true;
-          // Ferma anche il loopFlag del parent se è un loop
           if (curFlag.parentFlag.ownLoopFlag) curFlag.parentFlag.ownLoopFlag.stopped = true;
         }
-        // Propaga THISGO=F al parent nella scope chain (salta il primo THISGO = quello corrente)
         s = scope;
         let skipped = false;
         while (s) {
           if (s.vars.has("THISGO")) {
-            if (!skipped) { skipped = true; } // salta THISGO del GO corrente
+            if (!skipped) { skipped = true; } 
             else { const rec = s.vars.get("THISGO"); if (!rec.stay) rec.val = mkB(VF); break; }
           }
           s = s.parent;
@@ -1561,7 +1413,6 @@ class Interpreter {
       return;
     }
 
-    // Caso speciale: ROUND = F|N
     if (n.varName === "ROUND") {
       const val = this.evalFull(n.expr, scope);
       let s = scope;
@@ -1570,26 +1421,21 @@ class Interpreter {
         s = s.parent;
       }
       if (String(val.value) === VF) {
-        // ROUND=F → exit del loop corrente
         if (this._loopFlag) this._loopFlag.stopped = true;
-        // propaga anche via THISGO nello scope (per la condizione del loop)
         let ss = scope;
         while (ss) {
           if (ss.vars.has("THISGO")) { const rec = ss.vars.get("THISGO"); if (!rec.stay) rec.val = mkB(VF); }
           ss = ss.parent;
         }
-      } else if (this._loopFlag) {
-        // ROUND=N → salta al round N nel loop corrente
+      } else if (this._loopFlag) 
         const n = Number(val.value);
         if (!isNaN(n) && n > 0) this._loopFlag.roundTarget = n;
       }
       return;
     }
 
-    // Caso speciale: @THISGO = F  → propaga su tutta la catena di scope + stack
     if (n.varName === "THISGO") {
       const val = this.evalFull(n.expr, scope);
-      // Aggiorna ogni THISGO nella catena di scope
       let s = scope;
       while (s) {
         if (s.vars.has("THISGO")) {
@@ -1598,7 +1444,6 @@ class Interpreter {
         }
         s = s.parent;
       }
-      // Aggiorna anche il flag dello stack dei GO attivi
       if (val.value === VF && this._thisgoStack.length) {
         this._thisgoStack[this._thisgoStack.length - 1].stopped = true;
       }
@@ -1608,37 +1453,27 @@ class Interpreter {
     const rawExpr = n.expr;
     let val;
 
-    // Lista accesso
     const laM = rawExpr.match(/^(\w+)\[(.+)\]$/);
     if (laM) {
       val = this.listGet(laM[1], laM[2], scope);
     }
-    // Chiamata funzione
     else if (/^\w+\(/.test(rawExpr)) {
       val = this.callFnSync(rawExpr, scope) || mkS("");
     }
     else {
       val = this.evalFull(rawExpr, scope);
     }
-
-    // Eredita tipo da @var (assegnazione singolo riferimento)
     const singleRef = rawExpr.match(/^@(\w+)$/);
     if (singleRef) {
       const r = scope.get(singleRef[1], this);
       if (r) val = { ...r.val };
     }
-
-    // Se NON è una var numerica (#) e il valore è un numero puro letterale,
-    // convertilo in stringa (per rispettare "var=5 → stringa" del manuale LINE)
     if (!n.isNum && !n.isIF && val.type === TN && !rawExpr.includes("@") && !rawExpr.includes("(")) {
-      // Solo letterali numerici puri (es. x=5) diventano stringhe
-      // Ma se c'è un'operazione (x=2+3), rimane numero
       if (/^-?\d+(\.\d+)?$/.test(rawExpr.trim())) {
         val = mkS(String(val.value));
       }
     }
 
-    // Coercizione per #varname
     if (n.isNum) {
       if (val.type === TS) {
         if (val.value === VT || val.value === VF) {
@@ -1650,7 +1485,6 @@ class Interpreter {
       }
     }
 
-    // Coercizione per IF
     if (n.isIF) {
       if (val.type !== TB) val = mkB(truthy(val) ? VT : VF);
     }
@@ -1661,7 +1495,6 @@ class Interpreter {
 
   }
 
-  /* ── ASSIGN_OP ── */
   execAssignOp(n, scope) {
     const rec = scope.get(n.varName, this);
     if (!rec) lerr("VAR_NOT_FOUND", `Variabile '${n.varName}' non trovata`);
@@ -1681,19 +1514,13 @@ class Interpreter {
     scope.set(n.varName, mkN(v), { isRET: n.isRET, temp: n.temp });
   }
 
-  /* ── TALK:V — input persistente ──
-     Mostra il prompt via inp() (non come output!), salva in ASKED.
-     Se il programma è in un loop con #c, ogni iterazione che legge
-     @ASKED ottiene il valore dell'ultimo input ricevuto.
-     Il prompt è solo label per la UI dell'input (non stampato come riga). */
+
   async execTALKV(n, scope) {
     this.talkV       = true;
     this.talkVPrompt = n.prompt || "";
-    // TALK:V attiva solo la modalità. Non chiede input subito.
-    // Da ora @ASKED è monouso: ogni volta che appare in un template chiede un input.
+    
   }
 
-  /* ── Chiede un input e lo salva in ASKED ── */
   async _askAndStoreASKED() {
     const val = await this.inp(this.talkVPrompt);
     this._setASKED(val);
@@ -1706,7 +1533,6 @@ class Interpreter {
     else      { this.G.vars.set("ASKED", { val: mkS(val), stay: false, isIF: false, expr: null, isRET: false, temp: false }); }
   }
 
-  /* ── IO: TALK OUT INP SCREAM ── */
   async execIO(n, scope) {
     if (n.kw === "SCREAM") {
       const m = n.tpl.match(/@(\w+)/);
@@ -1716,26 +1542,20 @@ class Interpreter {
       }
     }
 
-    // ── TALK:V — @ASKED è monouso ──
-    // Per ogni @ASKED nel template: chiedi input → salva → sostituisci → poi stampa tutto
     if (this.talkV && (n.kw === "TALK" || n.kw === "OUT")) {
       const count = (n.tpl.match(/@ASKED/g) || []).length;
       if (count > 0) {
-        // Raccoglie i valori nell'ordine in cui @ASKED appare
         const vals = [];
         for (let i = 0; i < count; i++) {
           const v = await this.inp(this.talkVPrompt);
           this._setASKED(v);
           vals.push(v);
         }
-        // Sostituisce ogni @ASKED con il valore corrispondente
         let i = 0;
         const resolvedTpl = n.tpl.replace(/@ASKED/g, () => vals[i++] || "");
-        // Renderizza il template con i valori già iniettati
         const { text } = renderTpl(resolvedTpl, scope, this, false);
         if (text.trim()) this.out(text);
       } else {
-        // Nessun @ASKED: stampa normalmente senza chiedere input
         const { text } = renderTpl(n.tpl, scope, this, false);
         if (text.trim()) this.out(text);
       }
@@ -1762,7 +1582,7 @@ class Interpreter {
     if (remaining) this.out(remaining);
   }
 
-  /* ── CONV: n: s: b: ── */
+  // conversion to...
   execConv(n, scope) {
     const r = scope.get(n.varN, this);
     if (!r) lerr("VAR_NOT_FOUND", `Variabile '${n.varN}' non trovata`);
@@ -1782,19 +1602,13 @@ class Interpreter {
     }
     scope.set(n.varN, v, {});
   }
-
-  /* ── TAKE ── */
   execTAKE(n) {
     if (MODULES[n.module]) {
       this._loaded.add(n.module);
-      return; // modulo caricato
+      return; 
     }
     this.out(`[TAKE] Modulo '${n.module}' non trovato. Usa .MODS per la lista.`);
   }
-
-  /* ══════════════════════════════════════════════════════
-     GO BLOCK
-  ══════════════════════════════════════════════════════ */
   async execGO(n, scope) {
     const chain = parseGOChain(n.raw);
     for (let bi = 0; bi < chain.length; bi++) {
@@ -1803,11 +1617,8 @@ class Interpreter {
       if (!truthy(cond)) continue;
       await this._execBranch(branch, cond, scope);
 
-      // Se il ramo era un loop (#c o #n>1 o #@var), il ramo && successivo
-      // funziona come "post-loop": esegue sempre dopo che il loop finisce.
       const isLoop = branch.infinite || branch.reps > 1 || branch.repsVar != null;
       if (isLoop) {
-        // Cerca il prossimo ramo && immediatamente successivo
         const next = chain[bi + 1];
         if (next && next.isElse) {
           await this._execBranch(next, mkB(VT), scope);
@@ -1830,7 +1641,6 @@ class Interpreter {
   async _execBranch(branch, condVal, scope) {
     const isLoop = branch.infinite || branch.reps > 1 || branch.repsVar != null;
     let round = 1;
-    // Flag del loop: vive qui, accessibile a execAssign via this._loopFlag
     const loopFlag = isLoop ? { isLoop: true, stopped: false, roundTarget: null } : null;
     const prevLoopFlag = this._loopFlag;
     if (isLoop) this._loopFlag = loopFlag;  // sovrascrive solo per loop veri
@@ -1865,7 +1675,7 @@ class Interpreter {
         if (!cont || (loopFlag && loopFlag.stopped)) break;
       }
     }
-    this._loopFlag = prevLoopFlag;  // ripristina il flag del loop padre
+    this._loopFlag = prevLoopFlag;  
   }
 
   async _runInlineBody(bodyStr, scope, condVal, round = null) {
@@ -1874,9 +1684,8 @@ class Interpreter {
     const parentFlag = this._thisgoStack.length ? this._thisgoStack[this._thisgoStack.length - 1] : null;
     const flag       = { val: condVal, parentFlag, ownLoopFlag: this._loopFlag };
     this._thisgoStack.push(flag);
-    inner.set("THISGO", condVal, { temp: true }); // locale per ogni GO level
-    if (round !== null) inner.set("ROUND", mkN(round), { temp: true }); // locale, non propaga
-    // EXTGO = condizione del GO genitore (o F se non c'è)
+    inner.set("THISGO", condVal, { temp: true }); 
+    if (round !== null) inner.set("ROUND", mkN(round), { temp: true }); 
     inner.set("EXTGO", parentFlag ? { ...parentFlag.val } : mkB(VF), { temp: true });
     const isLoopBody = round !== null;
     flag.isLoop = isLoopBody;
@@ -1898,8 +1707,8 @@ class Interpreter {
       const parentFlag = this._thisgoStack.length ? this._thisgoStack[this._thisgoStack.length - 1] : null;
       const flag       = { val: condVal, isLoop: round !== null, parentFlag, ownLoopFlag: this._loopFlag };
       this._thisgoStack.push(flag);
-      inner.set("THISGO", condVal, { temp: true }); // locale per ogni GO level
-      if (round !== null) inner.set("ROUND", mkN(round), { temp: true }); // locale, non propaga
+      inner.set("THISGO", condVal, { temp: true }); 
+      if (round !== null) inner.set("ROUND", mkN(round), { temp: true }); 
       inner.set("EXTGO", parentFlag ? { ...parentFlag.val } : mkB(VF), { temp: true });
       this._skipFlag = false;
       await this.run(this.thens.get(clean).body, inner);
@@ -1916,14 +1725,11 @@ class Interpreter {
     lerr("FUNC_NOT_FOUND", `Funzione/then '${clean}' non trovata`);
   }
 
-  /* ══════════════════════════════════════════════════════
-     FOR
-  ══════════════════════════════════════════════════════ */
+
   async execFOR(n, scope) {
     const startN = Number(this.evalFull(n.start, scope).value) || 0;
     const stepN  = Number(this.evalFull(n.step,  scope).value) || 1;
 
-    /* NUMBERS: lista virtuale di tutti i numeri */
     if (n.list === "NUMBERS") {
       const endN = Number(this.evalFull(n.end, scope).value);
       const cmp  = stepN > 0 ? (v => v <= endN) : (v => v >= endN);
@@ -1962,27 +1768,22 @@ class Interpreter {
 
   async _forBody(fn, inner, parentScope) {
     fn = fn.trim();
-    // Body inline { ... } o @{ ... }
     if (fn.startsWith("{") || fn.startsWith("@{")) {
       const start = fn.indexOf("{");
       const body  = fn.slice(start + 1, findMatchingBrace(fn, start)).trim();
       await this.run(parse(body), inner);
       return;
     }
-    // @fn() o fn
     const clean = fn.replace(/^@/, "").replace(/\(\)$/, "");
     if (this.thens.has(clean)) { await this.run(this.thens.get(clean).body, inner); return; }
     if (this.fns.has(clean))   { await this.callFn(clean + "()", parentScope); return; }
     lerr("FUNC_NOT_FOUND", `Funzione '${clean}' non trovata per FOR`);
   }
-
-  /* ── ADD ── */
   execADD(n, scope) {
     const r = scope.get(n.list, this);
     if (!r || !(r.val.value instanceof LList))
       lerr("LIST_NOT_FOUND", `Lista '${n.list}' non trovata`);
     const list = r.val.value;
-    // Supporto tag | val nel valore da aggiungere
     const valRaw = n.val.trim();
     const segs   = splitPipe(valRaw);
     const rawVal = segs.pop().trim();
@@ -1994,13 +1795,12 @@ class Interpreter {
       const idx = n.idx === "" ? list.items.length
                                : Number(this.evalFull(n.idx, scope).value);
       list.items.splice(idx, 0, item);
-    } else { // BY → sostituisce
+    } else { 
       const idx = Number(this.evalFull(n.idx, scope).value);
       list.items.splice(idx, 1, item);
     }
   }
 
-  /* ── CANC ── */
   execCANC(n, scope) {
     const r = scope.get(n.list, this);
     if (!r || !(r.val.value instanceof LList))
@@ -2021,7 +1821,6 @@ class Interpreter {
     }
   }
 
-  /* ── TRY / SHOW / YET ── */
   async execTRY(n, scope) {
     let caught = null;
     try {
@@ -2042,17 +1841,14 @@ class Interpreter {
     if (n.yet) await this.run(n.yet.body, new Scope(scope));
   }
 
-  /* ── Chiamata funzione asincrona ── */
   async callFn(expr, scope) {
     const nameM = expr.match(/^@?(\w+)\s*\((.*)\)\s*$/s);
     if (!nameM) return null;
     const name   = nameM[1];
     const argStr = nameM[2];
 
-    // Modulo built-in: usa callFnSync
     if (ALL_FNS[name]) return this.callFnSync(expr, scope);
 
-    // Funzione/THEN utente: async
     const fn = this.fns.get(name) || this.thens.get(name);
     if (!fn) lerr("FUNC_NOT_FOUND", `Funzione '${name}' non trovata`);
 
@@ -2066,27 +1862,21 @@ class Interpreter {
     return this.retVal;
   }
 
-  /* ── Chiamata funzione sincrona (per RHS senza I/O) ── */
   callFnSync(expr, scope) {
-    // Estrai nome e argomenti. La regex cattura tutto fino alla ) di chiusura bilanciata.
     const nameM = expr.match(/^@?(\w+)\s*\((.*)\)\s*$/s);
     if (!nameM) return null;
     const name   = nameM[1];
-    const argStr = nameM[2]; // NON trimmare: potrebbe contenere " " come argomento
+    const argStr = nameM[2]; 
 
-    // ── Funzione di modulo built-in ──
     if (ALL_FNS[name]) {
       const argVals = argStr.trim() ? splitArgs(argStr).map(a => this._evalArg(a, scope)) : [];
       const vals    = argVals.map(a => a instanceof Object && "value" in a ? a.value : a);
       const types   = argVals.map(a => a instanceof Object && "type"  in a ? a.type  : "string");
-      // Modulo type riceve anche il tipo
       if (name.startsWith("type_")) return ALL_FNS[name](vals[0], types[0], vals[1], types[1]);
       return ALL_FNS[name](...vals);
     }
-
-    // ── Funzione/THEN utente (solo body sincrono, no I/O) ──
     const fn = this.fns.get(name) || this.thens.get(name);
-    if (!fn) return null; // funzione non trovata → ritorna null (gestita da callFn async)
+    if (!fn) return null; 
 
     const fnScope = new Scope(this.G);
     if (fn.params && fn.params.length && argStr.trim()) {
@@ -2102,35 +1892,25 @@ class Interpreter {
     }
     return this.retVal || mkS("");
   }
-
-  /* ── Valuta argomento funzione ── */
   _evalArg(arg, scope) {
     if (arg === undefined || arg === null) return mkS("");
-    // Preserva spazi: se l'argomento è SOLO spazio/whitespace, è un letterale stringa
     if (arg.trim() === "" && arg.length > 0) return mkS(arg);
     arg = arg.trim();
     if (!arg) return mkS("");
-    // Con #: valuta come numero
     if (arg.startsWith("#")) return this.evalFull(arg, scope);
-    // Con @: lookup diretto per preservare LList e altri tipi
     if (arg.startsWith("@")) {
       const nm = arg.slice(1);
       const rec = scope.get(nm, this);
-      if (rec) return rec.val;   // restituisce LList, number, bool, string intatti
-      return this.evalFull(arg, scope); // fallback per espressioni complesse
+      if (rec) return rec.val;   
+      return this.evalFull(arg, scope); 
     }
-    // Espressione con operatori matematici/lista
     if (/[+\-*/()\[\]]/.test(arg)) return this.evalFull(arg, scope);
-    // Plain word: cerca prima nello scope
     const rec = scope.get(arg, this);
     if (rec) return rec.val;
-    // Numero puro
     if (/^-?\d+(\.\d+)?$/.test(arg)) return mkN(parseFloat(arg));
-    // Altrimenti stringa letterale (preserva il valore esatto)
     return mkS(arg);
   }
 
-  /* ── Accesso lista ── */
   listGet(listName, key, scope) {
     const r = scope.get(listName, this);
     if (!r || !(r.val.value instanceof LList))
@@ -2154,7 +1934,6 @@ class Interpreter {
     return mkS(String(tagItem.value));
   }
 
-  /* ── Etichette ── */
   async execLabelCall(label, scope) {
     const n = this.labels.get(label);
     if (!n) lerr("SYNTAX_ERROR", `Etichetta '${label}' non trovata`);
@@ -2162,15 +1941,11 @@ class Interpreter {
   }
 }
 
-/* ══════════════════════════════════════════════════════════
-   ENTRY POINT
-══════════════════════════════════════════════════════════ */
 async function LINE_run(src, options = {}) {
   const lines = [];
   const out = options.output || (s => { lines.push(s); console.log("[LINE]", s); });
   const inp = options.input  || (() => Promise.resolve(""));
 
-  // Comandi speciali (.MODS  .NOMEMODULO)
   const trimmed = src.trim();
   if (trimmed === ".MODS") {
     out("Moduli disponibili:");
@@ -2208,3 +1983,5 @@ G.LINE_run   = LINE_run;
 G.LINE_parse = parse;
 
 })(typeof window !== "undefined" ? window : global);
+
+// AZZ finalmente è finito marò
