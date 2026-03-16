@@ -30,10 +30,23 @@
  *  ─────────────────────────────────────────────
  *  trigger="id"         → esegue l'intero programma al click di #id
  *  autorun              → esegue subito al caricamento
+ *  loop                 → ri-esegue il programma ogni volta che termina
+ *                         (usa input hidden o <ls> per persistere lo stato)
  *  replace              → ogni TALK sostituisce (default)
  *  counter="id"         → inietta __N__ e scrive il contatore in #id
  *  body-class="id"      → applica testo di #id come className del body
  *  onclick="btnId:lbl"  → aggancia click di #btnId al blocco lbl
+ *
+ *  NOTE SUI BUTTON ID
+ *  ──────────────────
+ *  THEN:id, FUN:id e GO:id supportano id con trattini: THEN:mio-btn nomeblocco
+ *
+ *  STATO PERSISTENTE SENZA localStorage
+ *  ──────────────────────────────────────
+ *  Usa un <input type="hidden" id="nome" value="0"> come memoria:
+ *  - injectVars inietta automaticamente il suo valore come variabile LINE
+ *  - <nome>TALK @nuovoValore</nome> aggiorna il valore dell'input
+ *  - Alla prossima esecuzione il valore aggiornato è già disponibile come @nome
  *
  *  API PROGRAMMATICA
  *  ─────────────────
@@ -53,6 +66,19 @@
      Trasforma <id>, <id=mode>, <.cls>, <ls> in marker OUT.
   ══════════════════════════════════════════════════════════ */
   function preprocess(src) {
+    // Pre-pass: <ls>key = val</ls> → <ls>TALK key = val</ls>
+    // Necessario perché "key = val" in LINE è un assegnamento (nessun output),
+    // mentre handleLS si aspetta un valore in arrivo dall'output handler.
+    // Se il contenuto inizia già con TALK o OUT, viene lasciato intatto.
+    src = src.replace(
+      /<ls>([\s\S]*?)<\/ls>/g,
+      (match, inner) => {
+        const t = inner.trim();
+        if (!t || /^(TALK|OUT)\s/i.test(t)) return match;
+        return '<ls>TALK ' + t + '</ls>';
+      }
+    );
+
     const lines = src.split("\n");
     const out   = [];
     const stack = [];
@@ -199,6 +225,7 @@
       const trimmed = line.trim();
 
       // THEN:btnId nomeblocco
+      // [\w-]+ invece di \w+ per supportare id con trattini (es. btn-submit)
       const thenM = trimmed.match(/^THEN:([\w-]+)\s+(\w+)/);
       if (thenM) {
         blocks[thenM[1]] = thenM[2];
@@ -302,6 +329,10 @@
       const counterId   = script.getAttribute('counter');
       const bodyClassId = script.getAttribute('body-class');
       const onclickAttr = script.getAttribute('onclick');
+      // loop: ri-esegue il programma ogni volta che termina.
+      // Utile per mantenere i blocchi THEN/FUN sempre registrati e
+      // per rileggere lo stato da input hidden o localStorage ad ogni ciclo.
+      const isLoop      = script.hasAttribute('loop');
 
       /* body-class */
       if (bodyClassId) {
@@ -326,6 +357,10 @@
         if (busy) return; busy = true;
         await LINE_dom(getSrc(), { replace });
         busy = false;
+        // Se loop è attivo, ri-schedula la prossima esecuzione.
+        // setTimeout(,0) cede il controllo all'event loop tra un'iterazione e l'altra,
+        // così i click e gli aggiornamenti DOM vengono elaborati.
+        if (isLoop) setTimeout(runAll, 0);
       }
 
       /* Esegue solo un blocco THEN/FUN — ri-esegue tutto ma chiama solo il blocco */
