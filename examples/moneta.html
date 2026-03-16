@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testa o Croce — LINE-DOM</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<style>
+:root { --acc: #f59e0b; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0f0e0c; color: #e8e0d4; font-family: 'Syne', sans-serif; min-height: 100dvh; display: flex; flex-direction: column; }
+header { background: #1c1a17; border-bottom: 2px solid var(--acc); padding: .9rem 1.5rem; display: flex; align-items: center; gap: .75rem; }
+h1 { font-size: .95rem; font-weight: 700; }
+.badge { margin-left: auto; font-family: 'Syne Mono', monospace; font-size: .5rem; letter-spacing: .3em; text-transform: uppercase; color: rgba(255,255,255,.25); background: rgba(255,255,255,.05); padding: .3rem .7rem; }
+main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+.card { background: #1c1a17; border: 1px solid rgba(255,255,255,.07); padding: 2rem; width: 100%; max-width: 360px; }
+.card-tag { font-family: 'Syne Mono', monospace; font-size: .5rem; letter-spacing: .4em; text-transform: uppercase; color: var(--acc); margin-bottom: 1.5rem; display: block; }
+.coin-display { text-align: center; margin-bottom: 1.5rem; }
+.coin { font-size: 4rem; line-height: 1; min-height: 4.5rem; }
+.coin-label { font-family: 'Syne Mono', monospace; font-size: .75rem; letter-spacing: .3em; color: rgba(255,255,255,.4); margin-top: .4rem; min-height: 1.2em; }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: .6rem; }
+.btn-bet { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); color: rgba(255,255,255,.6); font-family: 'Syne', sans-serif; font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: .85rem; cursor: pointer; transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+.btn-bet span:first-child { font-size: 1.3rem; }
+.btn-bet:hover { border-color: var(--acc); color: var(--acc); background: rgba(245,158,11,.07); }
+.divider { height: 1px; background: rgba(255,255,255,.06); margin: 1.2rem 0; }
+.stats { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: .4rem; }
+.stat { text-align: center; }
+.stat-val { font-family: 'Syne Mono', monospace; font-size: 1.3rem; font-weight: 800; color: var(--acc); line-height: 1; }
+.stat-lbl { font-size: .44rem; letter-spacing: .15em; text-transform: uppercase; color: rgba(255,255,255,.22); margin-top: .3rem; }
+.btn-reset { display: block; width: 100%; background: none; border: 1px solid rgba(255,255,255,.07); color: rgba(255,255,255,.22); font-family: 'Syne', sans-serif; font-size: .6rem; letter-spacing: .15em; text-transform: uppercase; padding: .5rem; cursor: pointer; margin-top: .6rem; transition: all .15s; }
+.btn-reset:hover { border-color: rgba(255,255,255,.18); color: rgba(255,255,255,.5); }
+footer { text-align: center; padding: 1.2rem; font-family: 'Syne Mono', monospace; font-size: .48rem; letter-spacing: .2em; color: rgba(255,255,255,.1); text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Testa o Croce</h1>
+  <span class="badge">LINE-DOM · zero js</span>
+</header>
+
+<main>
+  <div class="card">
+    <span class="card-tag">Scommetti sul lancio</span>
+
+    <div class="coin-display">
+      <div class="coin" id="coin">🪙</div>
+      <div class="coin-label" id="coin-label">Scegli un lato e lancia.</div>
+    </div>
+
+    <div class="choices">
+      <button class="btn-bet" id="btn-testa"><span>👑</span><span>Testa</span></button>
+      <button class="btn-bet" id="btn-croce"><span>⚜️</span><span>Croce</span></button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val" id="vinte">0</div>
+        <div class="stat-lbl">Vinte</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="perse">0</div>
+        <div class="stat-lbl">Perse</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="lanci">0</div>
+        <div class="stat-lbl">Lanci</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="streak">0</div>
+        <div class="stat-lbl">Streak</div>
+      </div>
+    </div>
+    <button class="btn-reset" id="btn-reset">↺ Azzera statistiche</button>
+  </div>
+</main>
+
+<footer>Costruito con LINE-DOM · Nessuna riga di JavaScript</footer>
+
+<script src="https://qc-17.github.io/LINE/interpreter.js"></script>
+<script src="https://qc-17.github.io/LINE/line-dom.js"></script>
+
+<script type="text/line" onclick="btn-testa:gioca_testa,btn-croce:gioca_croce,btn-reset:resetta">
+TAKE rand
+
+>> Aggiorna contatori comuni
+FUN aggiorna_lanci()
+  #n = @lanci - 0
+  #n += 1
+  <ls>lanci = @n</ls>
+  <lanci>TALK @n</lanci>
+FEND
+
+FUN update_streak_win()
+  #s = @streak - 0
+  #s += 1
+  <ls>streak = @s</ls>
+  <streak>TALK @s</streak>
+FEND
+
+FUN update_streak_reset()
+  <ls>streak = 0</ls>
+  <streak>TALK 0</streak>
+FEND
+
+>> Esito vittoria
+FUN esito_vince(faccia)
+  aggiorna_lanci()
+  update_streak_win()
+  #v = @vinte - 0
+  #v += 1
+  <ls>vinte = @v</ls>
+  <vinte>TALK @v</vinte>
+  <coin>TALK @faccia</coin>
+  <coin-label>TALK ✓ Hai vinto!</coin-label>
+FEND
+
+>> Esito sconfitta
+FUN esito_perde(faccia)
+  aggiorna_lanci()
+  update_streak_reset()
+  #p = @perse - 0
+  #p += 1
+  <ls>perse = @p</ls>
+  <perse>TALK @p</perse>
+  <coin>TALK @faccia</coin>
+  <coin-label>TALK ✗ Hai perso!</coin-label>
+FEND
+
+>> Esiti specifici (necessari per passare emoji diversa)
+FUN vince_testa()
+  esito_vince(👑)
+FEND
+FUN perde_testa()
+  esito_perde(⚜️)
+FEND
+FUN vince_croce()
+  esito_vince(⚜️)
+FEND
+FUN perde_croce()
+  esito_perde(👑)
+FEND
+
+>> Lanci
+FUN gioca_testa()
+  >> flip: 1 = testa (vinci), 2 = croce (perdi)
+  #flip = rand_int(1, 2)
+  IF w = #flip == 1
+  GO @w @{ vince_testa() } && @{ perde_testa() }
+FEND
+
+FUN gioca_croce()
+  >> flip: 2 = croce (vinci), 1 = testa (perdi)
+  #flip = rand_int(1, 2)
+  IF w = #flip == 2
+  GO @w @{ vince_croce() } && @{ perde_croce() }
+FEND
+
+FUN resetta()
+  <ls>vinte = 0</ls>
+  <ls>perse = 0</ls>
+  <ls>lanci = 0</ls>
+  <ls>streak = 0</ls>
+  <vinte>TALK 0</vinte>
+  <perse>TALK 0</perse>
+  <lanci>TALK 0</lanci>
+  <streak>TALK 0</streak>
+  <coin>TALK 🪙</coin>
+  <coin-label>TALK Scegli un lato e lancia.</coin-label>
+FEND
+</script>
+
+</body>
+</html>
