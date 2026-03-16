@@ -4,8 +4,8 @@
 
 **Language with Intuitive and Natural Expression**
 
-*Linguaggio interpretato · eseguibile nel browser*  
-*Interpreted language  · runs in the browser*
+*Linguaggio di programmazione interpretato · keyword inglesi · eseguibile nel browser*  
+*Interpreted programming language · English keywords · runs in the browser*
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
@@ -22,7 +22,7 @@
 
 ### Cos'è LINE?
 
-LINE è un linguaggio di programmazione interpretato, progettato per essere comprensibile e facile da apprendere. La sintassi è in italiano, verbosa e nominativa: ogni costrutto dice esattamente cosa fa.
+LINE è un linguaggio di programmazione interpretato, progettato per essere comprensibile e facile da apprendere. Le keyword sono in inglese, verbose e nominative — ogni costrutto dice esattamente cosa fa, rendendolo leggibile quasi come testo naturale.
 
 Un programma LINE viene salvato in un file con estensione `.line` ed eseguito dall'interprete, disponibile nel browser senza installazioni.
 
@@ -30,7 +30,7 @@ Un programma LINE viene salvato in un file con estensione `.line` ed eseguito da
 
 | Funzionalità | Descrizione |
 |---|---|
-| **Sintassi italiana** | Leggibile quasi come testo naturale — ogni keyword dice cosa fa |
+| **Keyword inglesi** | `TALK`, `STAY`, `FUN`, `THEN`, `GO`, `FOR`, `TRY` — leggibili e intuitive |
 | **Tre tipi di variabile** | Standard, costanti (`STAY`) e reattive (`IF`) che si aggiornano automaticamente |
 | **Liste native** | Con tag, accesso per indice o etichetta, iterazione con `FOR` |
 | **Funzioni & blocchi** | `FUN` per le funzioni, `THEN` per i blocchi, `GO` per le condizioni |
@@ -93,7 +93,7 @@ LINE è un progetto aperto. Puoi contribuire segnalando bug, suggerendo funziona
 
 ### What is LINE?
 
-LINE is an interpreted programming language designed to be understandable and easy to learn. Its syntax is in Italian, verbose and nominative — every construct says exactly what it does.
+LINE is an interpreted programming language designed to be understandable and easy to learn. Its keywords are in English, verbose and nominative — every construct says exactly what it does, making it readable almost like natural text.
 
 A LINE program is saved in a file with the `.line` extension and executed by the interpreter, available in the browser with no installation required.
 
@@ -101,7 +101,7 @@ A LINE program is saved in a file with the `.line` extension and executed by the
 
 | Feature | Description |
 |---|---|
-| **Italian syntax** | Readable almost like natural text — every keyword says what it does |
+| **English keywords** | `TALK`, `STAY`, `FUN`, `THEN`, `GO`, `FOR`, `TRY` — readable and intuitive |
 | **Three variable types** | Standard, constants (`STAY`) and reactive (`IF`) that auto-update |
 | **Native lists** | With tags, access by index or label, iteration with `FOR` |
 | **Functions & blocks** | `FUN` for functions, `THEN` for blocks, `GO` for conditions |
