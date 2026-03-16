@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tabelline — LINE-DOM</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<style>
+:root { --acc: #10b981; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0f0e0c; color: #e8e0d4; font-family: 'Syne', sans-serif; min-height: 100dvh; display: flex; flex-direction: column; }
+header { background: #1c1a17; border-bottom: 2px solid var(--acc); padding: .9rem 1.5rem; display: flex; align-items: center; gap: .75rem; }
+h1 { font-size: .95rem; font-weight: 700; }
+.badge { margin-left: auto; font-family: 'Syne Mono', monospace; font-size: .5rem; letter-spacing: .3em; text-transform: uppercase; color: rgba(255,255,255,.25); background: rgba(255,255,255,.05); padding: .3rem .7rem; }
+main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+.card { background: #1c1a17; border: 1px solid rgba(255,255,255,.07); padding: 2rem; width: 100%; max-width: 360px; }
+.card-tag { font-family: 'Syne Mono', monospace; font-size: .5rem; letter-spacing: .4em; text-transform: uppercase; color: var(--acc); margin-bottom: 1.5rem; display: block; }
+.question-area { text-align: center; margin-bottom: 1.8rem; }
+.question { font-family: 'Syne Mono', monospace; font-size: 2.4rem; font-weight: 800; color: #fff; line-height: 1; min-height: 3rem; }
+.question-sub { font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.25); margin-top: .5rem; min-height: 1.2em; }
+.input-row { display: flex; gap: .5rem; margin-bottom: .6rem; }
+input[type="number"] { flex: 1; background: rgba(255,255,255,.05); border: 1.5px solid rgba(255,255,255,.1); color: #fff; font-family: 'Syne Mono', monospace; font-size: 1.2rem; font-weight: 700; padding: .7rem .9rem; outline: none; text-align: center; -moz-appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+input:focus { border-color: var(--acc); }
+.btn { background: none; border: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.55); font-family: 'Syne', sans-serif; font-size: .7rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; padding: .65rem 1.1rem; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.btn:hover { border-color: var(--acc); color: var(--acc); }
+.btn.pri { background: var(--acc); border-color: var(--acc); color: #fff; }
+.btn.pri:hover { background: #059669; border-color: #059669; }
+.btn.full { display: block; width: 100%; margin-top: .5rem; }
+.feedback { font-family: 'Syne Mono', monospace; font-size: .85rem; min-height: 1.4em; color: rgba(255,255,255,.55); margin-bottom: 1.2rem; text-align: center; }
+.divider { height: 1px; background: rgba(255,255,255,.06); margin: 1rem 0; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+.stat { text-align: center; }
+.stat-val { font-family: 'Syne Mono', monospace; font-size: 1.5rem; font-weight: 800; color: var(--acc); line-height: 1; }
+.stat-lbl { font-size: .48rem; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.22); margin-top: .3rem; }
+footer { text-align: center; padding: 1.2rem; font-family: 'Syne Mono', monospace; font-size: .48rem; letter-spacing: .2em; color: rgba(255,255,255,.1); text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Tabelline</h1>
+  <span class="badge">LINE-DOM · zero js</span>
+</header>
+
+<main>
+  <div class="card">
+    <span class="card-tag">10 domande</span>
+
+    <div class="question-area">
+      <div class="question" id="domanda">—</div>
+      <div class="question-sub" id="feedback">Premi "Inizia" per cominciare.</div>
+    </div>
+
+    <div class="input-row">
+      <input id="risposta" type="number" min="1" placeholder="= ?">
+      <button class="btn pri" id="btn-check">OK</button>
+    </div>
+    <button class="btn full" id="btn-init">▶ Inizia</button>
+
+    <div class="divider"></div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val" id="score">0</div>
+        <div class="stat-lbl">Punti</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="round">—</div>
+        <div class="stat-lbl">Domanda</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>Costruito con LINE-DOM · Nessuna riga di JavaScript</footer>
+
+<script src="https://qc-17.github.io/LINE/interpreter.js"></script>
+<script src="https://qc-17.github.io/LINE/line-dom.js"></script>
+
+<script type="text/line" onclick="btn-init:init,btn-check:check">
+TAKE rand
+
+>> Genera una nuova domanda e la mostra
+FUN genera_domanda()
+  #a = rand_int(2, 9)
+  #b = rand_int(2, 9)
+  <ls>qa = @a</ls>
+  <ls>qb = @b</ls>
+  <domanda>TALK @a × @b</domanda>
+  <feedback>TALK &nbsp;</feedback>
+FEND
+
+>> Mostra risultato finale
+FUN fine()
+  #sc = @score - 0
+  <domanda>TALK Fine!</domanda>
+  <round>TALK —</round>
+  <feedback>TALK Hai totalizzato @sc / 10 punti.</feedback>
+FEND
+
+>> Avanza al round successivo (o termina)
+FUN avanza()
+  #r = @round - 0
+  #r += 1
+  <ls>round = @r</ls>
+  <round>TALK @r / 10</round>
+  IF fine = #r > 10
+  GO @fine @{ fine() } && @{ genera_domanda() }
+FEND
+
+>> Risposta corretta
+FUN corretto()
+  #sc = @score - 0
+  #sc += 1
+  <ls>score = @sc</ls>
+  <score>TALK @sc</score>
+  <feedback>TALK ✓ Corretto!</feedback>
+FEND
+
+>> Risposta sbagliata
+FUN sbagliato()
+  #a = @qa - 0
+  #b = @qb - 0
+  #c = #a * #b
+  <feedback>TALK ✗ Sbagliato. Era @c.</feedback>
+FEND
+
+>> Inizia una nuova partita
+FUN init()
+  <ls>score = 0</ls>
+  <ls>round = 1</ls>
+  <score>TALK 0</score>
+  <round>TALK 1 / 10</round>
+  TAKE rand
+  #a = rand_int(2, 9)
+  #b = rand_int(2, 9)
+  <ls>qa = @a</ls>
+  <ls>qb = @b</ls>
+  <domanda>TALK @a × @b</domanda>
+  <feedback>TALK &nbsp;</feedback>
+FEND
+
+>> Controlla la risposta e avanza
+FUN check()
+  #a = @qa - 0
+  #b = @qb - 0
+  #r = @risposta - 0
+  #c = #a * #b
+  IF ok = #r == #c
+  GO @ok @{ corretto() } && @{ sbagliato() }
+  avanza()
+FEND
+</script>
+
+</body>
+</html>
