@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LINE 3.0 — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+
+<script src="https://qc-17.github.io/LINE/interpreter.js"></script>
+<script src="https://qc-17.github.io/LINE/line-dom.js"></script>
+
+<style>
+  :root {
+    --bg:      #0b0c0e;
+    --surface: #111318;
+    --border:  rgba(255,255,255,.07);
+    --ink:     #e8e3d9;
+    --dim:     rgba(232,227,217,.4);
+    --acc:     #b8f55a;
+    --acc2:    #5af5c8;
+    --err:     #f55a5a;
+    --mono:    'Syne Mono', 'Courier New', monospace;
+    --sans:    'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative; z-index: 1;
+    padding: 3.5rem 2rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .header-left .eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .25em;
+    color: var(--acc);
+    text-transform: uppercase;
+    margin-bottom: .5rem;
+  }
+
+  .header-left h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -.03em;
+  }
+
+  .header-left h1 span { color: var(--acc); }
+
+  .header-left p {
+    margin-top: .6rem;
+    color: var(--dim);
+    font-size: .85rem;
+    font-family: var(--mono);
+  }
+
+  .header-right {
+    display: flex;
+    gap: .6rem;
+    align-items: center;
+  }
+
+  .pill {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    padding: .3rem .8rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--dim);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    position: relative; z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 2rem 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .2em;
+    color: var(--acc);
+    text-transform: uppercase;
+    margin-top: 3.5rem;
+    margin-bottom: 1.2rem;
+    display: block;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2px;
+    transition: border-color .2s;
+  }
+
+  .card:hover { border-color: rgba(255,255,255,.13); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .9rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+  }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: .78rem;
+    color: var(--dim);
+    letter-spacing: .05em;
+  }
+
+  .card-title strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* ── CODE EDITOR ── */
+  .code-area {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: var(--mono);
+    font-size: .82rem;
+    color: #b8f5a0;
+    line-height: 1.75;
+    padding: 1.2rem 1.4rem;
+    min-height: 100px;
+    caret-color: var(--acc);
+  }
+
+  .code-area::selection { background: rgba(184,245,90,.15); }
+
+  /* ── TOOLBAR ── */
+  .card-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .6rem 1.2rem;
+    border-top: 1px solid var(--border);
+    gap: .8rem;
+  }
+
+  .toolbar-hint {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(255,255,255,.2);
+  }
+
+  .btn-run {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    background: var(--acc);
+    color: #0b0c0e;
+    border: none;
+    border-radius: 4px;
+    padding: .45rem 1.1rem;
+    font-family: var(--mono);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+    white-space: nowrap;
+  }
+
+  .btn-run:hover { background: #ceff66; }
+  .btn-run:active { transform: scale(.97); }
+
+  .btn-run .run-icon {
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 4px 0 4px 7px;
+    border-color: transparent transparent transparent #0b0c0e;
+    flex-shrink: 0;
+  }
+
+  .btn-run.running {
+    background: var(--dim);
+    pointer-events: none;
+  }
+
+  /* ── OUTPUT ── */
+  .output-area {
+    border-top: 1px solid var(--border);
+    padding: 1rem 1.4rem;
+    font-family: var(--mono);
+    font-size: .8rem;
+    line-height: 1.8;
+    min-height: 40px;
+    display: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .output-area.visible { display: block; }
+  .output-area.ok  { color: #b8f5a0; }
+  .output-area.err { color: var(--err); }
+
+  .output-label {
+    font-size: 9px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    margin-bottom: .5rem;
+    opacity: .35;
+  }
+
+  /* ── LINE-DOM SECTION ── */
+  .dom-section {
+    margin-top: 1rem;
+  }
+
+  .dom-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .dom-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: 640px) {
+    .dom-split { grid-template-columns: 1fr; }
+  }
+
+  .dom-pane {
+    padding: 1.2rem 1.4rem;
+  }
+
+  .dom-pane + .dom-pane {
+    border-left: 1px solid var(--border);
+  }
+
+  @media (max-width: 640px) {
+    .dom-pane + .dom-pane {
+      border-left: none;
+      border-top: 1px solid var(--border);
+    }
+  }
+
+  .pane-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--acc2);
+    margin-bottom: .8rem;
+    display: block;
+  }
+
+  .dom-code {
+    font-family: var(--mono);
+    font-size: .77rem;
+    color: #a0d8f5;
+    line-height: 1.7;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .dom-code .tag  { color: #f5c05a; }
+  .dom-code .kw   { color: #b8f55a; }
+  .dom-code .attr { color: #f5a05a; }
+  .dom-code .str  { color: #a0d8f5; }
+  .dom-code .cmt  { color: rgba(255,255,255,.25); font-style: italic; }
+
+  /* ── LIVE DOM PREVIEW ── */
+  .live-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .preview-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--acc2);
+    margin-bottom: .4rem;
+  }
+
+  .preview-name-row {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .preview-input {
+    background: #0b0c0e;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: .4rem .8rem;
+    font-family: var(--mono);
+    font-size: .82rem;
+    color: var(--ink);
+    outline: none;
+    width: 140px;
+    transition: border-color .2s;
+  }
+
+  .preview-input:focus { border-color: var(--acc2); }
+
+  .btn-dom {
+    background: transparent;
+    border: 1px solid var(--acc2);
+    color: var(--acc2);
+    border-radius: 4px;
+    padding: .4rem .9rem;
+    font-family: var(--mono);
+    font-size: .75rem;
+    cursor: pointer;
+    transition: background .15s;
+  }
+
+  .btn-dom:hover { background: rgba(90,245,200,.1); }
+
+  .preview-output {
+    font-family: var(--mono);
+    font-size: .85rem;
+    color: #b8f55a;
+    line-height: 1.8;
+    min-height: 1.5rem;
+    padding: .6rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .preview-output.empty { color: rgba(255,255,255,.2); font-style: italic; }
+
+  /* ── COUNTER DEMO ── */
+  .counter-row {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+  }
+
+  .counter-display {
+    font-family: var(--mono);
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--acc);
+    min-width: 60px;
+    text-align: center;
+    letter-spacing: -.05em;
+  }
+
+  .btn-counter {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--ink);
+    border-radius: 4px;
+    padding: .4rem .9rem;
+    font-family: var(--mono);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+
+  .btn-counter:hover { border-color: var(--acc); color: var(--acc); }
+
+  /* ── DOM CARD TOOLBAR ── */
+  .dom-toolbar {
+    border-top: 1px solid var(--border);
+    padding: .6rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .dom-toolbar-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--acc2);
+    opacity: .6;
+  }
+
+  .dom-toolbar span {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(255,255,255,.25);
+    letter-spacing: .05em;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 1;
+    text-align: center;
+    padding: 2rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(255,255,255,.2);
+    letter-spacing: .1em;
+  }
+
+  footer a { color: rgba(255,255,255,.35); text-decoration: none; }
+  footer a:hover { color: var(--acc); }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="header-left">
+    <p class="eyebrow">Playground interattivo</p>
+    <h1>LINE <span>3.0</span></h1>
+    <p>Language with Intuitive and Natural Expression</p>
+  </div>
+  <div class="header-right">
+    <span class="pill">interpreter.js</span>
+    <span class="pill">line-dom.js</span>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main>
+
+  <span class="section-label">01 — Esempi di codice LINE</span>
+
+  <!-- ESEMPIO 1: Variabili e output -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><strong>Variabili e output</strong> — TALK · @var</span>
+    </div>
+    <textarea class="code-area" rows="5" spellcheck="false">nome = Marco
+eta = 25
+anno_nascita = 2025 - @eta
+TALK Ciao, @nome!
+TALK Hai @eta anni — nato nel @anno_nascita.</textarea>
+    <div class="card-toolbar">
+      <span class="toolbar-hint">modificabile ↑</span>
+      <button class="btn-run" onclick="runCard(this)"><span class="run-icon"></span> ESEGUI</button>
+    </div>
+    <div class="output-area">
+      <div class="output-label">output</div>
+      <div class="output-text"></div>
+    </div>
+  </div>
+
+  <!-- ESEMPIO 2: Condizioni -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><strong>Condizioni</strong> — GO · THEND</span>
+    </div>
+    <textarea class="code-area" rows="7" spellcheck="false">punteggio = 78
+
+GO punteggio >= 90
+  TALK Voto: A — Eccellente!
+THEND
+GO punteggio >= 70
+  TALK Voto: B — Buono.
+THEND
+GO punteggio < 70
+  TALK Voto: C — Da migliorare.
+THEND</textarea>
+    <div class="card-toolbar">
+      <span class="toolbar-hint">modificabile ↑</span>
+      <button class="btn-run" onclick="runCard(this)"><span class="run-icon"></span> ESEGUI</button>
+    </div>
+    <div class="output-area">
+      <div class="output-label">output</div>
+      <div class="output-text"></div>
+    </div>
+  </div>
+
+  <!-- ESEMPIO 3: Funzioni -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><strong>Funzioni</strong> — FUN · FEND · RET</span>
+    </div>
+    <textarea class="code-area" rows="10" spellcheck="false">FUN doppio n
+  RET @n * 2
+FEND
+
+FUN saluta nome
+  TALK Benvenuto, @nome! Il doppio di 7 è @doppio(7).
+FEND
+
+saluta(Alice)
+saluta(Bob)
+TALK Doppio di 15: @doppio(15)</textarea>
+    <div class="card-toolbar">
+      <span class="toolbar-hint">modificabile ↑</span>
+      <button class="btn-run" onclick="runCard(this)"><span class="run-icon"></span> ESEGUI</button>
+    </div>
+    <div class="output-area">
+      <div class="output-label">output</div>
+      <div class="output-text"></div>
+    </div>
+  </div>
+
+  <!-- ESEMPIO 4: Liste e FOR -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><strong>Liste e cicli</strong> — FOR · TREND · ADD</span>
+    </div>
+    <textarea class="code-area" rows="9" spellcheck="false">frutti = [mela, banana, arancia, kiwi]
+ADD pera IN frutti
+
+TALK Frutta disponibile:
+FOR frutto IN frutti
+  TALK  → @frutto
+TREND
+
+TALK Totale: @frutti#count elementi</textarea>
+    <div class="card-toolbar">
+      <span class="toolbar-hint">modificabile ↑</span>
+      <button class="btn-run" onclick="runCard(this)"><span class="run-icon"></span> ESEGUI</button>
+    </div>
+    <div class="output-area">
+      <div class="output-label">output</div>
+      <div class="output-text"></div>
+    </div>
+  </div>
+
+  <!-- ESEMPIO 5: TRY / SHOW / YET -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><strong>Gestione errori</strong> — TRY · SHOW · YET</span>
+    </div>
+    <textarea class="code-area" rows="7" spellcheck="false">TRY
+  TALK Tento di dividere 10 per 0...
+  risultato = 10 / 0
+  TALK Risultato: @risultato
+SHOW
+  TALK Errore catturato: @ERRMSG
+YET
+  TALK Esecuzione completata comunque.
+YEND</textarea>
+    <div class="card-toolbar">
+      <span class="toolbar-hint">modificabile ↑</span>
+      <button class="btn-run" onclick="runCard(this)"><span class="run-icon"></span> ESEGUI</button>
+    </div>
+    <div class="output-area">
+      <div class="output-label">output</div>
+      <div class="output-text"></div>
+    </div>
+  </div>
+
+  <!-- ── LINE-DOM SECTION ── -->
+  <span class="section-label" style="margin-top:4rem">02 — LINE-DOM · integrazione HTML</span>
+
+  <div class="dom-card dom-section">
+    <div class="dom-split">
+
+      <!-- SORGENTE ANNOTATO -->
+      <div class="dom-pane">
+        <span class="pane-label">sorgente HTML + LINE</span>
+        <pre class="dom-code"><span class="cmt">&lt;!-- Input HTML --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">id</span>=<span class="str">"nome"</span> <span class="attr">placeholder</span>=<span class="str">"Il tuo nome"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">id</span>=<span class="str">"btn-saluta"</span><span class="tag">&gt;</span>Saluta<span class="tag">&lt;/button&gt;</span>
+
+<span class="cmt">&lt;!-- Output HTML --&gt;</span>
+<span class="tag">&lt;p</span> <span class="attr">id</span>=<span class="str">"output"</span><span class="tag">&gt;&lt;/p&gt;</span>
+
+<span class="cmt">&lt;!-- Codice LINE --&gt;</span>
+<span class="tag">&lt;script</span> <span class="attr">type</span>=<span class="str">"text/line"</span>
+        <span class="attr">trigger</span>=<span class="str">"btn-saluta"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;output&gt;</span>
+    <span class="kw">TALK</span> Ciao, <span class="attr">@nome</span>!
+    <span class="kw">TALK</span> Bentornato su LINE 3.0.
+  <span class="tag">&lt;/output&gt;</span>
+<span class="tag">&lt;/script&gt;</span>
+
+<span class="cmt">&lt;!-- Contatore con STAY --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">id</span>=<span class="str">"btn-inc"</span><span class="tag">&gt;</span>+<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;span</span> <span class="attr">id</span>=<span class="str">"count"</span><span class="tag">&gt;</span>0<span class="tag">&lt;/span&gt;</span>
+
+<span class="tag">&lt;script</span> <span class="attr">type</span>=<span class="str">"text/line"</span>
+        <span class="attr">trigger</span>=<span class="str">"btn-inc"</span>
+        <span class="attr">counter</span>=<span class="str">"count"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;count&gt;</span>
+    <span class="kw">TALK</span> <span class="attr">@__N__</span>
+  <span class="tag">&lt;/count&gt;</span>
+<span class="tag">&lt;/script&gt;</span></pre>
+      </div>
+
+      <!-- PREVIEW LIVE -->
+      <div class="dom-pane">
+        <span class="pane-label">preview live</span>
+        <div class="live-preview">
+
+          <!-- Demo saluto -->
+          <div>
+            <div class="preview-label">saluto personalizzato</div>
+            <div class="preview-name-row">
+              <input class="preview-input" id="nome" type="text" placeholder="Il tuo nome">
+              <button class="btn-dom" id="btn-saluta">Saluta</button>
+            </div>
+            <div class="preview-output empty" id="output">in attesa...</div>
+          </div>
+
+          <!-- Demo contatore -->
+          <div>
+            <div class="preview-label">contatore LINE-DOM</div>
+            <div class="counter-row">
+              <button class="btn-counter" id="btn-inc">＋</button>
+              <div class="counter-display" id="count">0</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="dom-toolbar">
+      <div class="dom-toolbar-dot"></div>
+      <span>line-dom.js attivo · trigger su click · iniezione @nome automatica</span>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── LINE-DOM SCRIPTS ── -->
+<script type="text/line" trigger="btn-saluta">
+  <output replace>
+    TALK Ciao, @nome!
+    TALK Benvenuto su LINE 3.0.
+  </output>
+</script>
+
+<script type="text/line" trigger="btn-inc" counter="count">
+  <count>TALK @__N__</count>
+</script>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <a href="https://qc-17.github.io/LINE" target="_blank">qc-17.github.io/LINE</a>
+  &nbsp;·&nbsp; LINE 3.0 · GPL 3.0
+</footer>
+
+<script>
+/* ── Runner per le card ── */
+async function runCard(btn) {
+  const card   = btn.closest('.card');
+  const src    = card.querySelector('.code-area').value;
+  const area   = card.querySelector('.output-area');
+  const text   = card.querySelector('.output-text');
+
+  btn.classList.add('running');
+  btn.querySelector('.run-icon').style.display = 'none';
+  btn.childNodes[btn.childNodes.length - 1].textContent = ' ...';
+
+  area.classList.remove('visible', 'ok', 'err');
+  text.textContent = '';
+
+  const lines = [];
+  let hasErr  = false;
+
+  try {
+    await LINE_run(src, {
+      output: s => { lines.push(s); },
+      input:  () => Promise.resolve('')
+    });
+  } catch(e) {
+    lines.push('Errore: ' + e.message);
+    hasErr = true;
+  }
+
+  const out = lines.join('\n');
+  hasErr = hasErr || out.toLowerCase().startsWith('errore');
+
+  text.textContent  = out || '(nessun output)';
+  area.classList.add('visible', hasErr ? 'err' : 'ok');
+
+  btn.classList.remove('running');
+  btn.querySelector('.run-icon').style.display = '';
+  btn.childNodes[btn.childNodes.length - 1].textContent = ' ESEGUI';
+
+  // rimuovi stile "empty" dall'output LINE-DOM se presente
+  document.querySelectorAll('.preview-output').forEach(el => el.classList.remove('empty'));
+}
+
+/* rimuovi stile empty al click dei bottoni dom */
+document.getElementById('btn-saluta').addEventListener('click', () => {
+  setTimeout(() => {
+    const o = document.getElementById('output');
+    if(o) o.classList.remove('empty');
+  }, 100);
+});
+</script>
+
+</body>
+</html>
