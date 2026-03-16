@@ -12,17 +12,16 @@
 
 <style>
   :root {
-    --bg:      #0c0d0f;
-    --surf:    #13151a;
-    --surf2:   #181b22;
-    --border:  rgba(255,255,255,.07);
-    --ink:     #e6e1d6;
-    --dim:     rgba(230,225,214,.38);
-    --acc:     #b6f35a;
-    --acc2:    #5af3c6;
-    --red:     #f3655a;
-    --mono:    'Syne Mono', monospace;
-    --sans:    'Syne', sans-serif;
+    --bg:     #0c0d0f;
+    --surf:   #13151a;
+    --border: rgba(255,255,255,.07);
+    --ink:    #e6e1d6;
+    --dim:    rgba(230,225,214,.38);
+    --acc:    #b6f35a;
+    --acc2:   #5af3c6;
+    --red:    #f3655a;
+    --mono:   'Syne Mono', monospace;
+    --sans:   'Syne', sans-serif;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,7 +34,6 @@
     min-height: 100vh;
   }
 
-  /* ── HEADER ── */
   .topbar {
     border-bottom: 1px solid var(--border);
     padding: .9rem 2rem;
@@ -44,39 +42,30 @@
     justify-content: space-between;
     gap: 1rem;
   }
-
   .topbar-brand {
     font-family: var(--mono);
     font-size: .9rem;
     font-weight: 700;
-    letter-spacing: .05em;
     color: var(--ink);
     text-decoration: none;
   }
-
   .topbar-brand span { color: var(--acc); }
-
   .topbar-links { display: flex; gap: 1.5rem; }
-
   .topbar-links a {
     font-family: var(--mono);
     font-size: .75rem;
     color: var(--dim);
     text-decoration: none;
-    letter-spacing: .05em;
     transition: color .15s;
   }
-
   .topbar-links a:hover { color: var(--ink); }
 
-  /* ── HERO ── */
   .hero {
     padding: 4rem 2rem 3rem;
     max-width: 860px;
     margin: 0 auto;
     border-bottom: 1px solid var(--border);
   }
-
   .hero-eyebrow {
     font-family: var(--mono);
     font-size: 10px;
@@ -85,7 +74,6 @@
     text-transform: uppercase;
     margin-bottom: .8rem;
   }
-
   .hero h1 {
     font-size: clamp(2.2rem, 6vw, 3.8rem);
     font-weight: 800;
@@ -93,21 +81,14 @@
     line-height: 1;
     margin-bottom: .8rem;
   }
-
-  .hero h1 em {
-    font-style: normal;
-    color: var(--acc);
-  }
-
+  .hero h1 em { font-style: normal; color: var(--acc); }
   .hero p {
     font-family: var(--mono);
     font-size: .8rem;
     color: var(--dim);
-    max-width: 500px;
     line-height: 1.7;
   }
 
-  /* ── MAIN ── */
   main {
     max-width: 860px;
     margin: 0 auto;
@@ -117,7 +98,6 @@
     gap: 3rem;
   }
 
-  /* ── SECTION ── */
   .sec-header {
     display: flex;
     align-items: baseline;
@@ -126,7 +106,6 @@
     border-bottom: 1px solid var(--border);
     padding-bottom: .9rem;
   }
-
   .sec-num {
     font-family: var(--mono);
     font-size: 10px;
@@ -135,13 +114,7 @@
     text-transform: uppercase;
     flex-shrink: 0;
   }
-
-  .sec-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: -.02em;
-  }
-
+  .sec-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -.02em; }
   .sec-sub {
     font-family: var(--mono);
     font-size: .72rem;
@@ -149,13 +122,8 @@
     margin-left: auto;
   }
 
-  /* ── CARDS GRID ── */
-  .cards {
-    display: grid;
-    gap: 2px;
-  }
+  .cards { display: grid; gap: 2px; }
 
-  /* ── CARD ── */
   .card {
     background: var(--surf);
     border: 1px solid var(--border);
@@ -163,7 +131,6 @@
     overflow: hidden;
     transition: border-color .2s;
   }
-
   .card:hover { border-color: rgba(255,255,255,.12); }
 
   .card-top {
@@ -173,19 +140,9 @@
     padding: .75rem 1.1rem;
     border-bottom: 1px solid var(--border);
   }
+  .card-name { font-family: var(--mono); font-size: .73rem; color: var(--dim); }
+  .card-name strong { color: var(--ink); font-weight: 700; }
 
-  .card-name {
-    font-family: var(--mono);
-    font-size: .73rem;
-    color: var(--dim);
-  }
-
-  .card-name strong {
-    color: var(--ink);
-    font-weight: 700;
-  }
-
-  /* ── TEXTAREA ── */
   .editor {
     width: 100%;
     background: transparent;
@@ -198,12 +155,9 @@
     line-height: 1.8;
     padding: 1rem 1.2rem;
     caret-color: var(--acc);
-    min-height: 90px;
   }
-
   .editor::selection { background: rgba(182,243,90,.12); }
 
-  /* ── FOOTER CARD ── */
   .card-foot {
     display: flex;
     align-items: center;
@@ -212,7 +166,6 @@
     border-top: 1px solid var(--border);
     gap: 1rem;
   }
-
   .foot-hint {
     font-family: var(--mono);
     font-size: 10px;
@@ -220,7 +173,6 @@
     letter-spacing: .05em;
   }
 
-  /* ── RUN BUTTON ── */
   .btn-run {
     display: flex;
     align-items: center;
@@ -238,22 +190,12 @@
     transition: background .12s, opacity .12s;
     flex-shrink: 0;
   }
-
   .btn-run:hover { background: #ceff6a; }
   .btn-run:active { opacity: .8; }
-  .btn-run.busy { opacity: .5; pointer-events: none; }
+  .btn-run.busy { opacity: .45; pointer-events: none; }
 
-  .btn-run svg { flex-shrink: 0; }
-
-  /* ── OUTPUT ── */
-  .card-out {
-    display: none;
-    border-top: 1px solid var(--border);
-    padding: .9rem 1.2rem;
-  }
-
+  .card-out { display: none; border-top: 1px solid var(--border); padding: .9rem 1.2rem; }
   .card-out.show { display: block; }
-
   .out-label {
     font-family: var(--mono);
     font-size: 9px;
@@ -262,7 +204,6 @@
     color: rgba(255,255,255,.22);
     margin-bottom: .5rem;
   }
-
   .out-text {
     font-family: var(--mono);
     font-size: .8rem;
@@ -270,40 +211,23 @@
     white-space: pre-wrap;
     word-break: break-word;
   }
-
   .out-text.ok  { color: #a8e87a; }
   .out-text.err { color: var(--red); }
 
-  /* ── LINE-DOM CARD ── */
+  /* ── LINE-DOM ── */
   .dom-card {
     background: var(--surf);
     border: 1px solid var(--border);
     border-radius: 6px;
     overflow: hidden;
   }
+  .dom-split { display: grid; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 620px) { .dom-split { grid-template-columns: 1fr; } }
 
-  .dom-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
+  .dom-pane { padding: 1.2rem 1.3rem; }
+  .dom-pane + .dom-pane { border-left: 1px solid var(--border); }
   @media (max-width: 620px) {
-    .dom-split { grid-template-columns: 1fr; }
-  }
-
-  .dom-pane {
-    padding: 1.2rem 1.3rem;
-  }
-
-  .dom-pane + .dom-pane {
-    border-left: 1px solid var(--border);
-  }
-
-  @media (max-width: 620px) {
-    .dom-pane + .dom-pane {
-      border-left: none;
-      border-top: 1px solid var(--border);
-    }
+    .dom-pane + .dom-pane { border-left: none; border-top: 1px solid var(--border); }
   }
 
   .pane-label {
@@ -316,7 +240,6 @@
     display: block;
   }
 
-  /* Highlighted code block */
   .dom-code {
     font-family: var(--mono);
     font-size: .75rem;
@@ -325,17 +248,14 @@
     overflow-x: auto;
     color: #8ab4cc;
   }
-
   .dom-code .tag  { color: #f5c75a; }
   .dom-code .attr { color: #f5905a; }
   .dom-code .kw   { color: #a8e87a; }
-  .dom-code .str  { color: #8ab4cc; }
   .dom-code .var  { color: var(--acc2); }
   .dom-code .cmt  { color: rgba(255,255,255,.22); font-style: italic; }
+  .dom-code .str  { color: #8ab4cc; }
 
-  /* DOM live preview */
   .live { display: flex; flex-direction: column; gap: 1.6rem; }
-
   .live-group-label {
     font-family: var(--mono);
     font-size: 9px;
@@ -345,14 +265,7 @@
     margin-bottom: .6rem;
     opacity: .7;
   }
-
-  .input-row {
-    display: flex;
-    gap: .5rem;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-bottom: .7rem;
-  }
+  .input-row { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin-bottom: .7rem; }
 
   .line-input {
     background: var(--bg);
@@ -366,7 +279,6 @@
     width: 150px;
     transition: border-color .15s;
   }
-
   .line-input:focus { border-color: var(--acc2); }
 
   .btn-dom {
@@ -379,9 +291,7 @@
     font-size: .72rem;
     cursor: pointer;
     transition: background .12s;
-    letter-spacing: .05em;
   }
-
   .btn-dom:hover { background: rgba(90,243,198,.08); }
 
   .live-out {
@@ -393,18 +303,9 @@
     border-top: 1px solid var(--border);
     padding-top: .6rem;
   }
+  .live-out.empty { color: rgba(255,255,255,.18); font-style: italic; }
 
-  .live-out.empty {
-    color: rgba(255,255,255,.18);
-    font-style: italic;
-  }
-
-  .counter-row {
-    display: flex;
-    align-items: center;
-    gap: .7rem;
-  }
-
+  .counter-row { display: flex; align-items: center; gap: .7rem; }
   .btn-inc {
     background: transparent;
     border: 1px solid var(--border);
@@ -417,9 +318,7 @@
     transition: border-color .15s, color .15s;
     display: flex; align-items: center; justify-content: center;
   }
-
   .btn-inc:hover { border-color: var(--acc); color: var(--acc); }
-
   .counter-val {
     font-family: var(--mono);
     font-size: 2rem;
@@ -429,7 +328,6 @@
     letter-spacing: -.05em;
   }
 
-  /* ── DOM STATUS BAR ── */
   .dom-bar {
     border-top: 1px solid var(--border);
     padding: .5rem 1.2rem;
@@ -437,9 +335,7 @@
     align-items: center;
     gap: .5rem;
   }
-
   .dom-bar-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--acc2); opacity: .5; }
-
   .dom-bar span {
     font-family: var(--mono);
     font-size: 9px;
@@ -447,7 +343,6 @@
     letter-spacing: .05em;
   }
 
-  /* ── FOOTER ── */
   footer {
     text-align: center;
     padding: 2rem;
@@ -457,14 +352,12 @@
     color: rgba(255,255,255,.2);
     letter-spacing: .08em;
   }
-
   footer a { color: rgba(255,255,255,.3); text-decoration: none; }
   footer a:hover { color: var(--acc); }
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
 <nav class="topbar">
   <a class="topbar-brand" href="https://qc-17.github.io/LINE">LINE <span>3.0</span></a>
   <div class="topbar-links">
@@ -474,57 +367,51 @@
   </div>
 </nav>
 
-<!-- HERO -->
 <div class="hero">
   <p class="hero-eyebrow">Playground interattivo</p>
   <h1>Esplora <em>LINE</em><br>nel browser.</h1>
   <p>Ogni esempio è modificabile ed eseguito dall'interprete reale — zero simulazioni.</p>
 </div>
 
-<!-- MAIN -->
 <main>
 
-  <!-- ── SEZIONE 1: ESEMPI LINE ── -->
+  <!-- ── SEZIONE 1 ── -->
   <section>
     <div class="sec-header">
       <span class="sec-num">01</span>
       <span class="sec-title">Esempi di codice LINE</span>
       <span class="sec-sub">modificabili · eseguiti live</span>
     </div>
-
     <div class="cards">
 
-      <!-- 1. Variabili e TALK -->
+      <!-- 1. Variabili -->
       <div class="card">
         <div class="card-top">
-          <span class="card-name"><strong>Variabili e output</strong> &nbsp;·&nbsp; TALK · @var</span>
+          <span class="card-name"><strong>Variabili e output</strong> &nbsp;·&nbsp; #var numerico · TALK · @var</span>
         </div>
         <textarea class="editor" rows="5" spellcheck="false">nome = Marco
-eta = 25
-anno = 2025 - @eta
+#eta = 25
+#anno = 2025 - @eta
 TALK Ciao, @nome!
 TALK Hai @eta anni — nato nel @anno.</textarea>
         <div class="card-foot">
-          <span class="foot-hint">testo modificabile ↑</span>
+          <span class="foot-hint">modificabile ↑</span>
           <button class="btn-run" onclick="run(this)">
             <svg width="8" height="9" viewBox="0 0 8 9"><polygon points="0,0 8,4.5 0,9" fill="currentColor"/></svg>
             ESEGUI
           </button>
         </div>
-        <div class="card-out">
-          <div class="out-label">output</div>
-          <div class="out-text"></div>
-        </div>
+        <div class="card-out"><div class="out-label">output</div><div class="out-text"></div></div>
       </div>
 
-      <!-- 2. GO condizioni -->
+      <!-- 2. Condizioni GO -->
       <div class="card">
         <div class="card-top">
           <span class="card-name"><strong>Condizioni</strong> &nbsp;·&nbsp; GO inline · &amp; · &amp;&amp;</span>
         </div>
-        <textarea class="editor" rows="5" spellcheck="false">punteggio = 78
+        <textarea class="editor" rows="5" spellcheck="false">#punteggio = 78
 
-GO @{punteggio >= 90} @{TALK Voto A — Eccellente!} & @{punteggio >= 70} @{TALK Voto B — Buono.} && @{TALK Voto C — Da migliorare.}
+GO @{@punteggio >= 90} @{TALK Voto A — Eccellente!} & @{@punteggio >= 70} @{TALK Voto B — Buono.} && @{TALK Voto C — Da migliorare.}
 
 TALK Punteggio: @punteggio</textarea>
         <div class="card-foot">
@@ -534,98 +421,91 @@ TALK Punteggio: @punteggio</textarea>
             ESEGUI
           </button>
         </div>
-        <div class="card-out">
-          <div class="out-label">output</div>
-          <div class="out-text"></div>
-        </div>
+        <div class="card-out"><div class="out-label">output</div><div class="out-text"></div></div>
       </div>
 
-      <!-- 3. FUN -->
+      <!-- 3. Funzioni -->
       <div class="card">
         <div class="card-top">
-          <span class="card-name"><strong>Funzioni</strong> &nbsp;·&nbsp; FUN · FEND · return</span>
+          <span class="card-name"><strong>Funzioni</strong> &nbsp;·&nbsp; FUN · FEND · return · salva prima in variabile</span>
         </div>
-        <textarea class="editor" rows="9" spellcheck="false">FUN doppio(n)
-  return @n * 2
+        <textarea class="editor" rows="11" spellcheck="false">FUN doppio(n)
+  #risultato = @n * 2
+  return @risultato
 FEND
 
 FUN saluta(nome)
-  TALK Ciao, @nome! Il doppio di 7 è @doppio(7).
+  #d = doppio(7)
+  TALK Ciao, @nome! Il doppio di 7 è @d.
 FEND
 
 saluta(Alice)
 saluta(Bob)
-TALK Doppio di 15: @doppio(15)</textarea>
+#d15 = doppio(15)
+TALK Doppio di 15: @d15</textarea>
         <div class="card-foot">
-          <span class="foot-hint">testo modificabile ↑</span>
+          <span class="foot-hint">modificabile ↑</span>
           <button class="btn-run" onclick="run(this)">
             <svg width="8" height="9" viewBox="0 0 8 9"><polygon points="0,0 8,4.5 0,9" fill="currentColor"/></svg>
             ESEGUI
           </button>
         </div>
-        <div class="card-out">
-          <div class="out-label">output</div>
-          <div class="out-text"></div>
-        </div>
+        <div class="card-out"><div class="out-label">output</div><div class="out-text"></div></div>
       </div>
 
       <!-- 4. Liste e FOR -->
       <div class="card">
         <div class="card-top">
-          <span class="card-name"><strong>Liste e cicli</strong> &nbsp;·&nbsp; [;] · FOR · THEN · ONITEM</span>
+          <span class="card-name"><strong>Liste e cicli</strong> &nbsp;·&nbsp; [;] · ADD · FOR · THEN · ONITEM</span>
         </div>
-        <textarea class="editor" rows="9" spellcheck="false">frutti = [mela;banana;arancia;kiwi]
+        <textarea class="editor" rows="10" spellcheck="false">frutti = [mela;banana;arancia;kiwi]
 ADD frutti AT 4 = pera
 
-THEN stampa_frutto
-  TALK  → @ONITEM (@ONINDEX)
+THEN stampa
+  TALK  → @ONITEM (indice @ONINDEX)
 THEND
 
 TALK Frutta disponibile:
-FOR @frutti #[0;-1;1] = stampa_frutto
-TALK Totale: @list_len(frutti) elementi</textarea>
+FOR @frutti #[0;-1;1] = stampa
+#n = list_len(frutti)
+TALK Totale: @n elementi</textarea>
         <div class="card-foot">
-          <span class="foot-hint">testo modificabile ↑</span>
+          <span class="foot-hint">modificabile ↑</span>
           <button class="btn-run" onclick="run(this)">
             <svg width="8" height="9" viewBox="0 0 8 9"><polygon points="0,0 8,4.5 0,9" fill="currentColor"/></svg>
             ESEGUI
           </button>
         </div>
-        <div class="card-out">
-          <div class="out-label">output</div>
-          <div class="out-text"></div>
-        </div>
+        <div class="card-out"><div class="out-label">output</div><div class="out-text"></div></div>
       </div>
 
-      <!-- 5. TRY / SHOW / YET -->
+      <!-- 5. TRY -->
       <div class="card">
         <div class="card-top">
-          <span class="card-name"><strong>Gestione errori</strong> &nbsp;·&nbsp; TRY · SHOW · SEND · YET · YEND</span>
+          <span class="card-name"><strong>Gestione errori</strong> &nbsp;·&nbsp; TRY · TREND · SHOW · SEND · YET · YEND</span>
         </div>
-        <textarea class="editor" rows="10" spellcheck="false">TRY blocco1
+        <textarea class="editor" rows="12" spellcheck="false">TRY blocco1
   TALK Tento di accedere a un indice fuori range...
   lista = [a;b;c]
   x = lista[#99]
   TALK Mai eseguito: @x
+TREND
 SHOW blocco1 @e
   TALK Errore catturato!
   TALK Codice: @ERRCODE
   TALK Messaggio: @ERRMSG
 SEND
 YET blocco1
-  TALK Esecuzione completata comunque.
+  TALK Eseguito comunque, con o senza errore.
 YEND</textarea>
         <div class="card-foot">
-          <span class="foot-hint">testo modificabile ↑</span>
+          <span class="foot-hint">modificabile ↑</span>
           <button class="btn-run" onclick="run(this)">
             <svg width="8" height="9" viewBox="0 0 8 9"><polygon points="0,0 8,4.5 0,9" fill="currentColor"/></svg>
             ESEGUI
           </button>
         </div>
-        <div class="card-out">
-          <div class="out-label">output</div>
-          <div class="out-text"></div>
-        </div>
+        <div class="card-out"><div class="out-label">output</div><div class="out-text"></div></div>
       </div>
 
     </div>
@@ -636,48 +516,39 @@ YEND</textarea>
     <div class="sec-header">
       <span class="sec-num">02</span>
       <span class="sec-title">LINE-DOM · integrazione HTML</span>
-      <span class="sec-sub">trigger · autorun · counter</span>
+      <span class="sec-sub">trigger · autorun · counter · 1 TALK per tag</span>
     </div>
 
     <div class="dom-card">
       <div class="dom-split">
 
-        <!-- Codice annotato -->
         <div class="dom-pane">
           <span class="pane-label">sorgente HTML + LINE</span>
-          <pre class="dom-code"><span class="cmt">&lt;!-- 1. Saluto personalizzato --&gt;</span>
-<span class="tag">&lt;input</span> <span class="attr">id</span>=<span class="str">"nome"</span>
-       <span class="attr">placeholder</span>=<span class="str">"Il tuo nome"</span><span class="tag">&gt;</span>
+          <pre class="dom-code"><span class="cmt">&lt;!-- 1 TALK per tag, @nome iniettato in automatico --&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">id</span>=<span class="str">"nome"</span> <span class="attr">placeholder</span>=<span class="str">"Il tuo nome"</span><span class="tag">&gt;</span>
 <span class="tag">&lt;button</span> <span class="attr">id</span>=<span class="str">"btn-saluta"</span><span class="tag">&gt;</span>Saluta<span class="tag">&lt;/button&gt;</span>
 <span class="tag">&lt;p</span> <span class="attr">id</span>=<span class="str">"out-saluto"</span><span class="tag">&gt;&lt;/p&gt;</span>
 
 <span class="tag">&lt;script</span> <span class="attr">type</span>=<span class="str">"text/line"</span>
         <span class="attr">trigger</span>=<span class="str">"btn-saluta"</span><span class="tag">&gt;</span>
-  <span class="tag">&lt;out-saluto&gt;</span>
-    <span class="kw">TALK</span> Ciao, <span class="var">@nome</span>!
-    <span class="kw">TALK</span> Benvenuto su LINE 3.0.
-  <span class="tag">&lt;/out-saluto&gt;</span>
+  <span class="tag">&lt;out-saluto&gt;</span><span class="kw">TALK</span> Ciao, <span class="var">@nome</span>! Benvenuto su LINE 3.0.<span class="tag">&lt;/out-saluto&gt;</span>
 <span class="tag">&lt;/script&gt;</span>
 
-<span class="cmt">&lt;!-- 2. Contatore con counter= --&gt;</span>
+<span class="cmt">&lt;!-- Contatore con counter= --&gt;</span>
 <span class="tag">&lt;button</span> <span class="attr">id</span>=<span class="str">"btn-inc"</span><span class="tag">&gt;</span>+<span class="tag">&lt;/button&gt;</span>
 <span class="tag">&lt;span</span> <span class="attr">id</span>=<span class="str">"count-display"</span><span class="tag">&gt;</span>0<span class="tag">&lt;/span&gt;</span>
 
 <span class="tag">&lt;script</span> <span class="attr">type</span>=<span class="str">"text/line"</span>
         <span class="attr">trigger</span>=<span class="str">"btn-inc"</span>
         <span class="attr">counter</span>=<span class="str">"count-display"</span><span class="tag">&gt;</span>
-  <span class="tag">&lt;count-display&gt;</span>
-    <span class="kw">TALK</span> <span class="var">@__N__</span>
-  <span class="tag">&lt;/count-display&gt;</span>
+  <span class="tag">&lt;count-display&gt;</span><span class="kw">TALK</span> <span class="var">@__N__</span><span class="tag">&lt;/count-display&gt;</span>
 <span class="tag">&lt;/script&gt;</span></pre>
         </div>
 
-        <!-- Preview live -->
         <div class="dom-pane">
           <span class="pane-label">preview live</span>
           <div class="live">
 
-            <!-- Saluto -->
             <div>
               <div class="live-group-label">saluto personalizzato</div>
               <div class="input-row">
@@ -687,7 +558,6 @@ YEND</textarea>
               <div class="live-out empty" id="out-saluto">in attesa...</div>
             </div>
 
-            <!-- Contatore -->
             <div>
               <div class="live-group-label">contatore — trigger + counter</div>
               <div class="counter-row">
@@ -702,20 +572,16 @@ YEND</textarea>
 
       <div class="dom-bar">
         <div class="dom-bar-dot"></div>
-        <span>line-dom.js attivo · trigger su click · @nome iniettato automaticamente dall'input</span>
+        <span>line-dom.js attivo · 1 TALK per tag · @nome iniettato automaticamente dall'input</span>
       </div>
     </div>
-
   </section>
 
 </main>
 
-<!-- LINE-DOM scripts -->
+<!-- LINE-DOM scripts: 1 solo TALK per tag -->
 <script type="text/line" trigger="btn-saluta">
-  <out-saluto>
-    TALK Ciao, @nome!
-    TALK Benvenuto su LINE 3.0.
-  </out-saluto>
+  <out-saluto>TALK Ciao, @nome! Benvenuto su LINE 3.0.</out-saluto>
 </script>
 
 <script type="text/line" trigger="btn-inc" counter="count-display">
@@ -724,7 +590,7 @@ YEND</textarea>
 
 <footer>
   <a href="https://qc-17.github.io/LINE" target="_blank">qc-17.github.io/LINE</a>
-  &nbsp;·&nbsp; LINE 3.0 · GPL 3.0 · interprete reale, zero simulazioni
+  &nbsp;·&nbsp; LINE 3.0 · GPL 3.0 · interprete reale
 </footer>
 
 <script>
@@ -750,14 +616,10 @@ async function run(btn) {
   }
 
   const result = lines.join('\n') || '(nessun output)';
-  const isErr  = result.toLowerCase().startsWith('errore') || result.toLowerCase().includes('errore [');
+  const isErr  = /errore/i.test(result);
   txt.textContent = result;
   txt.classList.add(isErr ? 'err' : 'ok');
-
   btn.classList.remove('busy');
-
-  // rimuovi stile empty dal live-out LINE-DOM se presente
-  document.querySelectorAll('.live-out').forEach(el => el.classList.remove('empty'));
 }
 
 document.getElementById('btn-saluta').addEventListener('click', () => {
