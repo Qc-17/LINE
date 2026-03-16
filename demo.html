@@ -584,8 +584,12 @@ YEND</textarea>
   <out-saluto>TALK Ciao, @nome! Benvenuto su LINE 3.0.</out-saluto>
 </script>
 
-<script type="text/line" trigger="btn-inc" counter="count-display">
-  <count-display>TALK @__N__</count-display>
+<script type="text/line" autorun>
+  #var = 0
+  THEN:btn-inc
+    #var += 1
+  THEND
+  <count-display>TALK @var</count-display>
 </script>
 
 <footer>
