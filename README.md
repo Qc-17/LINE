@@ -4,8 +4,8 @@
 
 **Language with Intuitive and Natural Expression**
 
-*Linguaggio interpretato · sintassi italiana · eseguibile nel browser*  
-*Interpreted language · Italian syntax · runs in the browser*
+*Linguaggio interpretato · eseguibile nel browser*  
+*Interpreted language  · runs in the browser*
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
