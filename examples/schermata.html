@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Examples — LINE-DOM</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0f0e0c;
+  color: #e8e0d4;
+  font-family: 'Syne', sans-serif;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+header {
+  background: #1c1a17;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.logo-word {
+  font-family: 'Syne Mono', monospace;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .25em;
+  color: #fff;
+}
+.logo-word span { color: #e8854a; }
+.header-sep { width: 1px; height: 16px; background: rgba(255,255,255,.1); }
+.header-sub {
+  font-size: .6rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.25);
+  font-family: 'Syne Mono', monospace;
+}
+.header-badge {
+  margin-left: auto;
+  font-family: 'Syne Mono', monospace;
+  font-size: .5rem;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  padding: .3rem .75rem;
+}
+
+/* ── Hero ── */
+.hero {
+  padding: 4rem 2rem 3rem;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+  position: relative;
+}
+.hero-label {
+  font-family: 'Syne Mono', monospace;
+  font-size: .55rem;
+  letter-spacing: .5em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.2);
+  margin-bottom: 1.2rem;
+}
+.hero-title {
+  font-size: clamp(2.2rem, 7vw, 4rem);
+  font-weight: 800;
+  line-height: .95;
+  letter-spacing: -.03em;
+  margin-bottom: 1.2rem;
+}
+.hero-title em {
+  font-style: normal;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,.25);
+}
+.hero-desc {
+  font-size: .9rem;
+  color: rgba(255,255,255,.35);
+  max-width: 420px;
+  line-height: 1.65;
+}
+
+/* ── Griglia giochi ── */
+.games-grid {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 2rem 5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.game-card {
+  background: #0f0e0c;
+  padding: 1.8rem;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+  transition: background .15s;
+  position: relative;
+  overflow: hidden;
+}
+.game-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--c);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .2s ease;
+}
+.game-card:hover { background: #161410; }
+.game-card:hover::after { transform: scaleX(1); }
+
+.game-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  filter: grayscale(20%);
+}
+.game-num {
+  font-family: 'Syne Mono', monospace;
+  font-size: .48rem;
+  letter-spacing: .35em;
+  text-transform: uppercase;
+  color: var(--c);
+}
+.game-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -.01em;
+  line-height: 1.2;
+}
+.game-desc {
+  font-size: .78rem;
+  color: rgba(255,255,255,.35);
+  line-height: 1.55;
+  flex: 1;
+}
+.game-arrow {
+  font-family: 'Syne Mono', monospace;
+  font-size: .6rem;
+  color: rgba(255,255,255,.18);
+  letter-spacing: .1em;
+  transition: color .15s, transform .15s;
+  display: inline-block;
+}
+.game-card:hover .game-arrow {
+  color: var(--c);
+  transform: translateX(4px);
+}
+
+/* ── Footer ── */
+footer {
+  margin-top: auto;
+  background: #1c1a17;
+  border-top: 1px solid rgba(255,255,255,.05);
+  padding: 1.2rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.foot-note {
+  font-family: 'Syne Mono', monospace;
+  font-size: .5rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.15);
+}
+.foot-link {
+  font-family: 'Syne Mono', monospace;
+  font-size: .5rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.22);
+  text-decoration: none;
+  margin-left: auto;
+  transition: color .15s;
+}
+.foot-link:hover { color: rgba(255,255,255,.6); }
+
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo-word">LINE<span>3.0</span></span>
+  <div class="header-sep"></div>
+  <span class="header-sub">Examples</span>
+  <span class="header-badge">LINE-DOM · zero javascript</span>
+</header>
+
+<div class="hero">
+  <p class="hero-label">Esempi interattivi</p>
+  <h1 class="hero-title">Giochi<br><em>costruiti</em><br>con LINE-DOM</h1>
+  <p class="hero-desc">Cinque mini-giochi scritti interamente in LINE. Nessuna riga di JavaScript — tutta la logica è codice LINE eseguito da LINE-DOM direttamente nel browser.</p>
+</div>
+
+<div class="games-grid">
+
+  <a class="game-card" href="numero.html" style="--c: #3b82f6">
+    <div class="game-icon">🎯</div>
+    <div class="game-num">01 · Logica</div>
+    <div class="game-title">Indovina il Numero</div>
+    <div class="game-desc">Il computer pensa a un numero tra 1 e 100. Indovinalo nel minor numero di tentativi possibile.</div>
+    <span class="game-arrow">Gioca →</span>
+  </a>
+
+  <a class="game-card" href="rps.html" style="--c: #8b5cf6">
+    <div class="game-icon">✂️</div>
+    <div class="game-num">02 · Strategia</div>
+    <div class="game-title">Sasso Carta Forbice</div>
+    <div class="game-desc">Sfida il computer. La tua scelta contro quella casuale della macchina. Punteggio persistente tra le sessioni.</div>
+    <span class="game-arrow">Gioca →</span>
+  </a>
+
+  <a class="game-card" href="moneta.html" style="--c: #f59e0b">
+    <div class="game-icon">🪙</div>
+    <div class="game-num">03 · Fortuna</div>
+    <div class="game-title">Testa o Croce</div>
+    <div class="game-desc">Scommetti sul lato della moneta prima del lancio. Tieni traccia della tua streak di vincite consecutive.</div>
+    <span class="game-arrow">Gioca →</span>
+  </a>
+
+  <a class="game-card" href="tabelline.html" style="--c: #10b981">
+    <div class="game-icon">✖️</div>
+    <div class="game-num">04 · Matematica</div>
+    <div class="game-title">Tabelline</div>
+    <div class="game-desc">Dieci moltiplicazioni casuali. Rispondi velocemente e cerca di totalizzare il punteggio massimo.</div>
+    <span class="game-arrow">Gioca →</span>
+  </a>
+
+  <a class="game-card" href="parola.html" style="--c: #f43f5e">
+    <div class="game-icon">💬</div>
+    <div class="game-num">05 · Parole</div>
+    <div class="game-title">Indovina la Parola</div>
+    <div class="game-desc">Leggi l'indizio e scrivi la parola giusta. Hai tre vite — non sprecarle.</div>
+    <span class="game-arrow">Gioca →</span>
+  </a>
+
+</div>
+
+<footer>
+  <span class="foot-note">5 esempi · LINE 3.0 · Nessuna riga di JavaScript</span>
+  <a class="foot-link" href="https://qc-17.github.io/LINE" target="_blank">qc-17.github.io/LINE ↗</a>
+</footer>
+
+</body>
+</html>
