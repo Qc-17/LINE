@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShazamScore Â· Indice di Fama</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #08080f;
+      --surface: #0d0d1a;
+      --surface2: #111124;
+      --border: #1c1c38;
+      --border-bright: #2a2a55;
+      --gold: #d4a84b;
+      --gold-glow: rgba(212, 168, 75, 0.15);
+      --gold-dim: rgba(212, 168, 75, 0.08);
+      --blue: #4499cc;
+      --blue-glow: rgba(68, 153, 204, 0.15);
+      --text: #dde0f5;
+      --text-dim: #9090b5;
+      --muted: #5a5a80;
+      --green: #4cc98a;
+      --red: #c94466;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.5;
+      background-image:
+        linear-gradient(rgba(212, 168, 75, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212, 168, 75, 0.035) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    .container { max-width: 740px; margin: 0 auto; padding: 0 20px 80px; }
+
+    /* â”€â”€ HEADER â”€â”€ */
+    header {
+      padding: 32px 0 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .logo { display: flex; align-items: baseline; gap: 12px; }
+    .logo-mark {
+      font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--gold);
+    }
+    .logo-hex { opacity: 0.7; }
+    .logo-sub {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--muted); letter-spacing: 2px; text-transform: uppercase;
+    }
+    .header-pill {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold);
+      border: 1px solid var(--gold-glow); background: var(--gold-dim);
+      padding: 4px 12px; border-radius: 20px; letter-spacing: 1px;
+    }
+
+    /* â”€â”€ API SECTION â”€â”€ */
+    .api-section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; margin-bottom: 18px; overflow: hidden;
+    }
+    .api-header {
+      padding: 13px 18px; display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none; transition: background 0.2s;
+    }
+    .api-header:hover { background: var(--surface2); }
+    .api-title {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      color: var(--text-dim); display: flex; align-items: center; gap: 10px;
+    }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0;
+    }
+    .status-dot.on { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .api-chevron { color: var(--muted); transition: transform 0.2s; }
+    .api-chevron.open { transform: rotate(180deg); }
+    .api-body { padding: 0 18px 18px; display: none; }
+    .api-body.open { display: block; }
+    .api-note {
+      font-size: 12px; color: var(--text-dim); margin-bottom: 12px; line-height: 1.7;
+    }
+    .api-note a { color: var(--gold); text-decoration: none; }
+    .api-note a:hover { text-decoration: underline; }
+    .api-row { display: flex; gap: 10px; }
+
+    /* â”€â”€ INPUTS â”€â”€ */
+    .input-field {
+      font-family: 'JetBrains Mono', monospace; font-size: 13px;
+      background: var(--bg); border: 1px solid var(--border-bright);
+      color: var(--text); padding: 9px 14px; border-radius: 5px;
+      outline: none; width: 100%; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-field:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow); }
+    .input-field::placeholder { color: var(--muted); }
+
+    /* â”€â”€ BUTTONS â”€â”€ */
+    .btn {
+      font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
+      padding: 9px 18px; border: none; border-radius: 5px;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-gold { background: var(--gold); color: #08080f; }
+    .btn-gold:hover { background: #e8bb5a; box-shadow: 0 0 14px var(--gold-glow); }
+    .btn-ghost {
+      background: transparent; color: var(--text-dim);
+      border: 1px solid var(--border-bright);
+    }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* â”€â”€ SEARCH â”€â”€ */
+    .search-wrap { position: relative; margin-bottom: 18px; }
+    .search-icon {
+      position: absolute; left: 16px; top: 50%;
+      transform: translateY(-50%); color: var(--muted); pointer-events: none;
+    }
+    .search-field {
+      font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 600;
+      background: var(--surface); border: 1px solid var(--border-bright);
+      color: var(--text); padding: 15px 50px; border-radius: 8px;
+      outline: none; width: 100%; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-field:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow); }
+    .search-field::placeholder { color: var(--muted); font-weight: 400; font-size: 15px; }
+    .search-spinner {
+      position: absolute; right: 16px; top: 50%; transform: translateY(-50%); display: none;
+    }
+    .search-spinner.on { display: block; }
+    .spin {
+      width: 18px; height: 18px; border: 2px solid var(--border-bright);
+      border-top-color: var(--gold); border-radius: 50%;
+      animation: rotate 0.7s linear infinite;
+    }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+
+    /* â”€â”€ RESULTS â”€â”€ */
+    .results-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden; margin-bottom: 20px;
+    }
+    .result-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 18px; cursor: pointer;
+      border-bottom: 1px solid var(--border); transition: background 0.15s;
+    }
+    .result-row:last-child { border-bottom: none; }
+    .result-row:hover { background: var(--surface2); }
+    .result-row.active { background: var(--surface2); border-left: 3px solid var(--gold); }
+    .result-art {
+      width: 48px; height: 48px; border-radius: 5px;
+      object-fit: cover; background: var(--border); flex-shrink: 0;
+    }
+    .result-info { flex: 1; min-width: 0; }
+    .result-title {
+      font-weight: 700; font-size: 14px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .result-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    .result-badge {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--muted); border: 1px solid var(--border-bright);
+      padding: 2px 8px; border-radius: 2px; white-space: nowrap;
+    }
+    .result-arrow { color: var(--muted); font-size: 14px; }
+    .no-results { padding: 28px; text-align: center; color: var(--muted); font-size: 13px; }
+
+    /* â”€â”€ ERROR â”€â”€ */
+    .err-box {
+      background: rgba(201,68,102,0.1); border: 1px solid rgba(201,68,102,0.3);
+      border-radius: 6px; padding: 12px 16px; font-size: 13px; color: #f09;
+      margin-bottom: 16px; display: none;
+    }
+    .err-box.on { display: block; }
+
+    /* â”€â”€ ANALYSIS PANEL â”€â”€ */
+    .panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; display: none;
+    }
+    .panel.on { display: block; animation: rise 0.35s ease; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Song header */
+    .song-hd {
+      display: flex; align-items: center; gap: 18px;
+      padding: 22px 22px 20px;
+      background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .song-cover {
+      width: 76px; height: 76px; border-radius: 8px;
+      object-fit: cover; background: var(--border); flex-shrink: 0;
+    }
+    .song-info { flex: 1; min-width: 0; }
+    .song-title {
+      font-size: 21px; font-weight: 800; letter-spacing: -0.5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .song-artist { font-size: 14px; color: var(--text-dim); margin-top: 2px; }
+    .song-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .tag {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      padding: 2px 9px; border-radius: 3px; border: 1px solid; letter-spacing: 0.5px;
+    }
+    .tag-g { color: var(--gold); border-color: var(--gold-glow); background: var(--gold-dim); }
+    .tag-b { color: var(--blue); border-color: var(--blue-glow); background: rgba(68,153,204,0.06); }
+    .tag-d { color: var(--text-dim); border-color: var(--border-bright); background: transparent; }
+
+    /* Data strip */
+    .strip {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      border-bottom: 1px solid var(--border);
+    }
+    .strip-cell {
+      padding: 14px 22px; border-right: 1px solid var(--border);
+    }
+    .strip-cell:last-child { border-right: none; }
+    .cell-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;
+    }
+    .cell-val {
+      font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 600; color: var(--text);
+    }
+    .cell-val.g { color: var(--gold); }
+
+    /* Country row */
+    .country-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .country-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; white-space: nowrap;
+    }
+    .country-sel {
+      font-family: 'Syne', sans-serif; font-size: 13px;
+      background: var(--bg); border: 1px solid var(--border-bright);
+      color: var(--text); padding: 7px 12px; border-radius: 5px;
+      outline: none; cursor: pointer; flex: 1; min-width: 180px;
+    }
+    .country-sel:focus { border-color: var(--gold); }
+
+    /* Scores grid */
+    .scores-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--border);
+    }
+    .score-card {
+      padding: 28px 20px; display: flex; flex-direction: column;
+      align-items: center; gap: 10px; border-right: 1px solid var(--border);
+    }
+    .score-card:last-child { border-right: none; }
+    .score-head {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 2px;
+    }
+    .score-desc {
+      font-size: 12px; color: var(--text-dim); text-align: center;
+      max-width: 200px; line-height: 1.55; min-height: 36px;
+    }
+
+    /* Breakdown */
+    .bk-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 22px; cursor: pointer; transition: background 0.2s;
+    }
+    .bk-toggle:hover { background: var(--surface2); }
+    .bk-toggle-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px;
+    }
+    .bk-arrow { color: var(--muted); transition: transform 0.2s; font-size: 12px; }
+    .bk-toggle.open { border-bottom: 1px solid var(--border); }
+    .bk-toggle.open .bk-arrow { transform: rotate(180deg); }
+    .bk-body {
+      display: none; padding: 18px 22px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    }
+    .bk-body.open { display: block; }
+    .bk-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 0; border-bottom: 1px solid var(--border);
+    }
+    .bk-row:last-of-type { border-bottom: none; }
+    .bk-k { color: var(--muted); }
+    .bk-v { color: var(--text); }
+    .bk-v.g { color: var(--gold); }
+    .bk-v.b { color: var(--blue); }
+    .bk-section {
+      margin: 14px 0 6px;
+      font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px;
+    }
+    .progress-track {
+      height: 4px; background: var(--border-bright);
+      border-radius: 2px; margin: 4px 0 14px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 2px; transition: width 1.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .pf-g { background: var(--gold); }
+    .pf-b { background: var(--blue); }
+    .algo-note {
+      margin-top: 14px; font-size: 11px; color: var(--muted); line-height: 1.7;
+      border-top: 1px solid var(--border); padding-top: 12px;
+    }
+    .algo-note strong { color: var(--text-dim); }
+
+    /* â”€â”€ RESPONSIVE â”€â”€ */
+    @media (max-width: 500px) {
+      .scores-grid { grid-template-columns: 1fr; }
+      .score-card:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+      .strip { grid-template-columns: 1fr 1fr; }
+      .strip-cell:nth-child(3) { grid-column: 1/-1; border-right: none; border-top: 1px solid var(--border); }
+      .song-title { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">
+      <span class="logo-mark"><span class="logo-hex">â¬¡</span> ShazamScore</span>
+      <span class="logo-sub">Fame Index</span>
+    </div>
+    <span class="header-pill">v1.0 Â· BETA</span>
+  </header>
+
+  <!-- API KEY -->
+  <div class="api-section">
+    <div class="api-header" onclick="toggleApi()">
+      <div class="api-title">
+        <span class="status-dot" id="dot"></span>
+        <span>RapidAPI Key</span>
+        <span id="key-preview" style="color:var(--muted)">â€” non configurata</span>
+      </div>
+      <svg class="api-chevron" id="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+    <div class="api-body" id="api-body">
+      <p class="api-note">
+        Registrati su <a href="https://rapidapi.com/apidojo/api/shazam" target="_blank">RapidAPI â†’ Shazam API</a>
+        (piano free: 500 richieste/mese). Copia la chiave <code>X-RapidAPI-Key</code> e incollala qui.
+      </p>
+      <div class="api-row">
+        <input type="password" class="input-field" id="key-input"
+          placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+        <button class="btn btn-gold" onclick="saveKey()">Salva</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="err-box" id="err"></div>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" class="search-field" id="search"
+      placeholder="Cerca canzone o artista..."
+      oninput="onSearch()" autocomplete="off">
+    <div class="search-spinner" id="spinner"><div class="spin"></div></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results"></div>
+
+  <!-- ANALYSIS PANEL -->
+  <div class="panel" id="panel">
+
+    <div class="song-hd" id="song-hd"></div>
+    <div class="strip" id="strip"></div>
+
+    <div class="country-row">
+      <span class="country-label">Paese d'origine â†’</span>
+      <select class="country-sel" id="country-sel" onchange="recalc()">
+        <option value="">â€” seleziona paese â€”</option>
+      </select>
+      <button class="btn btn-ghost" onclick="recalc()" style="font-size:12px;padding:7px 14px">â†» Ricalcola</button>
+    </div>
+
+    <div class="scores-grid">
+      <div class="score-card">
+        <span class="score-head">Fama Mondiale</span>
+        <svg id="g-world" viewBox="0 0 180 180" width="160" height="160" style="overflow:visible"></svg>
+        <p class="score-desc" id="desc-world"></p>
+      </div>
+      <div class="score-card">
+        <span class="score-head">Fama nel Paese d'Origine</span>
+        <svg id="g-origin" viewBox="0 0 180 180" width="160" height="160" style="overflow:visible"></svg>
+        <p class="score-desc" id="desc-origin"></p>
+      </div>
+    </div>
+
+    <div>
+      <div class="bk-toggle" id="bk-toggle" onclick="toggleBk()">
+        <span class="bk-toggle-label">âš™ Dettagli Algoritmo</span>
+        <span class="bk-arrow" id="bk-arr">â–¼</span>
+      </div>
+      <div class="bk-body" id="bk-body"></div>
+    </div>
+
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ================================================================
+// PAESI â€” popolazione (M), internet penetration, emoji flag
+// ================================================================
+const COUNTRIES = [
+  {c:'AF',n:'Afghanistan',     p:40,   i:0.18, f:'ðŸ‡¦ðŸ‡«'},
+  {c:'AL',n:'Albania',         p:2.8,  i:0.73, f:'ðŸ‡¦ðŸ‡±'},
+  {c:'DZ',n:'Algeria',         p:45,   i:0.63, f:'ðŸ‡©ðŸ‡¿'},
+  {c:'AR',n:'Argentina',       p:45,   i:0.88, f:'ðŸ‡¦ðŸ‡·'},
+  {c:'AU',n:'Australia',       p:26,   i:0.96, f:'ðŸ‡¦ðŸ‡º'},
+  {c:'AT',n:'Austria',         p:9,    i:0.93, f:'ðŸ‡¦ðŸ‡¹'},
+  {c:'BE',n:'Belgio',          p:11,   i:0.93, f:'ðŸ‡§ðŸ‡ª'},
+  {c:'BR',n:'Brasile',         p:215,  i:0.81, f:'ðŸ‡§ðŸ‡·'},
+  {c:'CA',n:'Canada',          p:38,   i:0.97, f:'ðŸ‡¨ðŸ‡¦'},
+  {c:'CL',n:'Cile',            p:19,   i:0.92, f:'ðŸ‡¨ðŸ‡±'},
+  {c:'CN',n:'Cina',            p:1400, i:0.73, f:'ðŸ‡¨ðŸ‡³'},
+  {c:'CO',n:'Colombia',        p:51,   i:0.77, f:'ðŸ‡¨ðŸ‡´'},
+  {c:'HR',n:'Croazia',         p:3.9,  i:0.84, f:'ðŸ‡­ðŸ‡·'},
+  {c:'CZ',n:'Rep. Ceca',       p:10.8, i:0.88, f:'ðŸ‡¨ðŸ‡¿'},
+  {c:'DK',n:'Danimarca',       p:5.9,  i:0.99, f:'ðŸ‡©ðŸ‡°'},
+  {c:'EG',n:'Egitto',          p:104,  i:0.72, f:'ðŸ‡ªðŸ‡¬'},
+  {c:'FI',n:'Finlandia',       p:5.5,  i:0.96, f:'ðŸ‡«ðŸ‡®'},
+  {c:'FR',n:'Francia',         p:68,   i:0.92, f:'ðŸ‡«ðŸ‡·'},
+  {c:'DE',n:'Germania',        p:83,   i:0.93, f:'ðŸ‡©ðŸ‡ª'},
+  {c:'GH',n:'Ghana',           p:33,   i:0.53, f:'ðŸ‡¬ðŸ‡­'},
+  {c:'GR',n:'Grecia',          p:10.4, i:0.88, f:'ðŸ‡¬ðŸ‡·'},
+  {c:'HU',n:'Ungheria',        p:9.7,  i:0.89, f:'ðŸ‡­ðŸ‡º'},
+  {c:'IN',n:'India',           p:1400, i:0.46, f:'ðŸ‡®ðŸ‡³'},
+  {c:'ID',n:'Indonesia',       p:275,  i:0.73, f:'ðŸ‡®ðŸ‡©'},
+  {c:'IE',n:'Irlanda',         p:5,    i:0.95, f:'ðŸ‡®ðŸ‡ª'},
+  {c:'IL',n:'Israele',         p:9.3,  i:0.92, f:'ðŸ‡®ðŸ‡±'},
+  {c:'IT',n:'Italia',          p:60,   i:0.80, f:'ðŸ‡®ðŸ‡¹'},
+  {c:'JP',n:'Giappone',        p:125,  i:0.93, f:'ðŸ‡¯ðŸ‡µ'},
+  {c:'KE',n:'Kenya',           p:55,   i:0.42, f:'ðŸ‡°ðŸ‡ª'},
+  {c:'KR',n:'Corea del Sud',   p:51,   i:0.97, f:'ðŸ‡°ðŸ‡·'},
+  {c:'MX',n:'Messico',         p:127,  i:0.76, f:'ðŸ‡²ðŸ‡½'},
+  {c:'MA',n:'Marocco',         p:37,   i:0.88, f:'ðŸ‡²ðŸ‡¦'},
+  {c:'NL',n:'Paesi Bassi',     p:17.5, i:0.97, f:'ðŸ‡³ðŸ‡±'},
+  {c:'NZ',n:'Nuova Zelanda',   p:5,    i:0.93, f:'ðŸ‡³ðŸ‡¿'},
+  {c:'NG',n:'Nigeria',         p:218,  i:0.45, f:'ðŸ‡³ðŸ‡¬'},
+  {c:'NO',n:'Norvegia',        p:5.4,  i:0.99, f:'ðŸ‡³ðŸ‡´'},
+  {c:'PK',n:'Pakistan',        p:230,  i:0.48, f:'ðŸ‡µðŸ‡°'},
+  {c:'PE',n:'Peru',            p:33,   i:0.72, f:'ðŸ‡µðŸ‡ª'},
+  {c:'PH',n:'Filippine',       p:113,  i:0.74, f:'ðŸ‡µðŸ‡­'},
+  {c:'PL',n:'Polonia',         p:37,   i:0.87, f:'ðŸ‡µðŸ‡±'},
+  {c:'PT',n:'Portogallo',      p:10.3, i:0.84, f:'ðŸ‡µðŸ‡¹'},
+  {c:'RO',n:'Romania',         p:19,   i:0.80, f:'ðŸ‡·ðŸ‡´'},
+  {c:'RU',n:'Russia',          p:143,  i:0.88, f:'ðŸ‡·ðŸ‡º'},
+  {c:'SA',n:'Arabia Saudita',  p:35,   i:0.97, f:'ðŸ‡¸ðŸ‡¦'},
+  {c:'ZA',n:'Sudafrica',       p:60,   i:0.72, f:'ðŸ‡¿ðŸ‡¦'},
+  {c:'ES',n:'Spagna',          p:47,   i:0.94, f:'ðŸ‡ªðŸ‡¸'},
+  {c:'SE',n:'Svezia',          p:10.4, i:0.97, f:'ðŸ‡¸ðŸ‡ª'},
+  {c:'CH',n:'Svizzera',        p:8.7,  i:0.97, f:'ðŸ‡¨ðŸ‡­'},
+  {c:'TW',n:'Taiwan',          p:23,   i:0.94, f:'ðŸ‡¹ðŸ‡¼'},
+  {c:'TH',n:'Tailandia',       p:70,   i:0.77, f:'ðŸ‡¹ðŸ‡­'},
+  {c:'TR',n:'Turchia',         p:84,   i:0.88, f:'ðŸ‡¹ðŸ‡·'},
+  {c:'UA',n:'Ucraina',         p:44,   i:0.83, f:'ðŸ‡ºðŸ‡¦'},
+  {c:'AE',n:'Emirati Arabi',   p:9.9,  i:0.99, f:'ðŸ‡¦ðŸ‡ª'},
+  {c:'GB',n:'Regno Unito',     p:67,   i:0.96, f:'ðŸ‡¬ðŸ‡§'},
+  {c:'US',n:'Stati Uniti',     p:335,  i:0.95, f:'ðŸ‡ºðŸ‡¸'},
+  {c:'VN',n:'Vietnam',         p:98,   i:0.79, f:'ðŸ‡»ðŸ‡³'},
+];
+const CM = {}; COUNTRIES.forEach(c => CM[c.c] = c);
+
+// ================================================================
+// ALGORITMO â€” Modello storico Shazam
+//
+// Utenti attivi annuali Shazam (stima, milioni):
+//   2002: lancio UK come servizio telefonico â€” ~2M
+//   2008: lancio app iPhone â€” esplosione ~45M
+//   2012-2018: crescita accelerata, saturazione ~500M
+//   2018: acquisita da Apple, ~1 miliardo utenti totali registrati
+//   2024: stabile ~450M attivi/anno
+//
+// ERA FACTOR: normalizza gli shazam per opportunita' storica.
+//   Una canzone del 2010 ha avuto 14 anni con base utenti enorme.
+//   Una canzone del 1970 poteva essere shazamata solo per "scoperta catalogo"
+//   (radio, TV, film) â€” tasso di scoperta molto piu' basso.
+// ================================================================
+
+const ANNUAL_USERS = {
+  2002:2,  2003:4,   2004:6,   2005:9,   2006:14,
+  2007:22, 2008:45,  2009:90,  2010:160,
+  2011:230,2012:300, 2013:365, 2014:415,
+  2015:450,2016:475, 2017:500, 2018:505,
+  2019:505,2020:490, 2021:480, 2022:470,
+  2023:460,2024:450
+};
+const CUR = 2024;
+// Somma totale user-years 2002-2024
+const TOTAL_UY = Object.values(ANNUAL_USERS).reduce((a,b)=>a+b,0); // ~6447M
+
+/**
+ * Esposizione di una canzone: opportunita' totale ponderata di essere shazamata.
+ *
+ * Per canzoni post-2002: somma utenti * peso_recenza da anno uscita a oggi.
+ *   Le canzoni vengono shazamate di piu' nei primi 2 anni (lancio, promozione),
+ *   poi decadono come "catalogo" (peso minimo 0.2).
+ *
+ * Per canzoni pre-2002: non esisteva Shazam durante la vita attiva del brano.
+ *   Vengono scoperte solo incidentalmente (radio, TV, spot, film).
+ *   Tasso di scoperta catalogo = funzione esponenziale decrescente con l'eta'.
+ */
+function getExposure(year) {
+  if (year >= 2002) {
+    let exp = 0;
+    for (let y = year; y <= CUR; y++) {
+      const u = ANNUAL_USERS[y] || 450;
+      const age = y - year;
+      // Peso recenza: 1.0 al lancio, decade esponenzialmente, pavimento 0.2
+      const w = 0.2 + 0.8 * Math.exp(-0.35 * age);
+      exp += u * w;
+    }
+    return exp;
+  } else {
+    // Scoperta catalogo: tasso proporzionale all'eta' pre-Shazam
+    // Base: ~2.8% di tutti gli user-years per canzoni appena pre-Shazam
+    // Decade con l'eta' (canzoni degli anni '50 hanno quasi zero airplay oggi)
+    const ybs = 2002 - year; // anni prima di Shazam
+    const rate = 0.028 * Math.exp(-0.038 * ybs) + 0.003;
+    return TOTAL_UY * rate;
+  }
+}
+
+/**
+ * Era Factor: moltiplicatore per normalizzare gli shazam all'era.
+ *
+ * Riferimento = canzone uscita nel 2024 (1 anno, discovery attiva, ~450M utenti)
+ *
+ * Factor > 1 â†’ la canzone aveva MENO opportunita' â†’ stessi shazam = piu' impressionante
+ * Factor < 1 â†’ la canzone aveva PIU' opportunita' â†’ servono piu' shazam per impressionare
+ *
+ * Esempi attesi:
+ *   1950: ~10-12x   (era pre-digitale, quasi nessuno la shazama)
+ *   1970:  ~6x      (classic rock, rare scoperte casuali)
+ *   1990:  ~3x      (pre-Shazam ma piu' in circolazione)
+ *   2002:  ~1.7x    (appena entrati nell'era Shazam)
+ *   2010:  ~0.3x    (peak opportunity, 14 anni + grande userbase)
+ *   2018:  ~0.5x    (recente ma con base gia' ampia)
+ *   2024:  1.0x     (riferimento)
+ */
+function getEraFactor(year) {
+  const ref = getExposure(2024);
+  const exp = getExposure(year);
+  return Math.max(0.05, Math.min(20, ref / exp));
+}
+
+/**
+ * Base utenti Shazam stimata per paese (milioni).
+ *
+ * Modello: popolazione Ã— penetrazione_internet Ã— tasso_adozione_globale
+ * Tasso globale: ~1.2B utenti Shazam / ~5.5B utenti internet = 22%
+ */
+function getCountryBase(code) {
+  const c = CM[code];
+  if (!c) return 20; // default 20M
+  return c.p * c.i * 0.22;
+}
+
+/**
+ * Calcola i due punteggi.
+ *
+ * WORLD SCORE (0-1000):
+ *   75% volume shazam normalizzato per era (legge di Zipf â†’ compressione logaritmica)
+ *   25% diffusione geografica (radice quadrata per rendimenti decrescenti)
+ *
+ * ORIGIN SCORE (0-1000):
+ *   Misura la penetrazione relativa nel paese d'origine rispetto alla base utenti locale.
+ *   Un artista italiano con 2M shazam mondiali che saturano il mercato italiano
+ *   puo' avere un origin score altissimo nonostante un world score modesto.
+ *
+ *   60% volume shazam normalizzato
+ *   40% penetrazione nazionale (rapporto shazam/base-utenti-paese, log-compresso)
+ *
+ * Era adjustment sull'origin score: le canzoni antiche che circolano ancora
+ *   ottengono un boost aggiuntivo sulla componente nazionale.
+ */
+function calcScores({shazams, year, country, numCountries}) {
+  const ef = getEraFactor(year);
+  const norm = shazams * ef;
+
+  // Log-compressione: la fama segue distribuzione power-law
+  // MAX_LOG = 8 â†’ log10(100M) = 8 â†’ punteggio massimo di volume
+  const ML = 8;
+  const logS = Math.log10(norm + 1);
+  const sComp = Math.min(logS / ML, 1.0);
+
+  // Diffusione geografica
+  let gComp = 0.5; // default: spread ignota, assume moderata
+  if (numCountries > 0) gComp = Math.sqrt(Math.min(numCountries / 195, 1.0));
+
+  // World score
+  const wRaw = 0.75 * sComp + 0.25 * gComp;
+  const worldScore = Math.round(Math.min(wRaw, 1) * 1000);
+
+  // Origin score
+  let originScore = null, originMeta = null;
+  if (country && CM[country]) {
+    const cd = CM[country];
+    const natBase = getCountryBase(country) * 1e6; // utenti reali
+
+    // Rapporto shazam mondiali / base utenti paese
+    // Se shazam > 10 * natBase = saturazione estrema (punteggio massimo)
+    const rawRatio = shazams / (natBase * 10);
+
+    // Log-comprimi: log10(ratio*10+1) / log10(11)
+    const penComp = Math.min(Math.log10(rawRatio * 10 + 1) / Math.log10(11), 1.0);
+
+    // Amplifica leggermente per canzoni antiche (circolano ancora = molto significative nel paese)
+    const eraBoost = Math.min(Math.sqrt(ef), 2.0);
+    const penAdj = Math.min(penComp * eraBoost, 1.0);
+
+    const oRaw = 0.60 * sComp + 0.40 * penAdj;
+    originScore = Math.round(Math.min(oRaw, 1) * 1000);
+
+    originMeta = {
+      natBase: (natBase / 1e6).toFixed(1),
+      rawRatio: rawRatio.toFixed(4),
+      penComp: (penComp * 100).toFixed(1),
+      penAdj: (penAdj * 100).toFixed(1),
+      name: cd.n, flag: cd.f,
+    };
+  }
+
+  return {
+    worldScore,
+    originScore,
+    bd: {
+      ef: ef.toFixed(3),
+      norm: Math.round(norm),
+      sComp: (sComp * 100).toFixed(1),
+      gComp: (gComp * 100).toFixed(1),
+      originMeta,
+    }
+  };
+}
+
+// ================================================================
+// API SHAZAM (via RapidAPI)
+// ================================================================
+const HOST = 'shazam.p.rapidapi.com';
+const BASE = 'https://shazam.p.rapidapi.com';
+
+function hdrs() {
+  return { 'x-rapidapi-host': HOST, 'x-rapidapi-key': localStorage.getItem('sz_key') || '' };
+}
+
+async function apiSearch(q) {
+  const r = await fetch(`${BASE}/search?term=${encodeURIComponent(q)}&locale=it-IT&offset=0&limit=7`,
+    { method:'GET', headers: hdrs() });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const d = await r.json();
+  return d.tracks?.hits?.map(h => h.track) || [];
+}
+
+async function apiDetails(id) {
+  const r = await fetch(`${BASE}/songs/get-details?key=${id}&locale=it-IT`,
+    { method:'GET', headers: hdrs() });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return await r.json();
+}
+
+// Estrai conteggio shazam dal JSON risposta
+function parseCount(d) {
+  if (d.sections) {
+    for (const s of d.sections) {
+      if (s.metadata) {
+        for (const m of s.metadata) {
+          if (m.title?.toLowerCase().includes('shazam')) {
+            const n = parseInt(String(m.text).replace(/\D/g,''));
+            if (n > 0) return n;
+          }
+        }
+      }
+    }
+  }
+  if (typeof d.count === 'number' && d.count > 0) return d.count;
+  if (d.hub?.actions) {
+    for (const a of d.hub.actions) {
+      if (typeof a.count === 'number' && a.count > 0) return a.count;
+    }
+  }
+  return null;
+}
+
+// Estrai anno di uscita
+function parseYear(d) {
+  if (d.sections) {
+    for (const s of d.sections) {
+      if (s.metadata) {
+        for (const m of s.metadata) {
+          const t = m.title?.toLowerCase() || '';
+          if (t.includes('release') || t.includes('anno') || t.includes('uscita')) {
+            const match = String(m.text||'').match(/(\d{4})/);
+            if (match) return parseInt(match[1]);
+          }
+        }
+      }
+    }
+  }
+  if (d.releasedate) {
+    const m = String(d.releasedate).match(/(\d{4})/);
+    if (m) return parseInt(m[1]);
+  }
+  return null;
+}
+
+// ================================================================
+// STATO
+// ================================================================
+let _details = null, _shazams = null, _year = null;
+let _searchTmr = null, _anims = {};
+
+// ================================================================
+// UI â€” API KEY
+// ================================================================
+function toggleApi() {
+  document.getElementById('api-body').classList.toggle('open');
+  document.getElementById('chevron').classList.toggle('open');
+}
+
+function saveKey() {
+  const k = document.getElementById('key-input').value.trim();
+  if (!k) return;
+  localStorage.setItem('sz_key', k);
+  refreshKeyUI();
+  document.getElementById('api-body').classList.remove('open');
+  document.getElementById('chevron').classList.remove('open');
+}
+
+function refreshKeyUI() {
+  const k = localStorage.getItem('sz_key') || '';
+  const dot = document.getElementById('dot');
+  const prev = document.getElementById('key-preview');
+  if (k) {
+    dot.classList.add('on');
+    prev.textContent = `â€” \u00B7\u00B7\u00B7${k.slice(-5)}`;
+    prev.style.color = 'var(--green)';
+  } else {
+    dot.classList.remove('on');
+    prev.textContent = 'â€” non configurata';
+    prev.style.color = 'var(--muted)';
+  }
+}
+
+// ================================================================
+// UI â€” SEARCH
+// ================================================================
+function onSearch() {
+  clearTimeout(_searchTmr);
+  const q = document.getElementById('search').value.trim();
+  if (q.length < 2) { document.getElementById('results').innerHTML = ''; return; }
+  document.getElementById('spinner').classList.add('on');
+  _searchTmr = setTimeout(() => doSearch(q), 480);
+}
+
+async function doSearch(q) {
+  if (!localStorage.getItem('sz_key')) {
+    showErr('Configura prima la chiave RapidAPI per usare la ricerca.');
+    document.getElementById('spinner').classList.remove('on');
+    return;
+  }
+  clearErr();
+  try {
+    const tracks = await apiSearch(q);
+    renderResults(tracks);
+  } catch(e) {
+    showErr('Errore ricerca: ' + e.message);
+    document.getElementById('results').innerHTML = '';
+  } finally {
+    document.getElementById('spinner').classList.remove('on');
+  }
+}
+
+function renderResults(tracks) {
+  const c = document.getElementById('results');
+  if (!tracks.length) {
+    c.innerHTML = `<div class="results-box"><div class="no-results">Nessun risultato trovato.</div></div>`;
+    return;
+  }
+  c.innerHTML = `<div class="results-box">${tracks.map(t => `
+    <div class="result-row" onclick="selectTrack('${esc(t.key)}', this)">
+      <img class="result-art"
+        src="${esc(t.images?.coverart||t.images?.background||'')}"
+        onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22><rect fill=%22%231e1e36%22 width=%2248%22 height=%2248%22/><text x=%2224%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%235a5a80%22 font-size=%2220%22>â™ª</text></svg>'"
+        alt="">
+      <div class="result-info">
+        <div class="result-title">${esc(t.title||'')}</div>
+        <div class="result-sub">${esc(t.subtitle||'')}</div>
+      </div>
+      ${t.genres?.primary ? `<span class="result-badge">${esc(t.genres.primary)}</span>` : ''}
+      <span class="result-arrow">â†’</span>
+    </div>`).join('')}</div>`;
+}
+
+async function selectTrack(id, el) {
+  document.querySelectorAll('.result-row').forEach(r => r.classList.remove('active'));
+  el.classList.add('active');
+  clearErr();
+  try {
+    const d = await apiDetails(id);
+    _details = d;
+    _shazams = parseCount(d);
+    _year = parseYear(d);
+    renderPanel(d);
+  } catch(e) {
+    showErr('Errore dettagli: ' + e.message);
+  }
+}
+
+// ================================================================
+// UI â€” PANEL
+// ================================================================
+function renderPanel(d) {
+  const panel = document.getElementById('panel');
+  const title = d.title || 'â€”';
+  const artist = d.subtitle || 'â€”';
+  const cover = d.images?.coverarthq || d.images?.coverart || '';
+  const genre = d.genres?.primary || '';
+
+  // Intestazione canzone
+  document.getElementById('song-hd').innerHTML = `
+    <img class="song-cover"
+      src="${esc(cover)}"
+      onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 76 76%22><rect fill=%22%231e1e36%22 width=%2276%22 height=%2276%22/><text x=%2238%22 y=%2248%22 text-anchor=%22middle%22 fill=%22%235a5a80%22 font-size=%2230%22>â™ª</text></svg>'"
+      alt="">
+    <div class="song-info">
+      <div class="song-title">${esc(title)}</div>
+      <div class="song-artist">${esc(artist)}</div>
+      <div class="song-tags">
+        ${_year ? `<span class="tag tag-g">${_year}</span>` : ''}
+        ${genre ? `<span class="tag tag-b">${esc(genre)}</span>` : ''}
+        ${_year ? `<span class="tag tag-d">${getEra(_year)}</span>` : ''}
+      </div>
+    </div>`;
+
+  // Striscia dati
+  const ef = _year ? getEraFactor(_year) : null;
+  document.getElementById('strip').innerHTML = `
+    <div class="strip-cell">
+      <div class="cell-label">Shazam Totali</div>
+      <div class="cell-val g">${_shazams ? fmt(_shazams) : 'â€”'}</div>
+    </div>
+    <div class="strip-cell">
+      <div class="cell-label">Anno Uscita</div>
+      <div class="cell-val">${_year || 'â€”'}</div>
+    </div>
+    <div class="strip-cell">
+      <div class="cell-label">Era Factor</div>
+      <div class="cell-val ${ef && ef > 1.5 ? 'g' : ''}">${ef ? ef.toFixed(2) + '\u00D7' : 'â€”'}</div>
+    </div>`;
+
+  // Popola select paesi
+  const sel = document.getElementById('country-sel');
+  sel.innerHTML = '<option value="">â€” seleziona paese â€”</option>';
+  [...COUNTRIES].sort((a,b) => a.n.localeCompare(b.n)).forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.c; o.textContent = `${c.f} ${c.n}`; sel.appendChild(o);
+  });
+
+  // Mostra panel e calcola
+  panel.classList.add('on');
+  drawScores();
+  setTimeout(() => panel.scrollIntoView({behavior:'smooth', block:'start'}), 100);
+}
+
+function recalc() { drawScores(); }
+
+function drawScores() {
+  if (!_shazams || !_year) {
+    gaugePlaceholder('g-world', 'Dati insufficienti');
+    gaugePlaceholder('g-origin', 'Seleziona paese');
+    document.getElementById('desc-world').textContent = '';
+    document.getElementById('desc-origin').textContent = '';
+    return;
+  }
+
+  const country = document.getElementById('country-sel').value || null;
+  const scores = calcScores({ shazams: _shazams, year: _year, country, numCountries: 0 });
+
+  // World gauge
+  gaugeInit('g-world', '#d4a84b');
+  animGauge('g-world', scores.worldScore, '#d4a84b');
+  document.getElementById('desc-world').textContent = worldDesc(scores.worldScore);
+
+  // Origin gauge
+  if (scores.originScore !== null && country) {
+    const cd = CM[country];
+    gaugeInit('g-origin', '#4499cc');
+    animGauge('g-origin', scores.originScore, '#4499cc');
+    document.getElementById('desc-origin').textContent =
+      `Penetrazione relativa nel mercato ${cd.flag} ${cd.n} (pop. ${cd.p}M)`;
+  } else {
+    gaugePlaceholder('g-origin', 'Seleziona paese');
+    document.getElementById('desc-origin').textContent =
+      "Scegli il paese d'origine per calcolare questo punteggio.";
+  }
+
+  renderBreakdown(scores, country);
+}
+
+// ================================================================
+// GAUGE SVG
+// ================================================================
+const R = 72, CX = 90, CY = 90;
+const CIRC = 2 * Math.PI * R; // ~452.4
+
+function gaugeInit(id, color) {
+  document.getElementById(id).innerHTML = `
+    <circle cx="${CX}" cy="${CY}" r="${R}"
+      fill="none" stroke="#1c1c38" stroke-width="10"/>
+    <circle class="arc-${id}" cx="${CX}" cy="${CY}" r="${R}"
+      fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"
+      stroke-dasharray="0 ${CIRC}"
+      transform="rotate(-90 ${CX} ${CY})"
+      style="filter:drop-shadow(0 0 8px ${color}70)"/>
+    <text class="num-${id}" x="${CX}" y="${CY - 7}"
+      text-anchor="middle" dominant-baseline="middle"
+      font-family="JetBrains Mono,monospace" font-weight="600" font-size="36"
+      fill="#dde0f5">0</text>
+    <text x="${CX}" y="${CY + 20}"
+      text-anchor="middle" dominant-baseline="middle"
+      font-family="Syne,sans-serif" font-size="11" fill="#5a5a80">/ 1000</text>
+    <text class="lbl-${id}" x="${CX}" y="${CY + 36}"
+      text-anchor="middle"
+      font-family="JetBrains Mono,monospace" font-size="10"
+      fill="${color}"></text>`;
+}
+
+function gaugePlaceholder(id, txt) {
+  document.getElementById(id).innerHTML = `
+    <circle cx="${CX}" cy="${CY}" r="${R}"
+      fill="none" stroke="#1c1c38" stroke-width="10" stroke-dasharray="8 6"/>
+    <text x="${CX}" y="${CY}" text-anchor="middle" dominant-baseline="middle"
+      font-family="Syne,sans-serif" font-size="12" fill="#5a5a80">${esc(txt)}</text>`;
+}
+
+function animGauge(id, target, color) {
+  if (_anims[id]) cancelAnimationFrame(_anims[id]);
+  const arc = () => document.querySelector(`.arc-${id}`);
+  const num = () => document.querySelector(`.num-${id}`);
+  const lbl = () => document.querySelector(`.lbl-${id}`);
+  const t0 = performance.now(), dur = 1400;
+
+  function step(now) {
+    const t = Math.min((now - t0) / dur, 1);
+    const e = t === 1 ? 1 : 1 - Math.pow(2, -10 * t); // ease-out-expo
+    const cur = Math.round(target * e);
+    const fill = (cur / 1000) * CIRC;
+    arc()?.setAttribute('stroke-dasharray', `${fill} ${CIRC}`);
+    if (num()) num().textContent = cur;
+    if (lbl()) lbl().textContent = scoreLabel(cur);
+    if (t < 1) _anims[id] = requestAnimationFrame(step);
+  }
+  _anims[id] = requestAnimationFrame(step);
+}
+
+function scoreLabel(s) {
+  if (s >= 950) return '\u2605 LEGGENDARIA';
+  if (s >= 850) return '\u2605 ICONICA';
+  if (s >= 700) return '\u25C8 GLOBALE';
+  if (s >= 550) return '\u25C8 POPOLARE';
+  if (s >= 400) return '\u25C7 NOTA';
+  if (s >= 250) return '\u00B7 EMERGENTE';
+  return '\u00B7 LOCALE';
+}
+
+function worldDesc(s) {
+  if (s >= 950) return 'Patrimonio culturale globale. Riconoscibile in ogni angolo del pianeta.';
+  if (s >= 850) return 'Icona internazionale. Parte del repertorio musicale collettivo mondiale.';
+  if (s >= 700) return 'Hit mondiale di grande portata con diffusione geografica ampia.';
+  if (s >= 550) return 'Canzone popolare con solido riconoscimento internazionale.';
+  if (s >= 400) return 'Diffusione significativa oltre i confini del mercato d\'origine.';
+  if (s >= 250) return 'Artista emergente o canzone con diffusione ancora prevalentemente locale.';
+  return 'Diffusione limitata a mercati specifici o a nicchie di ascolto.';
+}
+
+// ================================================================
+// BREAKDOWN
+// ================================================================
+function renderBreakdown(scores, country) {
+  const bd = scores.bd;
+  const om = bd.originMeta;
+
+  document.getElementById('bk-body').innerHTML = `
+    <div class="bk-section">Normalizzazione Era</div>
+    <div class="bk-row"><span class="bk-k">Anno uscita</span><span class="bk-v">${_year}</span></div>
+    <div class="bk-row"><span class="bk-k">Era Factor</span><span class="bk-v g">${bd.ef}&times;</span></div>
+    <div class="bk-row"><span class="bk-k">Shazam grezzi</span><span class="bk-v">${fmt(_shazams)}</span></div>
+    <div class="bk-row"><span class="bk-k">Shazam normalizzati</span><span class="bk-v g">${fmt(bd.norm)}</span></div>
+
+    <div class="bk-section">Componenti World Score</div>
+    <div class="bk-row"><span class="bk-k">Volume (75%) â€” log-compresso</span><span class="bk-v">${bd.sComp}%</span></div>
+    <div class="bk-row"><span class="bk-k">Diffusione geografica (25%)</span><span class="bk-v">${bd.gComp}%</span></div>
+    <div class="bk-row"><span class="bk-k">World Score finale</span><span class="bk-v g">${scores.worldScore} / 1000</span></div>
+    <div class="progress-track"><div class="progress-fill pf-g" style="width:${scores.worldScore/10}%"></div></div>
+
+    ${om ? `
+    <div class="bk-section">Componenti Origin Score â€” ${om.flag} ${om.name}</div>
+    <div class="bk-row"><span class="bk-k">Utenti Shazam stimati nel paese</span><span class="bk-v">${om.natBase}M</span></div>
+    <div class="bk-row"><span class="bk-k">Ratio penetrazione nazionale</span><span class="bk-v b">${om.rawRatio}</span></div>
+    <div class="bk-row"><span class="bk-k">Penetrazione log-compressa</span><span class="bk-v">${om.penComp}%</span></div>
+    <div class="bk-row"><span class="bk-k">Penetrazione con era-boost</span><span class="bk-v">${om.penAdj}%</span></div>
+    <div class="bk-row"><span class="bk-k">Origin Score finale</span><span class="bk-v b">${scores.originScore} / 1000</span></div>
+    <div class="progress-track"><div class="progress-fill pf-b" style="width:${scores.originScore/10}%"></div></div>
+    ` : ''}
+
+    <div class="algo-note">
+      <strong>Modello storico Shazam (2002â€“2024):</strong>
+      L'era factor compara la "finestra di esposizione" del brano (utenti Ã— peso-recenza da anno uscita ad oggi)
+      con quella di riferimento di una canzone del 2024 (1 anno di discovery attiva).
+      Canzoni pre-Shazam vengono scoperti solo per catalogo (radio, TV, cinema) a tasso esponenzialmente decrescente con l'eta'.
+      L'origin score usa la base utenti stimata del paese (pop Ã— penetrazione-internet Ã— adoption-rate globale 22%)
+      per misurare quanto il brano sia "grande" relativamente al suo mercato domestico.
+    </div>`;
+}
+
+function toggleBk() {
+  document.getElementById('bk-toggle').classList.toggle('open');
+  document.getElementById('bk-body').classList.toggle('open');
+}
+
+// ================================================================
+// HELPERS
+// ================================================================
+function fmt(n) {
+  if (!n && n !== 0) return 'â€”';
+  if (n >= 1e9) return (n/1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'k';
+  return String(n);
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function getEra(y) {
+  if (y < 1960) return "pre-'60";
+  if (y < 1970) return "anni '60";
+  if (y < 1980) return "anni '70";
+  if (y < 1990) return "anni '80";
+  if (y < 2000) return "anni '90";
+  if (y < 2002) return 'pre-Shazam';
+  if (y < 2010) return 'era mobile';
+  if (y < 2018) return 'era streaming';
+  return 'era social';
+}
+
+function showErr(msg) {
+  const b = document.getElementById('err');
+  b.textContent = '\u26A0 ' + msg; b.classList.add('on');
+}
+function clearErr() { document.getElementById('err').classList.remove('on'); }
+
+// ================================================================
+// INIT
+// ================================================================
+refreshKeyUI();
+
+const saved = localStorage.getItem('sz_key');
+if (saved) document.getElementById('key-input').value = saved;
+
+document.getElementById('search').addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  clearTimeout(_searchTmr);
+  const q = e.target.value.trim();
+  if (q.length >= 2) { document.getElementById('spinner').classList.add('on'); doSearch(q); }
+});
+</script>
+</body>
+</html>
