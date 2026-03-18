@@ -668,22 +668,60 @@ function hdrs() {
 }
 
 async function apiSearch(q) {
-  const r = await fetch(`${BASE}/search?term=${encodeURIComponent(q)}&locale=it-IT&offset=0&limit=7`,
+  const r = await fetch(`${BASE}/v2/search?term=${encodeURIComponent(q)}&locale=en-US&offset=0&limit=7`,
     { method:'GET', headers: hdrs() });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   const d = await r.json();
-  return d.tracks?.hits?.map(h => h.track) || [];
+  // v2 structure: d.tracks.hits[].track  oppure  d.data[].attributes
+  if (d.tracks?.hits) return d.tracks.hits.map(h => h.track);
+  if (d.data) return d.data.map(item => ({
+    key: item.id,
+    title: item.attributes?.name,
+    subtitle: item.attributes?.artistName,
+    images: { coverart: item.attributes?.artwork?.url?.replace('{w}','300').replace('{h}','300') },
+    genres: { primary: item.attributes?.genreNames?.[0] },
+  }));
+  return [];
 }
 
 async function apiDetails(id) {
-  const r = await fetch(`${BASE}/songs/get-details?key=${id}&locale=it-IT`,
+  // Prova prima l'endpoint v2, poi fallback al classico
+  try {
+    const r = await fetch(`${BASE}/songs/v2/get-details?id=${id}&locale=en-US`,
+      { method:'GET', headers: hdrs() });
+    if (r.ok) {
+      const d = await r.json();
+      // normalizza in struttura attesa dal parser
+      if (d.data?.[0]) {
+        const a = d.data[0].attributes || {};
+        return {
+          _v2: true,
+          title: a.name,
+          subtitle: a.artistName,
+          images: { coverarthq: a.artwork?.url?.replace('{w}','600').replace('{h}','600') },
+          genres: { primary: a.genreNames?.[0] },
+          releasedate: a.releaseDate,
+          count: a.shazamCount || null,
+          sections: d.data[0].relationships ? [] : [],
+          _raw: d,
+        };
+      }
+    }
+  } catch(_) {}
+  // fallback endpoint classico
+  const r2 = await fetch(`${BASE}/songs/get-details?key=${id}&locale=en-US`,
     { method:'GET', headers: hdrs() });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return await r.json();
+  if (!r2.ok) throw new Error(`HTTP ${r2.status}`);
+  return await r2.json();
 }
 
 // Estrai conteggio shazam dal JSON risposta
 function parseCount(d) {
+  // v2 API
+  if (d._raw?.data?.[0]?.attributes?.shazamCount)
+    return d._raw.data[0].attributes.shazamCount;
+  if (typeof d.count === 'number' && d.count > 0) return d.count;
+  // sezioni metadata classico
   if (d.sections) {
     for (const s of d.sections) {
       if (s.metadata) {
@@ -696,13 +734,25 @@ function parseCount(d) {
       }
     }
   }
-  if (typeof d.count === 'number' && d.count > 0) return d.count;
   if (d.hub?.actions) {
     for (const a of d.hub.actions) {
       if (typeof a.count === 'number' && a.count > 0) return a.count;
     }
   }
-  return null;
+  // cerca ricorsivamente qualsiasi campo count > 1000
+  function findCount(obj, depth) {
+    if (depth > 6 || !obj || typeof obj !== 'object') return null;
+    for (const k of Object.keys(obj)) {
+      if ((k === 'count' || k === 'shazamCount')) {
+        const v = parseInt(obj[k]);
+        if (v > 1000) return v;
+      }
+      const r = findCount(obj[k], depth + 1);
+      if (r) return r;
+    }
+    return null;
+  }
+  return findCount(d, 0);
 }
 
 // Estrai anno di uscita
