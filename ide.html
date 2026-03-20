@@ -6,6 +6,7 @@
 <title>LINE 3.0 — Editor</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
@@ -68,6 +69,7 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);dis
 .dot.b{background:var(--sb);box-shadow:0 0 5px var(--sb);}
 .dot.lb{background:var(--slb);box-shadow:0 0 5px var(--slb);}
 .dot.go{background:var(--sgo);box-shadow:0 0 5px var(--sgo);}
+.dot.rd{background:#d4a96a;box-shadow:0 0 5px #d4a96a;}
 .si-arr{margin-left:auto;font-size:9px;color:var(--t4);opacity:0;transition:opacity .1s;}
 .si:hover .si-arr{opacity:1;}
 
@@ -101,6 +103,7 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);dis
 .cm-s-line30 .cm-gochain{color:var(--sgo);font-weight:700;}
 .cm-s-line30 .cm-tag    {color:#ffa726;}
 .cm-s-line30 .cm-not    {color:var(--snot);font-weight:700;}
+.cm-s-line30 .cm-render {color:#d4a96a;font-weight:700;}
 
 /* AUTOCOMPLETE */
 .CodeMirror-hints{background:#111820!important;border:1px solid var(--bdrg)!important;border-radius:5px!important;box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 20px rgba(0,229,255,.05)!important;font-family:'Share Tech Mono',monospace!important;font-size:13px!important;padding:4px 0!important;max-height:260px!important;z-index:9999!important;}
@@ -109,7 +112,7 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);dis
 .h-k{color:var(--sk);} .h-f{color:var(--sf);} .h-l{color:var(--sl);}
 .h-p{color:var(--sp);} .h-u{color:var(--su);} .h-e{color:var(--se);}
 .h-b{color:var(--sb);} .h-lb{color:var(--slb);} .h-go{color:var(--sgo);}
-.h-op{color:var(--so);}
+.h-op{color:var(--so);} .h-rd{color:#d4a96a;}
 
 /* QUICK BAR (mobile) */
 #quickbar{background:var(--bg1);border-top:1px solid var(--bdr);display:flex;align-items:center;gap:4px;padding:5px 8px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
@@ -125,6 +128,7 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);dis
 .qt.cgo{color:var(--sgo);border-color:rgba(100,255,218,.2);}
 .qt.clb{color:var(--slb);border-color:rgba(255,167,38,.2);}
 .qt.cb{color:var(--sb);border-color:rgba(79,195,247,.2);}
+.qt.crd{color:#d4a96a;border-color:rgba(212,169,106,.2);}
 .qsep{width:1px;height:16px;background:var(--bdr);flex-shrink:0;margin:0 2px;}
 
 /* STATUS */
@@ -150,6 +154,7 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);dis
 .chip.go{background:rgba(100,255,218,.09);color:var(--sgo);border-color:rgba(100,255,218,.18);}
 .chip.lb{background:rgba(255,167,38,.09);color:var(--slb);border-color:rgba(255,167,38,.18);}
 .chip.op{background:rgba(255,64,129,.09);color:var(--so);border-color:rgba(255,64,129,.18);}
+.chip.rd{background:rgba(212,169,106,.09);color:#d4a96a;border-color:rgba(212,169,106,.22);}
 .rp-mono{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);line-height:1.65;}
 
 /* DRAWER OVERLAY */
@@ -276,6 +281,25 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
   touch-action:manipulation;
 }
 #console-send:hover{background:var(--accg);}
+
+/* ── RENDER output in console ──────────────────── */
+.con-line-render{
+  margin:8px 0;padding:12px 16px;
+  display:flex;justify-content:center;
+  border:1px solid rgba(212,169,106,.2);
+  border-radius:4px;
+  background:rgba(0,0,0,.35);
+  overflow-x:auto;
+  white-space:normal;
+}
+.lrender-math{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;}
+.lrender-line{color:var(--t1);}
+.lrender-line .katex{font-size:1.3rem;}
+.lrender-sep{width:50%;height:1px;background:var(--bdrg);margin:3px auto;opacity:.35;}
+.lrender-chem{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.lrender-mol{display:flex;justify-content:center;}
+.lrender-err{color:#ff4081;font-family:'Share Tech Mono',monospace;font-size:.76rem;}
+.lrender-empty{color:var(--t3);font-family:'Share Tech Mono',monospace;font-size:.76rem;}
 </style>
 </head>
 <body>
@@ -370,6 +394,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
     <div class="sb-sec"><div class="sb-hd">Moduli</div>
       <div class="si" data-ins="TAKE "><span class="dot k"></span>TAKE<span class="si-arr">↵</span></div>
     </div>
+    <div class="sb-sec"><div class="sb-hd">Rendering</div>
+      <div class="si" data-ins="RENDER{\n  \n}"><span class="dot rd"></span>RENDER{…}<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="RENDER{\n  CHEM\n  \n}"><span class="dot rd"></span>RENDER CHEM<span class="si-arr">↵</span></div>
+    </div>
   </div>
 
   <div id="ed-wrap"><textarea id="editor"></textarea></div>
@@ -418,6 +446,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
     <div class="rp-blk"><div class="rp-t">Commenti</div>
       <span class="chip c">&gt;&gt;</span><span class="chip c">&lt;* *&gt;</span>
     </div>
+    <div class="rp-blk"><div class="rp-t">Rendering</div>
+      <span class="chip rd">RENDER{}</span><span class="chip rd">CHEM</span>
+    </div>
     <div class="rp-blk"><div class="rp-t">FOR sintassi</div>
       <div class="rp-mono">FOR @lista #[start;end;step]<br>= @funzione()</div>
     </div>
@@ -429,6 +460,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
     </div>
     <div class="rp-blk"><div class="rp-t">Accesso lista</div>
       <div class="rp-mono">lista[#0]<br>lista[tag]<br>lista[tag1;tag2]</div>
+    </div>
+    <div class="rp-blk"><div class="rp-t">RENDER sintassi</div>
+      <div class="rp-mono">RENDER{<br>  formula<br>}<br><br>RENDER{<br>  CHEM<br>  C(HHH=O)<br>}</div>
     </div>
     <div class="rp-blk"><div class="rp-t">Tasti</div>
       <div class="rp-mono" style="line-height:2.1">
@@ -476,6 +510,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
   <span class="qt ce" data-ins="#">#</span>
   <span class="qt clb" data-ins="*">*</span>
   <span class="qt" data-ins=">> ">»</span>
+  <span class="qsep"></span>
+  <span class="qt crd" data-ins="RENDER{\n  \n}">RENDER</span>
 </div>
 
 <div id="statusbar">
@@ -515,6 +551,7 @@ CodeMirror.defineMode("line30", function() {
   const FLOW    = new Set(["STAY","IF","THEN","THEND","FUN","FEND","GO","FOR",
                            "TRY","SHOW","YET","TREND","SEND","YEND",
                            "RET","DEFRET","TEMP","return","ADD","CANC"]);
+  const RENDER  = new Set(["RENDER"]);
   const LOGIC   = new Set(["ET","VEL","AUT","IN","AT","BY","IS"]);
   const SPECIAL = new Set(["ONITEM","ONINDEX","ONTAG","THISGO","ASKED",
                            "NUMBERS","ERRCODE","ERRMSG"]);
@@ -575,7 +612,7 @@ CodeMirror.defineMode("line30", function() {
       if (stream.match("&&")) return "gochain";
       if (stream.peek() === '&') { stream.next(); return "gochain"; }
 
-      /* ── Multi-char operators (longest match first) ── */
+      /* ── Multi-char operators ── */
       if (stream.match("//=")) return "op";
       if (stream.match("<="))  return "op";
       if (stream.match(">="))  return "op";
@@ -599,22 +636,30 @@ CodeMirror.defineMode("line30", function() {
       /* ── | tag separator ── */
       if (stream.peek() === '|') { stream.next(); return "tag"; }
 
+      /* ── { } per RENDER ── */
+      if (stream.peek() === '{' || stream.peek() === '}') {
+        stream.next(); return "render";
+      }
+
       /* ── word tokens ── */
       const m = stream.match(/^[a-zA-Z_][a-zA-Z0-9_]*/);
       if (m) {
         const w = m[0];
 
-        /* conversion: n: s: b: t: — eat the colon too */
+        /* conversion: n: s: b: t: */
         if (["n","s","b","t"].includes(w) && stream.peek() === ':') {
           stream.next();
           return "builtin";
         }
 
+        /* RENDER keyword */
+        if (RENDER.has(w)) return "render";
+
         /* keywords with optional :label suffix */
         if (KW.has(w) || FLOW.has(w)) {
           if (stream.peek() === ':') {
-            stream.next();              // eat ':'
-            stream.eatWhile(/\w/);     // eat label name → styled as same color
+            stream.next();
+            stream.eatWhile(/\w/);
           }
           return KW.has(w) ? "kw" : "flow";
         }
@@ -636,7 +681,7 @@ CodeMirror.defineMode("line30", function() {
 CodeMirror.defineMIME("text/x-line30","line30");
 
 /* ══════════════════════════════════════════
-   Hint data — tutte le keyword
+   Hint data
 ══════════════════════════════════════════ */
 const HINTS = [
   {t:"TALK ",     d:"TALK",     c:"h-k",  i:"output / input"},
@@ -706,6 +751,7 @@ const HINTS = [
   {t:" ^= ",      d:"^=",       c:"h-op", i:"potenza e assegna"},
   {t:" //= ",     d:"//=",      c:"h-op", i:"div. intera e assegna"},
   {t:" %= ",      d:"%=",       c:"h-op", i:"resto div. e assegna"},
+  {t:"RENDER{\n  \n}", d:"RENDER{}", c:"h-rd", i:"rendering matematico/chimico"},
 ];
 
 function line30Hint(cm) {
@@ -736,14 +782,15 @@ function line30Hint(cm) {
    Auto-close map
 ══════════════════════════════════════════ */
 const AUTO_CLOSE = {
-  "FUN":  "FEND",
-  "THEN": "THEND",
-  "TRY":  "TREND",
-  "SHOW": "SEND",
-  "YET":  "YEND"
+  "FUN":    "FEND",
+  "THEN":   "THEND",
+  "TRY":    "TREND",
+  "SHOW":   "SEND",
+  "YET":    "YEND",
+  "RENDER": "}"
 };
 
-/* Smart Enter — semplice e robusto */
+/* Smart Enter */
 function handleEnter(cm) {
   if (cm.somethingSelected()) {
     cm.replaceSelection("\n", "end");
@@ -755,43 +802,45 @@ function handleEnter(cm) {
   const trimmed       = lineText.slice(0, cur.ch).trim();
   const innerIndent   = currentIndent + "  ";
 
-  /* Keyword di apertura blocco all'inizio della riga */
   const kwMatch = trimmed.match(/^([A-Z]+)/);
   const kw = kwMatch ? kwMatch[1] : null;
 
   if (kw && AUTO_CLOSE[kw]) {
+    const closer = AUTO_CLOSE[kw];
+    /* RENDER{} ha la graffa sulla stessa riga — inserisce riga vuota + } */
+    if (kw === "RENDER") {
+      cm.operation(() => {
+        cm.replaceRange("\n" + innerIndent + "\n" + currentIndent + closer, cur);
+        cm.setCursor({ line: cur.line + 1, ch: innerIndent.length });
+      });
+      return;
+    }
     cm.operation(() => {
-      cm.replaceRange("\n" + innerIndent + "\n" + currentIndent + AUTO_CLOSE[kw], cur);
+      cm.replaceRange("\n" + innerIndent + "\n" + currentIndent + closer, cur);
       cm.setCursor({ line: cur.line + 1, ch: innerIndent.length });
     });
     return;
   }
 
-  /* Qualsiasi altro caso: vai a capo mantenendo l'indentazione corrente */
   cm.operation(() => {
     cm.replaceRange("\n" + currentIndent, cur);
     cm.setCursor({ line: cur.line + 1, ch: currentIndent.length });
   });
 }
 
-/* Smart Backspace: rimuove l'intero indent unit (2 spazi) in un colpo */
+/* Smart Backspace */
 function handleBackspace(cm) {
   if (cm.somethingSelected()) { cm.execCommand("delCharBefore"); return; }
   const cur  = cm.getCursor();
   const line = cm.getLine(cur.line);
   const before = line.slice(0, cur.ch);
-
-  /* Se siamo a inizio riga (solo spazi prima del cursore), rimuovi fino alla riga precedente */
   if (cur.ch === 0) { cm.execCommand("delCharBefore"); return; }
-
-  /* Se ci sono esattamente N spazi multipli di 2 prima del cursore (indentazione pura) */
   if (/^ +$/.test(before) && before.length % 2 === 0) {
     cm.operation(() => {
       cm.replaceRange("", { line: cur.line, ch: cur.ch - 2 }, cur);
     });
     return;
   }
-
   cm.execCommand("delCharBefore");
 }
 
@@ -898,7 +947,7 @@ document.querySelectorAll(".qt[data-ins]").forEach(el=>
 /* Right panel chips */
 document.querySelectorAll(".chip").forEach(chip=>
   chip.addEventListener("click",()=>{
-    const map={">>":">> ","<* *>":"<* \n*>","&":"& ","&&":"&& "};
+    const map={">>":">> ","<* *>":"<* \n*>","&":"& ","&&":"&& ","RENDER{}":"RENDER{\n  \n}"};
     const t = chip.textContent.trim();
     insertSnippet(map[t] || (t+" "));
   })
@@ -944,14 +993,10 @@ const conInpRow = document.getElementById("console-input-row");
 const conInp    = document.getElementById("console-input");
 const conSend   = document.getElementById("console-send");
 
-let inputResolve = null; // Promise resolver per input asincrono
+let inputResolve = null;
 
-function conOpen() {
-  conWrap.classList.add("open");
-}
-function conClose() {
-  conWrap.classList.remove("open","tall");
-}
+function conOpen() { conWrap.classList.add("open"); }
+function conClose() { conWrap.classList.remove("open","tall"); }
 function conAppend(text, cls = "con-line-out") {
   const lines = String(text).split("\n");
   lines.forEach(line => {
@@ -962,13 +1007,22 @@ function conAppend(text, cls = "con-line-out") {
   });
   conOut.scrollTop = conOut.scrollHeight;
 }
+function conAppendRender(content) {
+  if (typeof LINE_render_html !== "function") {
+    conAppend("[RENDER] line-render.js non trovato", "con-line-err");
+    return;
+  }
+  const wrap = document.createElement("div");
+  wrap.className = "con-line-render";
+  wrap.innerHTML = LINE_render_html(content);
+  conOut.appendChild(wrap);
+  conOut.scrollTop = conOut.scrollHeight;
+}
 function conSetStatus(state, text) {
   conStatus.className = "con-status " + state;
   conStatus.textContent = text;
 }
-function conClear() {
-  conOut.innerHTML = "";
-}
+function conClear() { conOut.innerHTML = ""; }
 function conShowInput(prompt) {
   document.getElementById("console-prompt").textContent = prompt ? prompt + " >" : ">";
   conInpRow.classList.add("visible");
@@ -996,7 +1050,7 @@ conInp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefa
 document.getElementById("con-close").onclick = conClose;
 document.getElementById("con-clear").onclick = conClear;
 document.getElementById("con-save").onclick = () => {
-  const lines = [...conOut.querySelectorAll("div")].map(d => d.textContent).join("\n");
+  const lines = [...conOut.querySelectorAll("div:not(.con-line-render)")].map(d => d.textContent).join("\n");
   const name  = (document.getElementById("filename").value.trim() || "output") + "_log.txt";
   const a     = document.createElement("a");
   a.href      = URL.createObjectURL(new Blob([lines], {type:"text/plain"}));
@@ -1046,11 +1100,29 @@ runBtn.onclick = async function() {
   conHideInput();
   conSetStatus("running", "● in esecuzione");
 
+  /* ── Pre-processa i blocchi RENDER{} ── */
+  let renderBlocks = {};
+  let sourceToRun = editor.getValue();
+  if (typeof LINE_render_preprocess === "function") {
+    const { processedSrc, blocks } = LINE_render_preprocess(sourceToRun);
+    sourceToRun = processedSrc;
+    blocks.forEach(b => { renderBlocks[b.index] = b.content; });
+  }
+
   const startTime = Date.now();
 
   try {
-    await LINE_run(editor.getValue(), {
+    await LINE_run(sourceToRun, {
       output(text) {
+        /* Intercetta i marker RENDER */
+        if (typeof LINE_RENDER_MARKER !== "undefined" &&
+            text.startsWith(LINE_RENDER_MARKER)) {
+          const idx = parseInt(text.slice(LINE_RENDER_MARKER.length));
+          if (!isNaN(idx) && renderBlocks[idx] !== undefined) {
+            conAppendRender(renderBlocks[idx]);
+            return;
+          }
+        }
         conAppend(text, "con-line-out");
       },
       async input(prompt) {
@@ -1073,6 +1145,8 @@ runBtn.onclick = async function() {
 setTimeout(()=>editor.focus(),80);
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="line-render.js" onerror="console.warn('[LINE-RENDER] line-render.js non trovato')"></script>
 <script src="interpreter.js" onerror="/* interpreter.js non trovato */"></script>
 <script data-goatcounter="https://qc17.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
