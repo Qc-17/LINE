@@ -482,8 +482,9 @@
   }
 
   /* ── API globale ── */
-  G.LINE_render_preprocess = preprocessRender;
-  G.LINE_render_html       = renderBlockToHTML;
-  G.LINE_RENDER_MARKER     = RENDER_MARKER;
+  G.LINE_render_preprocess  = preprocessRender;
+  G.LINE_render_html        = renderBlockToHTML;
+  G.LINE_RENDER_MARKER      = RENDER_MARKER;
+  G.LINE_render_to_latex    = toLatex;      // usato da ide.html per \R inline
 
 })(typeof window !== 'undefined' ? window : global);
