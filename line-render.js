@@ -1,19 +1,26 @@
 /**
  * ══════════════════════════════════════════════════════════
- *  LINE-RENDER  —  Motore di rendering matematico/chimico
+ *  LINE-RENDER  —  Motore di rendering matematico/chimico/HTML
  *  per LINE 3.0 IDE
  *
  *  Dipende da: KaTeX (deve essere caricato prima di questo file)
  *
  *  Sintassi LINE:
  *    RENDER{
- *      formula oppure espressione chimica
+ *      formula oppure espressione chimica oppure HTML
  *    }
  *
  *  Per la chimica la prima riga dentro il blocco deve essere CHEM:
  *    RENDER{
  *      CHEM
  *      C(HHH=O)
+ *    }
+ *
+ *  Per l'HTML la prima riga dentro il blocco deve essere HTML:
+ *    RENDER{
+ *      HTML
+ *      <h1>Titolo</h1>
+ *      <p>Contenuto</p>
  *    }
  *
  *  API esposta:
@@ -145,7 +152,7 @@
       while(!this.eof()){
         this.ws();if(this.eof())break;
         const c=this.ch();
-        if(['+','-',')','=','~','<','>',',',';','|'].includes(c)||(c==='!'&&this.ch(1)==='=')||(c==='='&&this.ch(1)==='>')||(c==='-'&&this.ch(1)==='>')||(c==='<'&&this.ch(1)==='=')||(c==='>'&&this.ch(1)==='=')||(c==='<'&&this.ch(1)==='='&&this.ch(2)==='>'))break;
+        if(['+','-',')','=','~','<','>',',',';','|'].includes(c)||(c==='!'&&this.ch(1)==='=')||(c==='='&&this.ch(1)==='>')||(c==='-'&&this.ch(1)==='>')||(c==='<'&&this.ch(1)==='=')||(c==='>'&&this.ch(1)!=='='))break;
         if(c==='*'){
           this.i++;this.ws();
           let mult=this.parseAtom();if(mult===null)break;
@@ -333,6 +340,15 @@
     catch(e) { return '\\text{errore}'; }
   }
 
+  /* ── HTML MODE ── */
+  function isHtmlMode(raw) {
+    return raw.split('\n')[0].trim().toUpperCase() === 'HTML';
+  }
+
+  function getHtmlContent(raw) {
+    return raw.split('\n').slice(1).join('\n').trim();
+  }
+
   /* ── CHEM ── */
   function isChemMode(raw) { return raw.split('\n')[0].trim().toUpperCase() === 'CHEM'; }
   function getChemLines(raw) { return raw.split('\n').slice(1).map(l => l.trim()).filter(Boolean); }
@@ -385,7 +401,7 @@
 
   function chemToSVG(molSrc) {
     const tree = parseChem(molSrc.trim());
-    if (!tree) return '<svg width="200" height="40" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="40" fill="#0c1118"/><text x="8" y="26" font-family="monospace" font-size="12" fill="#ff4081">errore sintassi</text></svg>';
+    if (!tree) return '<svg width="200" height="40" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="40" fill="#0c1118"/><text x="8" y="26" font-family="monospace" font-size="12" fill="#ff4081">Errore chimico</text></svg>';
     const {nodes,edges,W,H} = layoutChem(tree);
     const BC = {'-':'#606068','=':'#5fb3a0','#':'#d4a96a'};
     const AC = {C:'#87878f',H:'#444450',O:'#c96060',N:'#5fb3a0',S:'#d4a96a',P:'#c97040',F:'#70b870',Cl:'#70b870',Br:'#a05050',I:'#8060a0'};
@@ -398,7 +414,7 @@
       const nx=-ddy/len,ny=ddx/len;
       if(e.bond==='-'){svg+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+col+'" stroke-width="2"/>'}
       else if(e.bond==='='){const o=4;svg+='<line x1="'+(x1+nx*o)+'" y1="'+(y1+ny*o)+'" x2="'+(x2+nx*o)+'" y2="'+(y2+ny*o)+'" stroke="'+col+'" stroke-width="2"/><line x1="'+(x1-nx*o)+'" y1="'+(y1-ny*o)+'" x2="'+(x2-nx*o)+'" y2="'+(y2-ny*o)+'" stroke="'+col+'" stroke-width="2"/>'}
-      else{const o=4.5;svg+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+col+'" stroke-width="2"/><line x1="'+(x1+nx*o)+'" y1="'+(y1+ny*o)+'" x2="'+(x2+nx*o)+'" y2="'+(y2+ny*o)+'" stroke="'+col+'" stroke-width="1.4"/><line x1="'+(x1-nx*o)+'" y1="'+(y1-ny*o)+'" x2="'+(x2-nx*o)+'" y2="'+(y2-ny*o)+'" stroke="'+col+'" stroke-width="1.4"/>'}
+      else{const o=4.5;svg+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+col+'" stroke-width="2"/><line x1="'+(x1+nx*o)+'" y1="'+(y1+ny*o)+'" x2="'+(x2+nx*o)+'" y2="'+(y2+ny*o)+'" stroke="'+col+'" stroke-width="2"/><line x1="'+(x1-nx*o)+'" y1="'+(y1-ny*o)+'" x2="'+(x2-nx*o)+'" y2="'+(y2-ny*o)+'" stroke="'+col+'" stroke-width="2"/>'}
     }
     for (const n of nodes) {
       const isH=n.atom==='H';const r=isH?11:(n.atom.length>1?16:13);const fs=isH?11:(n.atom.length>1?10:14);const col=ac(n.atom);
@@ -446,6 +462,13 @@
   function renderBlockToHTML(content) {
     if (typeof katex === 'undefined') {
       return '<div style="color:#ff4081;font-family:monospace;font-size:.8rem;padding:.5rem">KaTeX non caricato — aggiungi katex.min.js</div>';
+    }
+
+    /* ── HTML ── */
+    if (isHtmlMode(content)) {
+      const htmlContent = getHtmlContent(content);
+      if (!htmlContent) return '<div class="lrender-empty">HTML — scrivi il contenuto HTML sotto</div>';
+      return '<div class="lrender-html">' + htmlContent + '</div>';
     }
 
     /* ── Chimica ── */
