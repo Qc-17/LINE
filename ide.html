@@ -13,6 +13,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
@@ -40,13 +42,13 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);dis
 #filename-wrap{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--bdr);border-radius:4px;padding:0 8px;height:28px;flex:1;min-width:0;max-width:200px;}
 #filename{background:none;border:none;outline:none;color:var(--t1);font-family:'Share Tech Mono',monospace;font-size:12px;width:100%;min-width:0;}
 #fext{color:var(--accd);font-family:'Share Tech Mono',monospace;font-size:12px;flex-shrink:0;}
-.tbtn{background:transparent;border:1px solid var(--bdr);color:var(--t2);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:0 11px;height:28px;border-radius:3px;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;touch-action:manipulation;}
+.tbtn{background:transparent;border:1px solid var(--bdr);color:var(--t2);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:0 11px;height:28px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;white-space:nowrap;touch-action:manipulation;transition:all .12s;}
 .tbtn:hover,.tbtn:active{background:var(--bg3);border-color:var(--bdrg);color:var(--t1);}
 .tbtn.pri{background:var(--accg);border-color:var(--accd);color:var(--acc);}
 .tbtn.pri:hover,.tbtn.pri:active{background:rgba(0,229,255,.18);border-color:var(--acc);box-shadow:0 0 10px rgba(0,229,255,.2);}
-#hambtn{display:none;background:none;border:1px solid var(--bdr);color:var(--t2);width:34px;height:28px;border-radius:3px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation;}
+#hambtn{display:none;background:none;border:1px solid var(--bdr);color:var(--t2);width:34px;height:28px;border-radius:3px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;flex-shrink:0;}
 #fszbtns{display:flex;gap:3px;flex-shrink:0;}
-.fszbtn{background:var(--bg2);border:1px solid var(--bdr);color:var(--t2);font-family:'Share Tech Mono',monospace;font-size:12px;width:24px;height:24px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;transition:all .15s;}
+.fszbtn{background:var(--bg2);border:1px solid var(--bdr);color:var(--t2);font-family:'Share Tech Mono',monospace;font-size:12px;width:24px;height:24px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s;}
 .fszbtn:hover{color:var(--acc);border-color:var(--accd);}
 
 /* LAYOUT */
@@ -56,7 +58,7 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);dis
 #sidebar{width:210px;background:var(--bg1);border-right:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;transition:transform .25s ease;}
 .sb-sec{border-bottom:1px solid var(--bdr);padding:5px 0;}
 .sb-hd{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);padding:4px 13px 5px;font-weight:600;}
-.si{display:flex;align-items:center;gap:8px;padding:5px 13px;cursor:pointer;font-size:12px;color:var(--t2);font-family:'Share Tech Mono',monospace;transition:all .1s;border-left:2px solid transparent;touch-action:manipulation;user-select:none;}
+.si{display:flex;align-items:center;gap:8px;padding:5px 13px;cursor:pointer;font-size:12px;color:var(--t2);font-family:'Share Tech Mono',monospace;transition:all .1s;border-left:2px solid transparent;}
 .si:hover,.si:active{background:var(--bg3);color:var(--t1);border-left-color:var(--acc);}
 .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 .dot.k{background:var(--sk);box-shadow:0 0 5px var(--sk);}
@@ -106,7 +108,7 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);dis
 .cm-s-line30 .cm-render {color:#d4a96a;font-weight:700;}
 
 /* AUTOCOMPLETE */
-.CodeMirror-hints{background:#111820!important;border:1px solid var(--bdrg)!important;border-radius:5px!important;box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 20px rgba(0,229,255,.05)!important;font-family:'Share Tech Mono',monospace!important;font-size:13px!important;padding:4px 0!important;max-height:260px!important;z-index:9999!important;}
+.CodeMirror-hints{background:#111820!important;border:1px solid var(--bdrg)!important;border-radius:5px!important;box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 20px rgba(0,229,255,.05)!important;font-family:'Share Tech Mono',monospace!important;font-size:11px!important;}
 .CodeMirror-hint{color:var(--t2)!important;padding:5px 12px!important;}
 .CodeMirror-hint-active{background:var(--accg)!important;color:var(--acc)!important;}
 .h-k{color:var(--sk);} .h-f{color:var(--sf);} .h-l{color:var(--sl);}
@@ -117,7 +119,7 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);dis
 /* QUICK BAR (mobile) */
 #quickbar{background:var(--bg1);border-top:1px solid var(--bdr);display:flex;align-items:center;gap:4px;padding:5px 8px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
 #quickbar::-webkit-scrollbar{display:none;}
-.qt{background:var(--bg2);border:1px solid var(--bdr);color:var(--t2);font-family:'Share Tech Mono',monospace;font-size:11px;padding:3px 8px;border-radius:3px;cursor:pointer;white-space:nowrap;flex-shrink:0;touch-action:manipulation;transition:all .12s;}
+.qt{background:var(--bg2);border:1px solid var(--bdr);color:var(--t2);font-family:'Share Tech Mono',monospace;font-size:11px;padding:3px 8px;border-radius:3px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .1s;touch-action:manipulation;}
 .qt:active,.qt:hover{background:var(--bg3);border-color:var(--bdrg);color:var(--t1);}
 .qt.ck{color:var(--sk);border-color:rgba(0,229,255,.2);}
 .qt.cf{color:var(--sf);border-color:rgba(255,145,0,.2);}
@@ -132,7 +134,7 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);dis
 .qsep{width:1px;height:16px;background:var(--bdr);flex-shrink:0;margin:0 2px;}
 
 /* STATUS */
-#statusbar{background:var(--bg1);border-top:1px solid var(--bdr);height:24px;display:flex;align-items:center;padding:0 12px;gap:16px;font-size:10.5px;font-family:'Share Tech Mono',monospace;color:var(--t3);flex-shrink:0;}
+#statusbar{background:var(--bg1);border-top:1px solid var(--bdr);height:24px;display:flex;align-items:center;padding:0 12px;gap:16px;font-size:10.5px;font-family:'Share Tech Mono',monospace;color:var(--t2);flex-shrink:0;}
 .sv{color:var(--t2);}
 .slang{margin-left:auto;color:var(--accd);letter-spacing:1px;}
 
@@ -301,6 +303,18 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
 .lrender-err{color:#ff4081;font-family:'Share Tech Mono',monospace;font-size:.76rem;}
 .lrender-empty{color:var(--t3);font-family:'Share Tech Mono',monospace;font-size:.76rem;}
 
+/* ── HTML rendering ────────────────────── */
+.lrender-html {
+  margin: 8px 0;
+  padding: 12px 16px;
+  border: 1px solid rgba(100, 255, 218, .2);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, .35);
+  overflow-x: auto;
+  white-space: normal;
+  color: #e4e4e4;
+}
+
 /* ── RENDER inline \R...\R ──────────────────────── */
 .con-inline-render{
   display:inline-block;
@@ -410,6 +424,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
     <div class="sb-sec"><div class="sb-hd">Rendering</div>
       <div class="si" data-ins="RENDER{\n  \n}"><span class="dot rd"></span>RENDER{…}<span class="si-arr">↵</span></div>
       <div class="si" data-ins="RENDER{\n  CHEM\n  \n}"><span class="dot rd"></span>RENDER CHEM<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="RENDER{\n  HTML\n  \n}"><span class="dot rd"></span>RENDER HTML<span class="si-arr">↵</span></div>
     </div>
   </div>
 
@@ -460,7 +475,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
       <span class="chip c">&gt;&gt;</span><span class="chip c">&lt;* *&gt;</span>
     </div>
     <div class="rp-blk"><div class="rp-t">Rendering</div>
-      <span class="chip rd">RENDER{}</span><span class="chip rd">CHEM</span>
+      <span class="chip rd">RENDER{}</span><span class="chip rd">CHEM</span><span class="chip rd">HTML</span>
       <span class="chip rd">\R</span><span class="chip e">\C{}</span>
     </div>
     <div class="rp-blk"><div class="rp-t">FOR sintassi</div>
@@ -476,7 +491,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
       <div class="rp-mono">lista[#0]<br>lista[tag]<br>lista[tag1;tag2]</div>
     </div>
     <div class="rp-blk"><div class="rp-t">RENDER / colori</div>
-      <div class="rp-mono">RENDER{<br>  formula<br>}<br><br>TALK testo \Rformula\R<br><br>\C{red+bold+_}...\C{}<br>colori: red green blue<br>cyan orange purple…<br>stili: bold italic - _</div>
+      <div class="rp-mono">RENDER{<br>  formula<br>}<br><br>RENDER{<br>  CHEM<br>  C(HHH=O)<br>}<br><br>RENDER{<br>  HTML<br>  &lt;h1&gt;Titolo&lt;/h1&gt;<br>}<br><br>\C{red+bold+_}...\C{}<br>colori: red green blue<br>cyan orange purple…<br>stili: bold italic - _</div>
     </div>
     <div class="rp-blk"><div class="rp-t">Tasti</div>
       <div class="rp-mono" style="line-height:2.1">
@@ -1000,22 +1015,15 @@ fileInput.onchange = function() {
   const file = this.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => {
-    editor.setValue(e.target.result);
-    editor.setCursor({line:0,ch:0});
-    editor.focus();
-    document.getElementById("filename").value = file.name.replace(/\.line$/i,"");
-  };
+  reader.onload = e => { editor.setValue(e.target.result); };
   reader.readAsText(file);
-  this.value = "";
 };
 
 /* ══════════════════════════════════════════
-   CONSOLE PANEL
+   CONSOLE  —  Output/Input
 ══════════════════════════════════════════ */
-const conWrap   = document.getElementById("console-wrap");
-const conOut    = document.getElementById("console-output");
-const conStatus = document.getElementById("console-status");
+const conWrap = document.getElementById("console-wrap");
+const conOut  = document.getElementById("console-output");
 const conInpRow = document.getElementById("console-input-row");
 const conInp    = document.getElementById("console-input");
 const conSend   = document.getElementById("console-send");
@@ -1084,110 +1092,74 @@ function _buildLine(rawText, cls) {
   };
 
   while (i < rawText.length) {
-    const c = rawText[i];
-
-    /* ── \R...formula...\R  ─────────────────── */
-    if (c === '\\' && rawText[i+1] === 'R') {
-      flush();
-      i += 2;
-      const end = rawText.indexOf('\\R', i);
-      const mathSrc = end >= 0 ? rawText.slice(i, end) : rawText.slice(i);
-      i = end >= 0 ? end + 2 : rawText.length;
-
-      const span = document.createElement('span');
-      span.className = 'con-inline-render';
-      if (typeof katex !== 'undefined' && typeof LINE_render_to_latex === 'function') {
-        try {
-          katex.render(LINE_render_to_latex(mathSrc.trim()), span,
-            { displayMode: false, throwOnError: false });
-        } catch(e) { span.textContent = mathSrc; }
-      } else {
-        span.textContent = '\\R' + mathSrc + '\\R';
-      }
-      _applyStyle(span, _conStyle);
-      el.appendChild(span);
-      continue;
-    }
-
-    /* ── \C{spec}  ──────────────────────────── */
-    if (c === '\\' && rawText[i+1] === 'C' && rawText[i+2] === '{') {
+    if (rawText[i] === '\\' && rawText[i+1] === 'C' && rawText[i+2] === '{') {
       flush();
       i += 3;
-      const end = rawText.indexOf('}', i);
-      const spec = end >= 0 ? rawText.slice(i, end) : '';
-      i = end >= 0 ? end + 1 : rawText.length;
+      let spec = '';
+      while (i < rawText.length && rawText[i] !== '}') spec += rawText[i++];
+      if (rawText[i] === '}') i++;
       _conStyle = _parseColorSpec(spec);
-      continue;
+    } else if (rawText[i] === '\\' && rawText[i+1] === 'R') {
+      flush();
+      i += 2;
+      let formula = '';
+      while (i < rawText.length && !(rawText[i] === '\\' && rawText[i+1] === 'R')) {
+        formula += rawText[i++];
+      }
+      if (rawText[i] === '\\' && rawText[i+1] === 'R') i += 2;
+      try {
+        if (typeof window.LINE_render_to_latex !== 'undefined' && typeof katex !== 'undefined') {
+          const latex = window.LINE_render_to_latex(formula);
+          const renderDiv = document.createElement('span');
+          renderDiv.className = 'con-inline-render';
+          katex.render(latex, renderDiv, { displayMode: false, throwOnError: false });
+          _applyStyle(renderDiv, _conStyle);
+          el.appendChild(renderDiv);
+        }
+      } catch(e) { buf += '\\R' + formula + '\\R'; }
+    } else {
+      buf += rawText[i++];
     }
-
-    buf += c;
-    i++;
   }
   flush();
-
-  if (!el.hasChildNodes()) el.appendChild(document.createTextNode('\u200b'));
   return el;
 }
 
-function conOpen()  { conWrap.classList.add("open"); }
-function conClose() { conWrap.classList.remove("open","tall"); }
-
-function conAppend(text, cls = "con-line-out") {
-  const formattable = (cls === "con-line-out" || cls === "con-line-err");
-  String(text).split("\n").forEach(line => {
-    const el = formattable ? _buildLine(line, cls) : (() => {
-      const d = document.createElement("div");
-      d.className = cls; d.textContent = line; return d;
-    })();
-    conOut.appendChild(el);
-  });
-  conOut.scrollTop = conOut.scrollHeight;
-}
-
-function conAppendRender(content) {
-  if (typeof LINE_render_html !== "function") {
-    conAppend("[RENDER] line-render.js non trovato", "con-line-err");
-    return;
+/* ── Output helpers ── */
+function conOpen() {
+  if (!conWrap.classList.contains('open')) {
+    conWrap.classList.add('open');
+    if (conOut.scrollHeight > 200) conWrap.classList.add('tall');
   }
-  const wrap = document.createElement("div");
-  wrap.className = "con-line-render";
-  wrap.innerHTML = LINE_render_html(content);
-  conOut.appendChild(wrap);
+}
+function conClose() { conWrap.classList.remove('open','tall'); }
+function conClear() { conOut.innerHTML = ''; _conStyle = null; }
+
+function conWrite(text, cls='con-line-out') {
+  conOpen();
+  const line = _buildLine(String(text), cls);
+  conOut.appendChild(line);
   conOut.scrollTop = conOut.scrollHeight;
 }
 
-function conSetStatus(state, text) {
-  conStatus.className = "con-status " + state;
-  conStatus.textContent = text;
+function conRender(html) {
+  conOpen();
+  const div = document.createElement('div');
+  div.className = 'con-line-render';
+  div.innerHTML = html;
+  conOut.appendChild(div);
+  conOut.scrollTop = conOut.scrollHeight;
 }
 
-function conClear() {
-  conOut.innerHTML = "";
-  _conStyle = null; // reset stile colore
-}
-
-function conShowInput(prompt) {
-  document.getElementById("console-prompt").textContent = prompt ? prompt + " >" : ">";
-  conInpRow.classList.add("visible");
-  conInp.value = "";
-  conInp.focus();
-}
-function conHideInput() {
-  conInpRow.classList.remove("visible");
-  conInp.value = "";
-}
-
-function submitInput() {
-  if (!inputResolve) return;
+async function submitInput() {
   const val = conInp.value;
-  conAppend((document.getElementById("console-prompt").textContent || ">") + " " + val, "con-line-inp");
-  conHideInput();
-  const res = inputResolve;
-  inputResolve = null;
-  res(val);
+  conInpRow.classList.remove('visible');
+  conOut.appendChild(_buildLine(val, 'con-line-inp'));
+  conOut.scrollTop = conOut.scrollHeight;
+  conInp.value = '';
+  if (inputResolve) { inputResolve(val); inputResolve = null; }
 }
 
-conSend.onclick = submitInput;
 conInp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); submitInput(); } });
 
 document.getElementById("con-close").onclick = conClose;
@@ -1206,7 +1178,7 @@ document.getElementById("con-save").onclick = () => {
   a.download = name; a.click(); URL.revokeObjectURL(a.href);
 };
 
-/* ── Salva PDF ── */
+/* ── Salva PDF (FULL PAGE - non solo quello visibile) ── */
 document.getElementById("con-pdf").onclick = async function() {
   const btn = this;
   const orig = btn.textContent;
@@ -1220,14 +1192,30 @@ document.getElementById("con-pdf").onclick = async function() {
     }
     const { jsPDF } = window.jspdf;
 
-    /* Snapshot della console a scala 2× per qualità */
-    const canvas = await html2canvas(conOut, {
+    // Salva lo scroll position corrente
+    const savedScrollTop = conOut.scrollTop;
+    
+    // Temporary container per catturare tutta la console
+    const tempContainer = document.createElement('div');
+    tempContainer.style.cssText = 'position:absolute;left:-9999px;top:0;width:'+conOut.offsetWidth+'px;background:#07090d;';
+    
+    // Clona tutto il contenuto della console
+    const clone = conOut.cloneNode(true);
+    tempContainer.appendChild(clone);
+    document.body.appendChild(tempContainer);
+
+    /* Snapshot della console completa a scala 2× per qualità */
+    const canvas = await html2canvas(tempContainer, {
       backgroundColor: '#07090d',
       scale: 2,
       logging: false,
       useCORS: true,
       allowTaint: true,
+      windowHeight: clone.scrollHeight, // Cattura l'intera altezza
     });
+
+    // Pulisci il temporary container
+    document.body.removeChild(tempContainer);
 
     const imgW = canvas.width;
     const imgH = canvas.height;
@@ -1240,6 +1228,7 @@ document.getElementById("con-pdf").onclick = async function() {
       unit: 'pt',
       format: [ptW, ptH]
     });
+    
     pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, ptW, ptH);
 
     const name = (document.getElementById("filename").value.trim() || "output") + "_log.pdf";
@@ -1272,80 +1261,44 @@ document.getElementById("con-pdf").onclick = async function() {
 })();
 
 /* ── ESEGUI ────────────────────────────────────── */
-const runBtn = document.getElementById("btn-run");
-
-function checkInterpreter() {
-  if (typeof LINE_run === "function") {
-    runBtn.classList.add("run");
-    runBtn.title = "Esegui programma";
-  } else {
-    runBtn.style.opacity = "0.4";
-    runBtn.title = "interpreter.js non trovato";
-  }
-}
-checkInterpreter();
-
-runBtn.onclick = async function() {
-  if (typeof LINE_run !== "function") {
-    alert("interpreter.js non trovato.\nMetti interpreter.js nella stessa cartella dell'editor e ricarica.");
-    return;
-  }
-
-  conOpen();
+document.getElementById("btn-run").onclick = async function(){
   conClear();
-  conHideInput();
-  conSetStatus("running", "● in esecuzione");
-
-  /* ── Pre-processa i blocchi RENDER{} ── */
-  let renderBlocks = {};
-  let sourceToRun = editor.getValue();
-  if (typeof LINE_render_preprocess === "function") {
-    const { processedSrc, blocks } = LINE_render_preprocess(sourceToRun);
-    sourceToRun = processedSrc;
-    blocks.forEach(b => { renderBlocks[b.index] = b.content; });
-  }
-
-  const startTime = Date.now();
+  const code = editor.getValue();
+  this.disabled = true;
+  const btnText = this.textContent;
+  this.textContent = '⟳ …';
+  document.getElementById("console-status").textContent = '';
+  document.getElementById("console-status").classList.remove('done','error');
+  document.getElementById("console-status").classList.add('running');
 
   try {
-    await LINE_run(sourceToRun, {
-      output(text) {
-        /* Intercetta i marker RENDER */
-        if (typeof LINE_RENDER_MARKER !== "undefined" &&
-            text.startsWith(LINE_RENDER_MARKER)) {
-          const idx = parseInt(text.slice(LINE_RENDER_MARKER.length));
-          if (!isNaN(idx) && renderBlocks[idx] !== undefined) {
-            conAppendRender(renderBlocks[idx]);
-            return;
-          }
-        }
-        conAppend(text, "con-line-out");
-      },
-      async input(prompt) {
-        conShowInput(prompt || "");
-        return new Promise(resolve => { inputResolve = resolve; });
+    const result = await LINE_run(code, {
+      output(s) { conWrite(s); },
+      input(prompt) {
+        return new Promise(resolve => {
+          conInpRow.classList.add('visible');
+          document.getElementById("console-prompt").textContent = (prompt || '>');
+          inputResolve = resolve;
+          conInp.focus();
+        });
       }
     });
-    const ms = Date.now() - startTime;
-    conSetStatus("done", `✓ terminato (${ms}ms)`);
-    conAppend(`\n── fine esecuzione (${ms}ms) ──`, "con-line-sys");
+    document.getElementById("console-status").textContent = '✓ Done';
+    document.getElementById("console-status").classList.remove('running');
+    document.getElementById("console-status").classList.add('done');
   } catch(e) {
-    conSetStatus("error", "✕ errore");
-    conAppend("ERRORE: " + e.message, "con-line-err");
-    console.error("[LINE]", e);
+    conWrite('ERRORE: ' + e.message, 'con-line-err');
+    document.getElementById("console-status").textContent = '✗ Errore';
+    document.getElementById("console-status").classList.remove('running');
+    document.getElementById("console-status").classList.add('error');
+    console.error(e);
   } finally {
-    conHideInput();
+    this.disabled = false;
+    this.textContent = btnText;
   }
 };
 
-setTimeout(()=>editor.focus(),80);
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="line-render.js" onerror="console.warn('[LINE-RENDER] line-render.js non trovato')"></script>
-<script src="interpreter.js" onerror="/* interpreter.js non trovato */"></script>
-<script data-goatcounter="https://qc17.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
