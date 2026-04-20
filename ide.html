@@ -282,7 +282,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
 }
 #console-send:hover{background:var(--accg);}
 
-/* ── RENDER output in console ──────────────────── */
+/* ── RENDER block output in console ────────────── */
 .con-line-render{
   margin:8px 0;padding:12px 16px;
   display:flex;justify-content:center;
@@ -300,6 +300,19 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
 .lrender-mol{display:flex;justify-content:center;}
 .lrender-err{color:#ff4081;font-family:'Share Tech Mono',monospace;font-size:.76rem;}
 .lrender-empty{color:var(--t3);font-family:'Share Tech Mono',monospace;font-size:.76rem;}
+
+/* ── RENDER inline \R...\R ──────────────────────── */
+.con-inline-render{
+  display:inline-block;
+  vertical-align:middle;
+  margin:0 3px;
+  line-height:1;
+}
+.con-inline-render .katex{ font-size:.98em; }
+
+/* ── PDF button ─────────────────────────────────── */
+.con-btn.pdf{ color:#d4a96a; }
+.con-btn.pdf:hover{ color:#d4a96a;border-color:#d4a96a;background:rgba(212,169,106,.08); }
 </style>
 </head>
 <body>
@@ -448,6 +461,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
     </div>
     <div class="rp-blk"><div class="rp-t">Rendering</div>
       <span class="chip rd">RENDER{}</span><span class="chip rd">CHEM</span>
+      <span class="chip rd">\R</span><span class="chip e">\C{}</span>
     </div>
     <div class="rp-blk"><div class="rp-t">FOR sintassi</div>
       <div class="rp-mono">FOR @lista #[start;end;step]<br>= @funzione()</div>
@@ -461,8 +475,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
     <div class="rp-blk"><div class="rp-t">Accesso lista</div>
       <div class="rp-mono">lista[#0]<br>lista[tag]<br>lista[tag1;tag2]</div>
     </div>
-    <div class="rp-blk"><div class="rp-t">RENDER sintassi</div>
-      <div class="rp-mono">RENDER{<br>  formula<br>}<br><br>RENDER{<br>  CHEM<br>  C(HHH=O)<br>}</div>
+    <div class="rp-blk"><div class="rp-t">RENDER / colori</div>
+      <div class="rp-mono">RENDER{<br>  formula<br>}<br><br>TALK testo \Rformula\R<br><br>\C{red+bold+_}...\C{}<br>colori: red green blue<br>cyan orange purple…<br>stili: bold italic - _</div>
     </div>
     <div class="rp-blk"><div class="rp-t">Tasti</div>
       <div class="rp-mono" style="line-height:2.1">
@@ -528,7 +542,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
   <div id="console-titlebar">
     <span id="console-title">Console</span>
     <span id="console-status"></span>
-    <button class="con-btn" id="con-save" title="Salva output come .txt">SALVA LOG</button>
+    <button class="con-btn" id="con-save" title="Salva output come .txt">TXT</button>
+    <button class="con-btn pdf" id="con-pdf" title="Salva output come PDF (conserva rendering)">PDF</button>
     <button class="con-btn" id="con-clear" title="Pulisci console">PULISCI</button>
     <button class="con-btn danger" id="con-close">✕</button>
   </div>
@@ -575,6 +590,16 @@ CodeMirror.defineMode("line30", function() {
       /* ── escape sequences ── */
       if (stream.peek() === '\\') {
         stream.next();
+        // \C{...} color escape — consuma fino alla }
+        if (stream.peek() === 'C') {
+          stream.next();
+          if (stream.peek() === '{') {
+            stream.next();
+            while (!stream.eol() && stream.peek() !== '}') stream.next();
+            if (stream.peek() === '}') stream.next();
+          }
+          return "escape";
+        }
         if (!stream.eol()) stream.next();
         return "escape";
       }
@@ -752,6 +777,8 @@ const HINTS = [
   {t:" //= ",     d:"//=",      c:"h-op", i:"div. intera e assegna"},
   {t:" %= ",      d:"%=",       c:"h-op", i:"resto div. e assegna"},
   {t:"RENDER{\n  \n}", d:"RENDER{}", c:"h-rd", i:"rendering matematico/chimico"},
+  {t:"\\R",       d:"\\R",      c:"h-rd", i:"inizio/fine render inline"},
+  {t:"\\C{",      d:"\\C{",     c:"h-e",  i:"colore/stile testo console"},
 ];
 
 function line30Hint(cm) {
@@ -995,18 +1022,128 @@ const conSend   = document.getElementById("console-send");
 
 let inputResolve = null;
 
-function conOpen() { conWrap.classList.add("open"); }
+/* ══════════════════════════════════════════
+   CONSOLE TEXT FORMATTING
+   Supporta \R...formula...\R  (render inline KaTeX)
+   e \C{color+bold+_+italic+-}  (colori e stili)
+   \C{} ripristina lo stile di default
+══════════════════════════════════════════ */
+let _conStyle = null; // null = default
+
+const _CCOLORS = {
+  red:    '#ff5370', green:  '#69f0ae', blue:   '#82aaff',
+  yellow: '#ffcc02', orange: '#ff9100', pink:   '#ff4081',
+  cyan:   '#00e5ff', purple: '#ce93d8', teal:   '#80cbc4',
+  white:  '#e4e4e4', gray:   '#7a8fa8', amber:  '#ffb300',
+  lime:   '#b9f56f', navy:   '#80b0ff', gold:   '#ffd04b',
+  magenta:'#f48fb1', brown:  '#c4a97b', sky:    '#40c4ff',
+};
+
+function _parseColorSpec(spec) {
+  if (!spec.trim()) return null; // vuoto → reset
+  const parts = spec.split('+').map(p => p.trim().toLowerCase());
+  const s = { color:null, bold:false, italic:false, strike:false, underline:false };
+  for (const p of parts) {
+    if      (p === 'bold')   s.bold    = true;
+    else if (p === 'italic') s.italic  = true;
+    else if (p === '-')      s.strike  = true;
+    else if (p === '_')      s.underline = true;
+    else s.color = _CCOLORS[p] || (p.match(/^#[0-9a-f]{3,6}$/) ? p : null) || p;
+  }
+  return s;
+}
+
+function _applyStyle(el, s) {
+  if (!s) return;
+  const css = [];
+  if (s.color)     css.push('color:' + s.color);
+  if (s.bold)      css.push('font-weight:700');
+  if (s.italic)    css.push('font-style:italic');
+  const td = [];
+  if (s.strike)    td.push('line-through');
+  if (s.underline) td.push('underline');
+  if (td.length)   css.push('text-decoration:' + td.join(' '));
+  if (css.length)  el.style.cssText = css.join(';');
+}
+
+/* Costruisce un elemento riga con \R e \C{} interpretati */
+function _buildLine(rawText, cls) {
+  const el = document.createElement('div');
+  el.className = cls;
+  el.style.whiteSpace = 'pre-wrap';
+
+  let i = 0, buf = '';
+
+  const flush = () => {
+    if (!buf) return;
+    const span = document.createElement('span');
+    span.textContent = buf;
+    _applyStyle(span, _conStyle);
+    el.appendChild(span);
+    buf = '';
+  };
+
+  while (i < rawText.length) {
+    const c = rawText[i];
+
+    /* ── \R...formula...\R  ─────────────────── */
+    if (c === '\\' && rawText[i+1] === 'R') {
+      flush();
+      i += 2;
+      const end = rawText.indexOf('\\R', i);
+      const mathSrc = end >= 0 ? rawText.slice(i, end) : rawText.slice(i);
+      i = end >= 0 ? end + 2 : rawText.length;
+
+      const span = document.createElement('span');
+      span.className = 'con-inline-render';
+      if (typeof katex !== 'undefined' && typeof LINE_render_to_latex === 'function') {
+        try {
+          katex.render(LINE_render_to_latex(mathSrc.trim()), span,
+            { displayMode: false, throwOnError: false });
+        } catch(e) { span.textContent = mathSrc; }
+      } else {
+        span.textContent = '\\R' + mathSrc + '\\R';
+      }
+      _applyStyle(span, _conStyle);
+      el.appendChild(span);
+      continue;
+    }
+
+    /* ── \C{spec}  ──────────────────────────── */
+    if (c === '\\' && rawText[i+1] === 'C' && rawText[i+2] === '{') {
+      flush();
+      i += 3;
+      const end = rawText.indexOf('}', i);
+      const spec = end >= 0 ? rawText.slice(i, end) : '';
+      i = end >= 0 ? end + 1 : rawText.length;
+      _conStyle = _parseColorSpec(spec);
+      continue;
+    }
+
+    buf += c;
+    i++;
+  }
+  flush();
+
+  if (!el.hasChildNodes()) el.appendChild(document.createTextNode('\u200b'));
+  return el;
+}
+
+function conOpen()  { conWrap.classList.add("open"); }
 function conClose() { conWrap.classList.remove("open","tall"); }
+
 function conAppend(text, cls = "con-line-out") {
-  const lines = String(text).split("\n");
-  lines.forEach(line => {
-    const div = document.createElement("div");
-    div.className = cls;
-    div.textContent = line;
-    conOut.appendChild(div);
+  const formattable = (cls === "con-line-out" || cls === "con-line-err");
+  String(text).split("\n").forEach(line => {
+    const el = formattable ? _buildLine(line, cls) : (() => {
+      const d = document.createElement("div");
+      d.className = cls; d.textContent = line; return d;
+    })();
+    conOut.appendChild(el);
   });
   conOut.scrollTop = conOut.scrollHeight;
 }
+
 function conAppendRender(content) {
   if (typeof LINE_render_html !== "function") {
     conAppend("[RENDER] line-render.js non trovato", "con-line-err");
@@ -1018,11 +1155,17 @@ function conAppendRender(content) {
   conOut.appendChild(wrap);
   conOut.scrollTop = conOut.scrollHeight;
 }
+
 function conSetStatus(state, text) {
   conStatus.className = "con-status " + state;
   conStatus.textContent = text;
 }
-function conClear() { conOut.innerHTML = ""; }
+
+function conClear() {
+  conOut.innerHTML = "";
+  _conStyle = null; // reset stile colore
+}
+
 function conShowInput(prompt) {
   document.getElementById("console-prompt").textContent = prompt ? prompt + " >" : ">";
   conInpRow.classList.add("visible");
@@ -1049,12 +1192,112 @@ conInp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefa
 
 document.getElementById("con-close").onclick = conClose;
 document.getElementById("con-clear").onclick = conClear;
+
+/* ── Salva TXT ── */
 document.getElementById("con-save").onclick = () => {
-  const lines = [...conOut.querySelectorAll("div:not(.con-line-render)")].map(d => d.textContent).join("\n");
-  const name  = (document.getElementById("filename").value.trim() || "output") + "_log.txt";
-  const a     = document.createElement("a");
-  a.href      = URL.createObjectURL(new Blob([lines], {type:"text/plain"}));
-  a.download  = name; a.click(); URL.revokeObjectURL(a.href);
+  // Estrae testo puro (rimuove eventuali sequenze \R \C{} residue)
+  const lines = [...conOut.children].map(el => {
+    if (el.classList.contains('con-line-render')) return '[RENDER]';
+    return el.textContent;
+  }).join("\n");
+  const name = (document.getElementById("filename").value.trim() || "output") + "_log.txt";
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([lines], {type:"text/plain"}));
+  a.download = name; a.click(); URL.revokeObjectURL(a.href);
+};
+
+/* ── Salva PDF — intero log ── */
+document.getElementById("con-pdf").onclick = async function() {
+  const btn = this;
+  const orig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '…';
+
+  let ghost = null;
+  try {
+    if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+      alert('Librerie PDF non caricate. Controlla la connessione e ricarica la pagina.');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+
+    /*
+     * Clona il contenuto della console in un div off-screen
+     * senza nessuna restrizione di altezza, così html2canvas
+     * cattura TUTTO il log indipendentemente dallo scroll.
+     */
+    ghost = document.createElement('div');
+    ghost.style.cssText = [
+      'position:fixed',
+      'top:0',
+      'left:-99999px',          /* fuori schermo — non visibile */
+      'width:' + conOut.offsetWidth + 'px',
+      'height:auto',            /* altezza libera: tutto il contenuto */
+      'overflow:visible',
+      'background:#07090d',
+      'padding:10px 14px',
+      'font-family:"Share Tech Mono",monospace',
+      'font-size:13px',
+      'line-height:1.7',
+      'color:#cdd9e5',
+      'white-space:pre-wrap',
+      'word-break:break-word',
+      'box-sizing:border-box',
+    ].join(';');
+
+    /* Copia profonda di tutti i figli (inclusi gli iframe KaTeX e gli SVG CHEM) */
+    ghost.innerHTML = conOut.innerHTML;
+
+    /* Forza ogni elemento figlio a non avere overflow nascosto */
+    ghost.querySelectorAll('*').forEach(el => {
+      el.style.overflow = 'visible';
+      el.style.maxHeight = 'none';
+    });
+
+    document.body.appendChild(ghost);
+
+    /* Aspetta un frame per assicurarsi che il layout sia calcolato */
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    const canvas = await html2canvas(ghost, {
+      backgroundColor: '#07090d',
+      scale: 2,
+      logging: false,
+      useCORS: true,
+      allowTaint: true,
+      width: ghost.offsetWidth,
+      height: ghost.scrollHeight,   /* altezza reale completa */
+      windowWidth: ghost.offsetWidth,
+      windowHeight: ghost.scrollHeight,
+    });
+
+    document.body.removeChild(ghost);
+    ghost = null;
+
+    /* Dimensioni in pt per jsPDF (scala 2× → ÷2, poi 96dpi→72pt → ×0.75) */
+    const ptW = (canvas.width  / 2) * 0.75;
+    const ptH = (canvas.height / 2) * 0.75;
+
+    /* PDF con dimensioni custom uguali al contenuto */
+    const pdf = new jsPDF({
+      orientation: ptW > ptH ? 'l' : 'p',
+      unit: 'pt',
+      format: [ptW, ptH],
+      compress: true,
+    });
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, ptW, ptH);
+
+    const name = (document.getElementById("filename").value.trim() || "output") + "_log.pdf";
+    pdf.save(name);
+
+  } catch(e) {
+    console.error('[LINE PDF]', e);
+    alert('Errore PDF: ' + e.message);
+  } finally {
+    if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
+    btn.disabled = false;
+    btn.textContent = orig;
+  }
 };
 
 /* Resize drag */
@@ -1146,6 +1389,8 @@ setTimeout(()=>editor.focus(),80);
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="line-render.js" onerror="console.warn('[LINE-RENDER] line-render.js non trovato')"></script>
 <script src="interpreter.js" onerror="/* interpreter.js non trovato */"></script>
 <script data-goatcounter="https://qc17.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
