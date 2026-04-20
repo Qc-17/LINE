@@ -52,6 +52,6 @@ LINE is an open project. Contributions are welcome: bug reports, feature suggest
 
 <div align="center">
 
-Copyright © [qc-17](https://github.com/qc-17) · [GNU GPL v3.0](https://www.gnu.org/licenses/gpl-3.0.html)
+Copyleft [qc-17](https://github.com/qc-17) · [GNU GPL v3.0](https://www.gnu.org/licenses/gpl-3.0.html)
 
 </div>
