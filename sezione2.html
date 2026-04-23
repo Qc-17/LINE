@@ -3,7 +3,7 @@
   <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sezione 1: Benvenuto in LINE — Manuale LINE 3.0</title>
+  <title>Sezione 2: Variabili e tipi — Manuale LINE 3.0</title>
   <link rel="icon" href="favicon.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
@@ -164,80 +164,137 @@
           <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house"></i> Home</a></li>
           <li class="nav-item"><a class="nav-link" href="ide.html"><i class="bi bi-terminal"></i> IDE</a></li>
           <li class="nav-item">
-            <span class="badge bg-primary-subtle text-primary px-3 py-2">Sezione 1/10</span>
+            <span class="badge bg-primary-subtle text-primary px-3 py-2">Sezione 2/10</span>
           </li>
         </ul>
       </div>
     </div>
   </nav>
-  <section class="hero" style="background:linear-gradient(135deg, rgba(13,110,253,.85), rgba(155,89,182,.85)), url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;">
+  <section class="hero" style="background:linear-gradient(135deg, rgba(13,110,253,.85), rgba(155,89,182,.85)), url('https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;">
     <div class="hero-content fade-in">
-      <span class="badge bg-light text-primary mb-3 px-3 py-2 fs-6">Sezione 1</span>
-      <h1 class="display-4 fw-bold mt-2">Benvenuto in LINE</h1>
-      <p class="lead mt-3">Cos'è LINE, come si scrivono i commenti e i caratteri di escape.</p>
+      <span class="badge bg-light text-primary mb-3 px-3 py-2 fs-6">Sezione 2</span>
+      <h1 class="display-4 fw-bold mt-2">Variabili e tipi</h1>
+      <p class="lead mt-3">Come dichiarare variabili, gestire tipi di dato e usare STAY e IF.</p>
     </div>
   </section>
   <div class="container mt-3">
     <div class="d-flex justify-content-between small text-muted mb-1">
       <span>Progresso del corso</span>
-      <span>10%</span>
+      <span>20%</span>
     </div>
     <div class="progress-track" style="height:8px;">
-      <div style="width:10%; height:100%; background:linear-gradient(90deg,#0d6efd,#9b59b6); transition:width .8s ease;"></div>
+      <div style="width:20%; height:100%; background:linear-gradient(90deg,#0d6efd,#9b59b6); transition:width .8s ease;"></div>
     </div>
   </div><div class="container py-5">
   <div class="card section-card p-4 p-md-5 mb-4 reveal">
   <div class="row align-items-center g-4">
-    <div class="col-lg-6">
-      <div class="icon-circle"><i class="bi bi-stars"></i></div>
-      <h2 class="fw-bold">Cos'è LINE?</h2>
-      <p class="lead">LINE è un linguaggio di programmazione progettato per essere comprensibile e facile da apprendere.</p>
-      <p>La sintassi mette al centro la <strong>logica</strong>, rendendola leggibile quasi come testo naturale. Il nome è un acronimo: <em>Language with Intuitive and Natural Expression</em>.</p>
-      <p class="mb-0">Un programma LINE viene salvato in un file con estensione <code>.line</code> ed eseguito dall'interprete.</p>
+    <div class="col-lg-7">
+      <div class="icon-circle"><i class="bi bi-box-seam"></i></div>
+      <h2 class="fw-bold">Variabili</h2>
+      <p>Una variabile ha questa forma:</p>
+      <pre class="code-block"><code>TIPO_VARIABILE nome_variabile = dati</code></pre>
+      <ul>
+        <li><strong>TIPO_VARIABILE</strong> — indica la tipologia (vedi più sotto). Può essere omesso per le variabili standard.</li>
+        <li><strong>nome_variabile</strong> — nome univoco. Può contenere lettere, numeri (non in prima posizione) e <code>_</code>.</li>
+        <li><strong>dati</strong> — il valore immagazzinato. Se c'è più di un dato si tratta di una lista.</li>
+      </ul>
+      <p>Per riferirsi al valore di una variabile da un altro punto del codice si usa <code>@</code> davanti al nome:</p>
+      <pre class="code-block"><code>nome = Mario
+  TALK Ciao, @nome!
+  &lt;* Output: Ciao, Mario! *&gt;</code></pre>
+      <p class="text-muted small">Il "potere" di <code>@</code> si interrompe al primo carattere non ammesso nel nome (spazio, <code>!</code>, <code>,</code>, ecc.).</p>
     </div>
-    <div class="col-lg-6">
-      <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80" alt="LINE" class="cover-img mb-3"/>
+    <div class="col-lg-5">
+      <img src="https://images.unsplash.com/photo-1633419461186-7d40a38105ec?auto=format&fit=crop&w=900&q=80" alt="Variables" class="cover-img mb-3"/>
     </div>
   </div>
   </div>
 
   <div class="card section-card p-4 p-md-5 mb-4 reveal">
-  <div class="icon-circle"><i class="bi bi-chat-left-text"></i></div>
-  <h2 class="fw-bold">Commenti</h2>
-  <p>I commenti sono ignorati dall'interprete: servono a spiegare il codice. LINE supporta sia commenti su singola riga che multilinea.</p>
-  <pre class="code-block"><code>&gt;&gt; Commento su singola riga
-
-  &lt;* Commento
-     multilinea *&gt;</code></pre>
-  </div>
-
-  <div class="card section-card p-4 p-md-5 mb-4 reveal">
-  <div class="icon-circle"><i class="bi bi-slash-square"></i></div>
-  <h2 class="fw-bold">Escape</h2>
-  <p>Il carattere di escape è il backslash <code>\</code>. Precede caratteri speciali per dargli un significato diverso da quello letterale.</p>
+  <div class="icon-circle"><i class="bi bi-123"></i></div>
+  <h2 class="fw-bold">Tipi di dato</h2>
+  <p>Esistono tre tipi di dato. Il prefisso <code>#</code> davanti al nome dichiara che la variabile contiene un numerale o un booleano.</p>
   <div class="table-responsive">
-  <table class="table table-striped align-middle">
-    <thead class="table-primary"><tr><th>Sequenza</th><th>Significato</th></tr></thead>
+  <table class="table table-bordered align-middle">
+    <thead class="table-primary"><tr><th>Tipo</th><th>Prefisso</th><th>Descrizione</th></tr></thead>
     <tbody>
-      <tr><td><code>\n</code></td><td>Vai a capo (newline)</td></tr>
-      <tr><td><code>\\</code></td><td>Backslash letterale</td></tr>
-      <tr><td><code>\@</code></td><td><code>@</code> letterale (non riferimento a variabile)</td></tr>
-      <tr><td><code>\%</code></td><td><code>%</code> letterale (<code>%</code> senza escape è invisibile in TALK)</td></tr>
-      <tr><td><code>\;</code></td><td><code>;</code> letterale in una lista</td></tr>
-      <tr><td><code>\|</code></td><td><code>|</code> letterale in una lista</td></tr>
-      <tr><td><code>\tNOME</code></td><td>Tipo della variabile NOME (<code>string</code>, <code>number</code> o <code>bool</code>)</td></tr>
+      <tr><td>Stringa</td><td><em>(nessuno)</em></td><td>Immagazzina il dato come testo</td></tr>
+      <tr><td>Numerale</td><td><code>#</code></td><td>Immagazzina un valore numerico</td></tr>
+      <tr><td>Booleano</td><td><code>#</code></td><td>Solo due valori: <code>V</code> (vero) o <code>F</code> (falso)</td></tr>
     </tbody>
   </table>
   </div>
-  <div class="alert alert-info mt-3"><i class="bi bi-info-circle"></i> <strong>Nota su <code>%</code>:</strong> il simbolo <code>%</code> scritto direttamente in un TALK è invisibile nell'output. Se contenuto in una variabile, viene stampato normalmente. Per stamparlo direttamente usa <code>\%</code>.</div>
+  <pre class="code-block"><code>var = 8      &gt;&gt; stringa: immagazzina il testo "8"
+  #var = 8     &gt;&gt; numerale: immagazzina il numero 8
+  var = V      &gt;&gt; stringa: immagazzina il testo "V"
+  #var = V     &gt;&gt; booleano: immagazzina il valore vero</code></pre>
+
+  <h4 class="mt-4">Conversioni di tipo</h4>
+  <div class="table-responsive">
+  <table class="table align-middle">
+    <thead class="table-light"><tr><th>Comando</th><th>Effetto</th></tr></thead>
+    <tbody>
+      <tr><td><code>n:var</code></td><td>Converte in numerale. Se la stringa è un numero usa quel valore, altrimenti vale <code>1</code>. Stringa vuota → <code>0</code>.</td></tr>
+      <tr><td><code>b:var</code></td><td>Converte in booleano. Stringa vuota o "F" → <code>F</code>, tutto il resto → <code>V</code>. Da numero: 0 → F, qualsiasi altro → V.</td></tr>
+      <tr><td><code>s:var</code></td><td>Converte in stringa. Il valore diventa testo leggibile.</td></tr>
+    </tbody>
+  </table>
   </div>
-  <div class="nav-arrows"><a href="index.html" class="prev">
-        <span class="label">← Indietro</span>
-        <span class="title">Home</span>
+  <pre class="code-block"><code>var = 8
+  n:var        &gt;&gt; ora var è il numerale 8
+
+  #n = 0
+  b:n          &gt;&gt; ora n è il booleano F
+
+  #n = 5
+  s:n          &gt;&gt; ora n è la stringa "5"</code></pre>
+  <p class="mt-3">Per sapere il tipo attuale di una variabile si usa <code>\t</code> seguito dal nome:</p>
+  <pre class="code-block"><code>#eta = 25
+  TALK \teta   &gt;&gt; Output: number
+
+  nome = Mario
+  TALK \tnome  &gt;&gt; Output: string</code></pre>
+  </div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <div class="icon-circle"><i class="bi bi-diagram-3"></i></div>
+  <h2 class="fw-bold">Tipi di variabile</h2>
+  <p>Esistono tre tipi di variabile.</p>
+
+  <h4 class="mt-4">Standard <small class="text-muted">(nessun prefisso)</small></h4>
+  <p>La più comune. Il valore può essere cambiato con una <strong>riassegnazione</strong>:</p>
+  <pre class="code-block"><code>var = Buongiorno   &gt;&gt; dichiarazione
+  var = Arrivederci  &gt;&gt; riassegnazione</code></pre>
+  <p>Si può anche cambiare tipo durante la riassegnazione:</p>
+  <pre class="code-block"><code>var = Ciao    &gt;&gt; stringa
+  #var = V      &gt;&gt; riassegnata come booleano</code></pre>
+  <div class="alert alert-warning"><strong>Importante:</strong> se una variabile viene posta uguale a un'altra e quella cambia, la prima <strong>non cambierà</strong> — il valore viene copiato al momento dell'assegnazione.</div>
+  <pre class="code-block"><code>#a = 5
+  var = @a    &gt;&gt; var vale 5 (copia di a)
+  #a = 6      &gt;&gt; a cambia, ma var rimane 5</code></pre>
+
+  <h4 class="mt-4">STAY — costante</h4>
+  <p>Si antepone <code>STAY</code> alla dichiarazione. Il valore non può essere cambiato in nessun modo.</p>
+  <pre class="code-block"><code>STAY #pi = 3.14
+  STAY lingua = italiano</code></pre>
+
+  <h4 class="mt-4">IF — reattiva</h4>
+  <p>Si antepone <code>IF</code>. Possono contenere solo booleani o operazioni che producono booleani. Il prefisso <code>#</code> non è necessario.</p>
+  <pre class="code-block"><code>IF vero = V          &gt;&gt; corretto
+  IF errore = 5        &gt;&gt; ERRORE: 5 non è un booleano</code></pre>
+  <p>La caratteristica speciale: se una variabile IF è posta uguale a un'altra e quella cambia, <strong>anche la IF cambia di conseguenza</strong>.</p>
+  <pre class="code-block"><code>#a = V
+  IF cond = @a
+  #a = F    &gt;&gt; adesso anche cond vale F</code></pre>
+  </div>
+  <div class="nav-arrows">
+      <a href="sezione1.html" class="prev">
+        <span class="label">← Precedente</span>
+        <span class="title">Sezione 1</span>
       </a>
-      <a href="sezione2.html" class="next" style="background:linear-gradient(135deg,#0d6efd,#9b59b6); color:white;">
+      <a href="sezione3.html" class="next" style="background:linear-gradient(135deg,#0d6efd,#9b59b6); color:white;">
         <span class="label" style="color:rgba(255,255,255,.8)">Successiva →</span>
-        <span class="title">Sezione 2</span>
+        <span class="title">Sezione 3</span>
       </a>
     </div></div>
   <footer class="footer">

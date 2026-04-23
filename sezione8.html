@@ -3,7 +3,7 @@
   <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sezione 1: Benvenuto in LINE — Manuale LINE 3.0</title>
+  <title>Sezione 8: Errori, moduli e file LINE — Manuale LINE 3.0</title>
   <link rel="icon" href="favicon.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
@@ -164,80 +164,149 @@
           <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house"></i> Home</a></li>
           <li class="nav-item"><a class="nav-link" href="ide.html"><i class="bi bi-terminal"></i> IDE</a></li>
           <li class="nav-item">
-            <span class="badge bg-primary-subtle text-primary px-3 py-2">Sezione 1/10</span>
+            <span class="badge bg-primary-subtle text-primary px-3 py-2">Sezione 8/10</span>
           </li>
         </ul>
       </div>
     </div>
   </nav>
-  <section class="hero" style="background:linear-gradient(135deg, rgba(13,110,253,.85), rgba(155,89,182,.85)), url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;">
+  <section class="hero" style="background:linear-gradient(135deg, rgba(13,110,253,.85), rgba(155,89,182,.85)), url('https://images.unsplash.com/photo-1607799279861-4dd421887fb3?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;">
     <div class="hero-content fade-in">
-      <span class="badge bg-light text-primary mb-3 px-3 py-2 fs-6">Sezione 1</span>
-      <h1 class="display-4 fw-bold mt-2">Benvenuto in LINE</h1>
-      <p class="lead mt-3">Cos'è LINE, come si scrivono i commenti e i caratteri di escape.</p>
+      <span class="badge bg-light text-primary mb-3 px-3 py-2 fs-6">Sezione 8</span>
+      <h1 class="display-4 fw-bold mt-2">Errori, moduli e file LINE</h1>
+      <p class="lead mt-3">Gestione degli errori con TRY/SHOW/YET, moduli standard e file .line.</p>
     </div>
   </section>
   <div class="container mt-3">
     <div class="d-flex justify-content-between small text-muted mb-1">
       <span>Progresso del corso</span>
-      <span>10%</span>
+      <span>80%</span>
     </div>
     <div class="progress-track" style="height:8px;">
-      <div style="width:10%; height:100%; background:linear-gradient(90deg,#0d6efd,#9b59b6); transition:width .8s ease;"></div>
+      <div style="width:80%; height:100%; background:linear-gradient(90deg,#0d6efd,#9b59b6); transition:width .8s ease;"></div>
     </div>
   </div><div class="container py-5">
   <div class="card section-card p-4 p-md-5 mb-4 reveal">
-  <div class="row align-items-center g-4">
-    <div class="col-lg-6">
-      <div class="icon-circle"><i class="bi bi-stars"></i></div>
-      <h2 class="fw-bold">Cos'è LINE?</h2>
-      <p class="lead">LINE è un linguaggio di programmazione progettato per essere comprensibile e facile da apprendere.</p>
-      <p>La sintassi mette al centro la <strong>logica</strong>, rendendola leggibile quasi come testo naturale. Il nome è un acronimo: <em>Language with Intuitive and Natural Expression</em>.</p>
-      <p class="mb-0">Un programma LINE viene salvato in un file con estensione <code>.line</code> ed eseguito dall'interprete.</p>
-    </div>
-    <div class="col-lg-6">
-      <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80" alt="LINE" class="cover-img mb-3"/>
-    </div>
-  </div>
-  </div>
-
-  <div class="card section-card p-4 p-md-5 mb-4 reveal">
-  <div class="icon-circle"><i class="bi bi-chat-left-text"></i></div>
-  <h2 class="fw-bold">Commenti</h2>
-  <p>I commenti sono ignorati dall'interprete: servono a spiegare il codice. LINE supporta sia commenti su singola riga che multilinea.</p>
-  <pre class="code-block"><code>&gt;&gt; Commento su singola riga
-
-  &lt;* Commento
-     multilinea *&gt;</code></pre>
-  </div>
-
-  <div class="card section-card p-4 p-md-5 mb-4 reveal">
-  <div class="icon-circle"><i class="bi bi-slash-square"></i></div>
-  <h2 class="fw-bold">Escape</h2>
-  <p>Il carattere di escape è il backslash <code>\</code>. Precede caratteri speciali per dargli un significato diverso da quello letterale.</p>
+  <div class="icon-circle"><i class="bi bi-exclamation-triangle"></i></div>
+  <h2 class="fw-bold">Codici di errore</h2>
   <div class="table-responsive">
-  <table class="table table-striped align-middle">
-    <thead class="table-primary"><tr><th>Sequenza</th><th>Significato</th></tr></thead>
+  <table class="table table-sm table-striped">
+    <thead class="table-danger"><tr><th>Codice</th><th>Causa</th></tr></thead>
     <tbody>
-      <tr><td><code>\n</code></td><td>Vai a capo (newline)</td></tr>
-      <tr><td><code>\\</code></td><td>Backslash letterale</td></tr>
-      <tr><td><code>\@</code></td><td><code>@</code> letterale (non riferimento a variabile)</td></tr>
-      <tr><td><code>\%</code></td><td><code>%</code> letterale (<code>%</code> senza escape è invisibile in TALK)</td></tr>
-      <tr><td><code>\;</code></td><td><code>;</code> letterale in una lista</td></tr>
-      <tr><td><code>\|</code></td><td><code>|</code> letterale in una lista</td></tr>
-      <tr><td><code>\tNOME</code></td><td>Tipo della variabile NOME (<code>string</code>, <code>number</code> o <code>bool</code>)</td></tr>
+      <tr><td><code>VAR_NOT_FOUND</code></td><td>Variabile inesistente</td></tr>
+      <tr><td><code>TYPE_ERROR</code></td><td>Tipo di dato non valido</td></tr>
+      <tr><td><code>INVALID_CONVERSION</code></td><td>Conversione di tipo non possibile</td></tr>
+      <tr><td><code>CONST_MODIFY</code></td><td>Tentativo di modifica di una costante (STAY)</td></tr>
+      <tr><td><code>DIV_BY_ZERO</code></td><td>Divisione per zero</td></tr>
+      <tr><td><code>MATH_ERROR</code></td><td>Operazione matematica non valida</td></tr>
+      <tr><td><code>BOOL_EXPECTED</code></td><td>Atteso valore booleano</td></tr>
+      <tr><td><code>NUMBER_EXPECTED</code></td><td>Atteso valore numerico</td></tr>
+      <tr><td><code>STRING_EXPECTED</code></td><td>Attesa stringa</td></tr>
+      <tr><td><code>LIST_NOT_FOUND</code></td><td>Lista inesistente</td></tr>
+      <tr><td><code>LIST_OUT_OF_RANGE</code></td><td>Indice fuori dai limiti della lista</td></tr>
+      <tr><td><code>LIST_EMPTY</code></td><td>Lista vuota</td></tr>
+      <tr><td><code>TAG_NOT_FOUND</code></td><td>Tag inesistente nella lista</td></tr>
+      <tr><td><code>DUPLICATE_TAG</code></td><td>Tag duplicato non consentito</td></tr>
+      <tr><td><code>FUNC_NOT_FOUND</code></td><td>Funzione inesistente</td></tr>
+      <tr><td><code>INVALID_ARGUMENTS</code></td><td>Argomenti non validi</td></tr>
+      <tr><td><code>RETURN_NOT_ALLOWED</code></td><td>Uso di return non consentito</td></tr>
+      <tr><td><code>THEN_ARGUMENTS</code></td><td>Uso di argomenti in un blocco THEN</td></tr>
+      <tr><td><code>IF_NOT_FOUND</code></td><td>IF block inesistente</td></tr>
+      <tr><td><code>GO_INVALID</code></td><td>GO block non valido</td></tr>
+      <tr><td><code>GO_LOOP_ERROR</code></td><td>Loop infinito o non valido</td></tr>
+      <tr><td><code>INPUT_ERROR</code></td><td>Errore nell'input</td></tr>
+      <tr><td><code>OUTPUT_ERROR</code></td><td>Errore di output</td></tr>
+      <tr><td><code>SYNTAX_ERROR</code></td><td>Errore di sintassi</td></tr>
+      <tr><td><code>ESCAPE_ERROR</code></td><td>Escape non valido</td></tr>
+      <tr><td><code>MOD_NOT_FOUND</code></td><td>Modulo non trovato</td></tr>
+      <tr><td><code>UNKNOWN_ERROR</code></td><td>Errore sconosciuto</td></tr>
     </tbody>
   </table>
   </div>
-  <div class="alert alert-info mt-3"><i class="bi bi-info-circle"></i> <strong>Nota su <code>%</code>:</strong> il simbolo <code>%</code> scritto direttamente in un TALK è invisibile nell'output. Se contenuto in una variabile, viene stampato normalmente. Per stamparlo direttamente usa <code>\%</code>.</div>
   </div>
-  <div class="nav-arrows"><a href="index.html" class="prev">
-        <span class="label">← Indietro</span>
-        <span class="title">Home</span>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <div class="icon-circle"><i class="bi bi-shield-check"></i></div>
+  <h2 class="fw-bold">TRY / SHOW / YET</h2>
+  <p>Permettono di gestire errori di esecuzione senza interrompere bruscamente il programma.</p>
+  <pre class="code-block"><code>TRY nome_try
+    ...codice che potrebbe dare errore...
+    TREND
+
+  SHOW nome_show @nome_try
+    ...eseguito solo se c'è stato un errore...
+    SEND
+
+  YET @nome_try
+    ...eseguito sempre (con o senza errore)...
+    YEND</code></pre>
+  <p><code>SHOW</code> e <code>YET</code> sono facoltativi.</p>
+  <p>All'interno di SHOW sono disponibili due variabili speciali — esistono <strong>solo</strong> lì:</p>
+  <table class="table table-striped">
+    <thead class="table-primary"><tr><th>Variabile</th><th>Tipo</th><th>Contenuto</th></tr></thead>
+    <tbody>
+      <tr><td><code>ERRCODE</code></td><td>numerale</td><td><code>1</code> per tutti gli errori gestiti da LINE</td></tr>
+      <tr><td><code>ERRMSG</code></td><td>stringa</td><td>Messaggio descrittivo dell'errore</td></tr>
+    </tbody>
+  </table>
+  <pre class="code-block"><code>TRY prova
+    OUT @inesistente
+    TREND
+
+  SHOW gestisci @prova
+    TALK @ERRCODE
+    TALK @ERRMSG
+    SEND
+
+  YET @prova
+    TALK Fine operazione
+    YEND</code></pre>
+
+  <h4 class="mt-3">Regole</h4>
+  <ul>
+    <li><code>TRY</code> non può essere annidato.</li>
+    <li>Ogni TRY può avere al massimo un SHOW e un YET.</li>
+    <li>Se un errore avviene in un TRY senza SHOW, LINE stampa <code>ERRMSG</code> e termina l'esecuzione.</li>
+  </ul>
+  </div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <div class="icon-circle"><i class="bi bi-box"></i></div>
+  <h2 class="fw-bold">Moduli</h2>
+  <p>I moduli sono collezioni di funzioni pronte all'uso. Si importano con <code>TAKE</code>:</p>
+  <pre class="code-block"><code>TAKE math
+  #r = math_sqrt(9)
+  TALK @r   &gt;&gt; 3</code></pre>
+  <p>Le funzioni di un modulo si chiamano con il formato <code>nomemodulo_nomefunzione()</code>.</p>
+  <p>Per vedere l'elenco di tutti i moduli disponibili, esegui <code>.MODS</code> in un file vuoto. Per vedere le funzioni di un modulo specifico, usa <code>.MATH</code>, <code>.STR</code>, ecc.</p>
+  <table class="table table-striped">
+    <thead class="table-primary"><tr><th>Modulo</th><th>Contenuto</th></tr></thead>
+    <tbody>
+      <tr><td><code>math</code></td><td>Funzioni matematiche (sqrt, abs, floor, ceil, pow, sin, cos…)</td></tr>
+      <tr><td><code>str</code></td><td>Manipolazione stringhe (len, sub, upper, lower, replace…)</td></tr>
+      <tr><td><code>list</code></td><td>Operazioni su liste (len, has, sort, rev, shuffle…)</td></tr>
+      <tr><td><code>rand</code></td><td>Casualità (int, float, pick, shuffle, dice…)</td></tr>
+      <tr><td><code>io</code></td><td>Input/output avanzato (time, date…)</td></tr>
+      <tr><td><code>type</code></td><td>Verifica e conversione di tipi</td></tr>
+      <tr><td><code>conv</code></td><td>Conversioni (hex, bin, oct, tonum…)</td></tr>
+      <tr><td><code>num</code></td><td>Funzioni numeriche avanzate (fmt, fib, fact, gcd, prime…)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <div class="icon-circle"><i class="bi bi-file-earmark-code"></i></div>
+  <h2 class="fw-bold">File LINE</h2>
+  <p>Un programma LINE viene salvato con estensione <strong><code>.line</code></strong> ed eseguito dall'interprete.</p>
+  </div>
+  <div class="nav-arrows">
+      <a href="sezione7.html" class="prev">
+        <span class="label">← Precedente</span>
+        <span class="title">Sezione 7</span>
       </a>
-      <a href="sezione2.html" class="next" style="background:linear-gradient(135deg,#0d6efd,#9b59b6); color:white;">
+      <a href="sezione9.html" class="next" style="background:linear-gradient(135deg,#0d6efd,#9b59b6); color:white;">
         <span class="label" style="color:rgba(255,255,255,.8)">Successiva →</span>
-        <span class="title">Sezione 2</span>
+        <span class="title">Sezione 9</span>
       </a>
     </div></div>
   <footer class="footer">

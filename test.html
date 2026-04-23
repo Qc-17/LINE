@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+  <html lang="it">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Esame ufficiale — LINE 3.0</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Fira+Code:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <style>
+  :root{
+    --bg:#0b1220;
+    --card:#141d33;
+    --primary:#0d6efd;
+    --accent:#ff6b6b;
+    --good:#2ecc71;
+    --bad:#e74c3c;
+    --text:#e2e8f0;
+    --muted:#8b97b1;
+  }
+  *{ box-sizing:border-box; }
+  html, body { user-select:none; }
+  body{
+    font-family:'Syne',sans-serif;
+    background:radial-gradient(circle at top right, #1a2845, #0b1220 70%);
+    color:var(--text);
+    min-height:100vh;
+    margin:0;
+  }
+  .lockbar{
+    background:linear-gradient(90deg,#ff6b6b,#9b59b6);
+    color:white; text-align:center;
+    padding:8px; font-weight:600; font-size:.9rem;
+    letter-spacing:.5px;
+  }
+  .topbar{
+    position:sticky; top:0; z-index:100;
+    background:rgba(11,18,32,.92);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(255,255,255,.08);
+    padding:14px 0;
+  }
+  .timer{
+    background:linear-gradient(135deg,#0d6efd,#9b59b6);
+    padding:10px 22px; border-radius:50px;
+    font-weight:700; font-size:1.1rem;
+    display:inline-flex; align-items:center; gap:8px;
+    box-shadow:0 4px 20px rgba(13,110,253,.4);
+  }
+  .timer.warn{ background:linear-gradient(135deg,#ff9100,#ff6b6b); }
+  .timer.danger{ background:linear-gradient(135deg,#ff3d3d,#9b1b1b); animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  .q-card{
+    background:var(--card);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:18px;
+    padding:28px;
+    margin-bottom:22px;
+    box-shadow:0 8px 30px rgba(0,0,0,.3);
+  }
+  .q-num{
+    display:inline-block;
+    background:linear-gradient(135deg,#0d6efd,#9b59b6);
+    color:white;
+    padding:4px 14px; border-radius:50px;
+    font-size:.8rem; font-weight:700;
+    margin-bottom:14px; letter-spacing:.5px;
+  }
+  .q-text{ font-size:1.15rem; font-weight:600; line-height:1.5; margin-bottom:18px; }
+  .q-text code{
+    background:#0b1220; color:#79c0ff;
+    padding:2px 8px; border-radius:6px;
+    font-family:'Fira Code',monospace;
+    font-size:.95rem;
+  }
+  .opt{
+    display:block; padding:14px 18px; margin-bottom:10px;
+    background:rgba(255,255,255,.04);
+    border:2px solid rgba(255,255,255,.08);
+    border-radius:12px;
+    cursor:pointer;
+    transition:all .2s ease;
+    font-size:1rem;
+  }
+  .opt:hover{ border-color:#0d6efd; background:rgba(13,110,253,.1); }
+  .opt.selected{
+    border-color:#0d6efd;
+    background:rgba(13,110,253,.18);
+    box-shadow:0 0 0 4px rgba(13,110,253,.15);
+  }
+  .opt input{ margin-right:12px; accent-color:#0d6efd; }
+  .opt code{
+    background:#0b1220; color:#79c0ff;
+    padding:1px 6px; border-radius:4px;
+    font-family:'Fira Code',monospace;
+    font-size:.9rem;
+  }
+  .progress-fixed{
+    position:fixed; top:0; left:0; height:5px;
+    background:linear-gradient(90deg,#0d6efd,#9b59b6);
+    z-index:200;
+    transition:width .3s ease;
+  }
+  .btn-submit{
+    background:linear-gradient(135deg,#2ecc71,#0d6efd);
+    color:white; font-weight:700;
+    padding:16px 50px; border-radius:50px; border:none;
+    font-size:1.15rem;
+    box-shadow:0 8px 30px rgba(46,204,113,.4);
+    transition:all .25s ease;
+  }
+  .btn-submit:hover{ transform:translateY(-2px); box-shadow:0 12px 40px rgba(46,204,113,.55); color:white;}
+  .btn-submit:disabled{ opacity:.5; cursor:not-allowed; }
+  .welcome-card, .result-card{
+    background:var(--card);
+    border-radius:24px;
+    padding:50px 40px;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
+    text-align:center;
+  }
+  .start-btn{
+    background:linear-gradient(135deg,#0d6efd,#9b59b6);
+    color:white; font-weight:700;
+    padding:18px 60px; border-radius:60px; border:none;
+    font-size:1.2rem;
+    box-shadow:0 12px 40px rgba(13,110,253,.5);
+    transition:all .25s ease;
+  }
+  .start-btn:hover{ transform:translateY(-3px) scale(1.03); box-shadow:0 16px 50px rgba(13,110,253,.7); color:white;}
+  .score-circle{
+    width:200px; height:200px;
+    border-radius:50%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    margin:30px auto;
+    font-weight:800;
+    background:conic-gradient(var(--good) 0deg, var(--card) 0deg);
+    position:relative;
+    animation: scoreIn 1.2s ease both;
+  }
+  .score-circle::before{
+    content:''; position:absolute; inset:14px; border-radius:50%; background:var(--card);
+  }
+  .score-circle .num, .score-circle .lbl{ position:relative; z-index:2; }
+  .score-circle .num{ font-size:3.5rem; line-height:1; color:white; }
+  .score-circle .lbl{ font-size:.85rem; color:var(--muted); margin-top:6px; letter-spacing:1px;}
+  @keyframes scoreIn { from {transform:scale(.5); opacity:0} to {transform:scale(1); opacity:1} }
+  .cert-form input{
+    background:#0b1220; border:2px solid rgba(255,255,255,.1);
+    color:white; padding:14px 18px; border-radius:12px;
+    width:100%; margin-bottom:12px; font-size:1rem;
+  }
+  .cert-form input:focus{ outline:none; border-color:#0d6efd; }
+  .warn-banner{
+    background:rgba(231,76,60,.15);
+    border:1px solid rgba(231,76,60,.4);
+    color:#ff8a8a;
+    padding:14px 18px; border-radius:12px;
+    margin-bottom:20px; font-size:.95rem;
+  }
+  .security-hud{
+    position:fixed; bottom:14px; right:14px;
+    background:rgba(0,0,0,.6); backdrop-filter:blur(10px);
+    padding:8px 14px; border-radius:50px;
+    font-size:.78rem; color:var(--muted);
+    border:1px solid rgba(255,255,255,.08);
+    display:flex; gap:10px; align-items:center;
+    z-index:100;
+  }
+  .security-hud .dot{
+    width:8px; height:8px; border-radius:50%;
+    background:#2ecc71; animation:blink 1.5s infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1} 50%{opacity:.3} }
+  .brand{ font-weight:800; letter-spacing:-.5px; }
+  .brand i{ color:#0d6efd; }
+  hr.fancy{ border:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent); margin:30px 0; }
+  .review-list{ text-align:left; max-height:300px; overflow-y:auto; }
+  .review-item{ padding:10px 14px; border-radius:8px; margin-bottom:6px; font-size:.92rem; }
+  .review-item.ok{ background:rgba(46,204,113,.1); border-left:3px solid #2ecc71;}
+  .review-item.no{ background:rgba(231,76,60,.1); border-left:3px solid #e74c3c;}
+  </style>
+  </head>
+  <body>
+  <div class="lockbar" id="lockbar">
+    <i class="bi bi-shield-lock-fill"></i> Modalità esame attiva — non lasciare la pagina, non aggiornare
+  </div>
+  <div class="progress-fixed" id="progress" style="width:0%; top:34px;"></div>
+
+  <!-- WELCOME / INTRO -->
+  <div id="screen-intro" class="container py-5">
+    <div class="welcome-card mx-auto" style="max-width:720px;">
+      <div class="brand fs-3 mb-3"><i class="bi bi-code-slash"></i> LINE 3.0</div>
+      <h1 class="display-5 fw-bold mb-3" style="background:linear-gradient(135deg,#0d6efd,#9b59b6,#ff6b6b); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Esame di Certificazione</h1>
+      <p class="lead text-light-emphasis mb-4">Per ottenere l'attestato ufficiale del team LINE devi superare un test di <strong>50 domande</strong> in <strong>30 minuti</strong>, con almeno <strong>40 risposte corrette</strong>.</p>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="p-3" style="background:rgba(13,110,253,.1); border-radius:14px;">
+            <i class="bi bi-clock-history fs-2 text-primary"></i>
+            <div class="fw-bold mt-2">30 minuti</div>
+            <div class="small text-secondary">Tempo limite</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3" style="background:rgba(155,89,182,.1); border-radius:14px;">
+            <i class="bi bi-question-circle fs-2" style="color:#9b59b6"></i>
+            <div class="fw-bold mt-2">50 domande</div>
+            <div class="small text-secondary">Estratte da un pool di 163</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3" style="background:rgba(255,107,107,.1); border-radius:14px;">
+            <i class="bi bi-trophy fs-2" style="color:#ff6b6b"></i>
+            <div class="fw-bold mt-2">≥ 40/50</div>
+            <div class="small text-secondary">Soglia di promozione</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="warn-banner text-start">
+        <strong><i class="bi bi-shield-exclamation"></i> Regole di sicurezza</strong><br>
+        Una volta avviato il test:
+        <ul class="mb-0 mt-1">
+          <li>Non potrai uscire dalla pagina o ricaricarla.</li>
+          <li>Il timer di 30 minuti partirà immediatamente.</li>
+          <li>Allo scadere del tempo il test verrà inviato automaticamente.</li>
+          <li>Il tasto destro e le scorciatoie comuni saranno disabilitati.</li>
+          <li>L'attestato è scaricabile <strong>una sola volta</strong>.</li>
+        </ul>
+      </div>
+
+      <button class="start-btn mt-3" id="btnStart">
+        <i class="bi bi-play-fill"></i> Avvia l'esame
+      </button>
+      <div class="small mt-3 text-secondary">Cliccando avvii l'esame e accetti le condizioni.</div>
+    </div>
+  </div>
+
+  <!-- TEST -->
+  <div id="screen-test" style="display:none;">
+    <div class="topbar">
+      <div class="container d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="brand"><i class="bi bi-code-slash"></i> Esame LINE 3.0</div>
+        <div class="d-flex align-items-center gap-3">
+          <span class="text-secondary small" id="answeredCount">0 / 50 risposte</span>
+          <span class="timer" id="timer"><i class="bi bi-clock"></i> 30:00</span>
+        </div>
+      </div>
+    </div>
+    <div class="container py-4" style="max-width:880px;">
+      <div id="questions"></div>
+      <div class="text-center py-4">
+        <button class="btn-submit" id="btnSubmit"><i class="bi bi-check2-circle"></i> Consegna esame</button>
+        <div class="small mt-3 text-secondary">Una volta consegnato non si può tornare indietro.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS PASS -->
+  <div id="screen-pass" class="container py-5" style="display:none;">
+    <div class="result-card mx-auto" style="max-width:640px;">
+      <div class="score-circle" id="scorePass">
+        <div class="num" id="scoreNumPass">0</div>
+        <div class="lbl">SU 50</div>
+      </div>
+      <h2 class="fw-bold" style="color:#2ecc71;"><i class="bi bi-trophy-fill"></i> Esame superato!</h2>
+      <p class="lead text-light-emphasis">Ottimo lavoro. Sei ufficialmente pronto a scrivere codice LINE.</p>
+      <hr class="fancy">
+      <h4 class="mb-3">Genera il tuo attestato</h4>
+      <p class="text-secondary small">Inserisci nome e cognome esattamente come vuoi che appaiano sul certificato. Il PDF è scaricabile <strong>una sola volta</strong>.</p>
+      <div class="cert-form mt-3">
+        <input type="text" id="certNome" placeholder="Nome" maxlength="40">
+        <input type="text" id="certCognome" placeholder="Cognome" maxlength="40">
+        <button class="btn-submit mt-2" id="btnCert"><i class="bi bi-file-earmark-pdf"></i> Scarica attestato (una sola volta)</button>
+        <div class="small mt-2" id="certStatus" style="color:#ff8a8a;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS FAIL -->
+  <div id="screen-fail" class="container py-5" style="display:none;">
+    <div class="result-card mx-auto" style="max-width:640px;">
+      <div class="score-circle" id="scoreFail" style="background:conic-gradient(#e74c3c 0deg, var(--card) 0deg);">
+        <div class="num" id="scoreNumFail">0</div>
+        <div class="lbl">SU 50</div>
+      </div>
+      <h2 class="fw-bold" style="color:#ff6b6b;"><i class="bi bi-x-circle-fill"></i> Esame non superato</h2>
+      <p class="lead text-light-emphasis">Servono almeno 40 risposte corrette per ottenere l'attestato. Riprova dopo aver ripassato il manuale.</p>
+      <hr class="fancy">
+      <a href="sezione1.html" class="start-btn"><i class="bi bi-arrow-counterclockwise"></i> Torna a studiare</a>
+      <div class="mt-3"><a href="index.html" class="text-secondary small">← Torna alla home</a></div>
+    </div>
+  </div>
+
+  <div class="security-hud" id="hud" style="display:none;">
+    <span class="dot"></span> Sessione protetta
+  </div>
+
+  <script>
+  const QUESTIONS = [{"q":"Cosa significa l'acronimo LINE?","opts":["Logical Instruction & Numeric Engine","Language with Intuitive and Natural Expression","Linear Indexed Naming Environment","Lightweight Interpreter for New Engineers"],"c":1},{"q":"Quale estensione hanno i file LINE?","opts":[".ln",".lne",".line",".li"],"c":2},{"q":"Come si scrive un commento su singola riga?","opts":["// commento","# commento",">> commento","-- commento"],"c":2},{"q":"Come si delimita un commento multilinea?","opts":["/* ... */","&lt;* ... *&gt;","<!-- ... -->","((( ... )))"],"c":1},{"q":"Qual è il carattere di escape in LINE?","opts":["/","\\","%","^"],"c":1},{"q":"Cosa rappresenta <code>\\n</code>?","opts":["Numero null","Vai a capo (newline)","Negazione","Nessun valore"],"c":1},{"q":"Cosa fa <code>\\@</code> in una stringa?","opts":["Segna un'email","Stampa il carattere @ letterale, non un riferimento","Inserisce il nome utente","È un errore di sintassi"],"c":1},{"q":"Cosa fa <code>\\tNOME</code>?","opts":["Inserisce un tab davanti a NOME","Restituisce il tipo della variabile NOME","Cancella la variabile NOME","Esporta NOME come stringa"],"c":1},{"q":"Cosa accade se scrivi <code>%</code> direttamente in un TALK senza escape?","opts":["Stampa %","È invisibile nell'output","Genera un errore","Stampa 100"],"c":1},{"q":"Per stampare un <code>;</code> letterale dentro una lista cosa si usa?","opts":["@;","\\;","%;","'';''"],"c":1},{"q":"Quale di queste è la sintassi corretta per dichiarare una variabile?","opts":["var nome = Mario","nome := Mario","nome = Mario","let nome = Mario"],"c":2},{"q":"Per riferirsi al valore di una variabile si usa:","opts":["$nome","&nome","@nome","#nome"],"c":2},{"q":"Cosa rappresenta il prefisso <code>#</code> davanti a un nome di variabile?","opts":["Commento inline","Indica numerale o booleano","Variabile globale","Variabile costante"],"c":1},{"q":"Quale di queste è una variabile booleana?","opts":["bool x = true","#x = V","bool:x = vero","x = bool(V)"],"c":1},{"q":"Quali sono i due valori booleani in LINE?","opts":["true / false","T / F","V / F","1 / 0"],"c":2},{"q":"Cosa fa <code>n:var</code>?","opts":["Crea una nuova variabile","Cancella var","Converte var in numerale","Negazione di var"],"c":2},{"q":"Convertire una stringa vuota in numerale produce:","opts":["1","null","0","errore"],"c":2},{"q":"Convertire la stringa \"F\" in booleano produce:","opts":["V","F","null","errore"],"c":1},{"q":"Quale prefisso rende una variabile costante?","opts":["CONST","STAY","LOCK","FIX"],"c":1},{"q":"Una variabile <code>STAY</code> può essere modificata?","opts":["Sì, con riassegnazione","No, mai","Sì, solo dentro una FUN","Solo se preceduta da #"],"c":1},{"q":"Quale prefisso crea una variabile reattiva?","opts":["REACT","BIND","IF","WATCH"],"c":2},{"q":"Una variabile <code>IF</code> può contenere:","opts":["Qualsiasi tipo","Solo numeri","Solo stringhe","Solo booleani / operazioni booleane"],"c":3},{"q":"Se <code>#a = V</code> e <code>IF cond = @a</code>, e poi <code>#a = F</code>, quanto vale cond?","opts":["V","F","null","errore"],"c":1},{"q":"Se <code>var = @a</code> (variabile standard) e poi <code>a</code> cambia, var:","opts":["Cambia di conseguenza","Rimane invariata","Diventa null","Genera errore"],"c":1},{"q":"Un nome di variabile può iniziare con un numero?","opts":["Sì","No","Solo se preceduto da #","Solo nei commenti"],"c":1},{"q":"Quale è la parola chiave principale per stampare in console?","opts":["PRINT","TALK","ECHO","SAY"],"c":1},{"q":"Se in <code>TALK @x</code>, x non esiste, cosa accade?","opts":["Errore VAR_NOT_FOUND","Stampa una stringa vuota","La console chiede un input e lo salva in x","Stampa @x letterale"],"c":2},{"q":"Qual è la differenza tra <code>OUT</code> e <code>TALK</code>?","opts":["Sono identici","OUT è solo output e dà errore con variabili inesistenti","OUT non supporta @","OUT stampa anche i tag"],"c":1},{"q":"<code>INP</code> richiede:","opts":["Almeno un output","Almeno un input","Una variabile booleana","Una lista"],"c":1},{"q":"Per stampare una lista mostrando i tag si usa:","opts":["TALK","SHOW","SCREAM","TAG"],"c":2},{"q":"<code>TALK:V</code> serve a:","opts":["Stampare in verde","Attivare un input persistente","Forzare il valore vero","Validare l'input"],"c":1},{"q":"L'input persistente viene salvato nella variabile speciale:","opts":["INPUT","ASKED","USER","RESP"],"c":1},{"q":"Per disattivare l'input persistente si usa:","opts":["TALK:F","STOP","TALK:OFF","INP:F"],"c":0},{"q":"Quale modificatore di colore esiste?","opts":["thick","_","wide","glow"],"c":1},{"q":"La sintassi per colorare il testo è:","opts":["@C(red)","\\C{red}","#color(red)","TALK:red"],"c":1},{"q":"Per resettare il colore al default si scrive:","opts":["\\C{reset}","\\C{}","\\C{none}","\\C[]"],"c":1},{"q":"Si può usare un colore esadecimale?","opts":["No","Sì, con \\C{#ff9100}","Sì, con \\HEX(ff9100)","Solo nei moduli"],"c":1},{"q":"L'operatore di potenza è:","opts":["**","^","pow","//"],"c":1},{"q":"Cosa fa l'operatore <code>//</code>?","opts":["Commento","Divisione intera","Doppia divisione","Concatenazione"],"c":1},{"q":"Cosa fa l'operatore <code>%</code> tra numeri?","opts":["Percentuale","Modulo (resto della divisione)","Divisione decimale","Stampa una percentuale"],"c":1},{"q":"L'operatore <code>+</code> tra stringhe:","opts":["Genera errore","Concatena le stringhe","Calcola la lunghezza totale","Crea una lista"],"c":1},{"q":"Quale operatore corrisponde a logico AND?","opts":["AND","&&","ET","E"],"c":2},{"q":"Quale operatore corrisponde a logico OR?","opts":["OR","||","VEL","O"],"c":2},{"q":"Quale operatore corrisponde a XOR?","opts":["XOR","AUT","^^","NOR"],"c":1},{"q":"L'operatore di negazione (NOT) è:","opts":["NOT","~","!","NO"],"c":2},{"q":"L'operatore con priorità massima è:","opts":["*","^","//","ET"],"c":1},{"q":"<code>5 == \"5\"</code> in LINE produce:","opts":["V","F","Errore","null"],"c":1},{"q":"<code>x += 3</code> equivale a:","opts":["x = x * 3","x = @x + 3","x = 3","x++ tre volte"],"c":1},{"q":"Quale operazione di comparazione funziona solo tra numeri?","opts":["==","!=",">",">e<"],"c":2},{"q":"Una funzione si dichiara con:","opts":["DEF","FUN","FUNC","FN"],"c":1},{"q":"Una funzione si chiude con:","opts":["END","FEND","ENDFUN","RETURN"],"c":1},{"q":"Quante istruzioni <code>return</code> può avere una funzione?","opts":["Nessuna","Una sola","Massimo 3","Illimitate"],"c":1},{"q":"Un blocco THEN si chiude con:","opts":["THEND","TEND","END","DONE"],"c":0},{"q":"Un blocco THEN può avere parametri?","opts":["Sì","No","Solo numerici","Solo se ha return"],"c":1},{"q":"Un blocco THEN può essere chiamato:","opts":["Direttamente","Solo dentro un GO block","Solo da una FUN","Solo all'avvio"],"c":1},{"q":"<code>GO</code> esegue un blocco:","opts":["Sempre","Mai","Se la condizione è V","Se la condizione è F"],"c":2},{"q":"Il valore speciale <code>#c</code> in <code>GO ... #c</code> significa:","opts":["Esegui una sola volta","Esegui finché la condizione è V","Esegui in centesimi di secondo","Esegui in callback"],"c":1},{"q":"Quale operatore aggiunge un ramo \"elif\" a un GO?","opts":["|","&&","&","ELIF"],"c":2},{"q":"Quale operatore aggiunge un ramo \"else\" a un GO?","opts":["&","&&","||","ELSE"],"c":1},{"q":"Per scrivere il corpo di un GO inline si usa:","opts":["#{}","@{}","[]","()"],"c":1},{"q":"La variabile speciale <code>THISGO</code>:","opts":["Esegue il GO","Contiene la condizione del GO corrente","È un ID univoco","Conta le iterazioni"],"c":1},{"q":"Una lista si racchiude tra:","opts":["()","{}","[]","<>"],"c":2},{"q":"Gli elementi di una lista sono separati da:","opts":[",",";","|","/"],"c":1},{"q":"Per assegnare un tag a un elemento si usa:","opts":[":","|",">","#"],"c":1},{"q":"L'indice del primo elemento di una lista è:","opts":["1","-1","0","null"],"c":2},{"q":"L'indice <code>-1</code> indica:","opts":["Errore","Il primo elemento","L'ultimo elemento","La lunghezza"],"c":2},{"q":"Per accedere all'elemento per indice si scrive:","opts":["lista(0)","lista[#0]","lista{0}","lista.0"],"c":1},{"q":"Per appendere un elemento in fondo si usa:","opts":["ADD lista AT = valore","PUSH lista valore","lista << valore","ADD lista END = valore"],"c":0},{"q":"Per sostituire l'elemento a un certo indice:","opts":["ADD ... AT","ADD ... BY indice","SET ... AT","REPLACE"],"c":1},{"q":"Per rimuovere un elemento per tag:","opts":["CANC lista BY tag","DEL lista [tag]","REMOVE lista BY tag","CANC lista AT tag"],"c":0},{"q":"Per default le variabili dichiarate dentro un blocco sono:","opts":["Globali","Locali","Costanti","Reattive"],"c":1},{"q":"Quale prefisso rende globale una singola variabile?","opts":["GLOBAL","RET","EXPORT","SHARE"],"c":1},{"q":"L'operatore <code>IN</code> verifica:","opts":["Se una variabile esiste","Se un elemento è in una lista","Se un input è valido","Se due variabili sono uguali"],"c":1},{"q":"Il ciclo FOR itera su:","opts":["Numeri","Stringhe","Liste","Funzioni"],"c":2},{"q":"La sintassi è <code>FOR @lista #[inizio ; fine ; salto] = ...</code>. Il default di <code>fine</code> è:","opts":["0","-1","len(lista)","null"],"c":1},{"q":"Il default di <code>salto</code> è:","opts":["0","1","-1","2"],"c":1},{"q":"All'interno di un FOR, <code>ONITEM</code> contiene:","opts":["L'indice","Il valore corrente","Il tag","Il numero di iterazioni"],"c":1},{"q":"<code>ONINDEX</code> contiene:","opts":["Il valore","L'indice corrente","Il tag","La lunghezza"],"c":1},{"q":"La lista speciale <code>NUMBERS</code> contiene:","opts":["I numeri primi","Tutti i numeri reali, indicizzati con se stessi","I primi 100 interi","I numeri inseriti dall'utente"],"c":1},{"q":"Per assegnare un'etichetta a un'istruzione si scrive:","opts":["LABEL:nome","parola_chiave:etichetta","#etichetta","TAG nome"],"c":1},{"q":"Per rieseguire l'istruzione associata a un'etichetta:","opts":["GOTO etichetta","*etichetta","RUN etichetta","CALL etichetta"],"c":1},{"q":"Quale codice indica una divisione per zero?","opts":["MATH_ERROR","DIV_BY_ZERO","NUMBER_EXPECTED","TYPE_ERROR"],"c":1},{"q":"Il blocco TRY si chiude con:","opts":["END","TRYEND","TREND","CATCH"],"c":2},{"q":"Il blocco SHOW si chiude con:","opts":["SEND","SHOWEND","END","SE"],"c":0},{"q":"Il blocco YET si chiude con:","opts":["YEND","YETEND","FINALLY","END"],"c":0},{"q":"Dentro SHOW, la variabile <code>ERRMSG</code>:","opts":["È un numero","Contiene il messaggio descrittivo dell'errore","È un booleano","È sempre vuota"],"c":1},{"q":"<code>TRY</code> può essere annidato?","opts":["Sì","No","Solo con SHOW","Solo dentro una FUN"],"c":1},{"q":"Per importare un modulo si usa:","opts":["IMPORT","TAKE","USE","REQUIRE"],"c":1},{"q":"Le funzioni di un modulo si chiamano con il formato:","opts":["modulo.funzione()","modulo::funzione()","modulo_funzione()","funzione@modulo()"],"c":2},{"q":"Quale modulo gestisce le operazioni su stringhe?","opts":["text","str","strings","string"],"c":1},{"q":"Quale modulo gestisce la casualità?","opts":["random","rand","chance","rnd"],"c":1},{"q":"Il tag per scrivere codice LINE in HTML è:","opts":["&lt;script type=\"line\"&gt;","&lt;script type=\"text/line\"&gt;","&lt;line&gt;","&lt;code lang=\"line\"&gt;"],"c":1},{"q":"Per eseguire del codice LINE al click di un bottone:","opts":["onclick=\"line()\"","attributo trigger=\"id\"","attributo run=\"id\"","attributo bind=\"id\""],"c":1},{"q":"Per eseguire al caricamento della pagina si usa l'attributo:","opts":["onload","start","autorun","init"],"c":2},{"q":"L'attributo <code>replace</code>:","opts":["Sostituisce il file","Sovrascrive il contenuto dell'elemento target","Rimpiazza una variabile","Rinomina la pagina"],"c":1},{"q":"Per scrivere su un elemento con id=\"out\":","opts":["TALK out: ciao","&lt;out&gt;TALK ciao&lt;/out&gt;","WRITE out ciao","DOM.out = ciao"],"c":1},{"q":"Per appendere al contenuto invece di sostituire:","opts":["&lt;id=add&gt;...&lt;/id&gt;","&lt;id=after&gt;...&lt;/id&gt;","&lt;id+&gt;...&lt;/id&gt;","&lt;id=push&gt;...&lt;/id&gt;"],"c":1},{"q":"Gli input HTML con id vengono iniettati come:","opts":["Funzioni","Variabili LINE","Tag CSS","Eventi"],"c":1},{"q":"Per la persistenza con localStorage si usa il tag:","opts":["&lt;save&gt;","&lt;ls&gt;","&lt;persist&gt;","&lt;store&gt;"],"c":1},{"q":"L'attributo <code>body-class</code>:","opts":["Aggiunge una classe statica al body","Osserva un elemento e applica il suo testo come className del body","Genera un CSS","Rinomina il body"],"c":1},{"q":"Per il rendering di formule si usa:","opts":["MATH{...}","RENDER{...}","KATEX{...}","FORMULA{...}"],"c":1},{"q":"La libreria usata per il rendering matematico è:","opts":["MathJax","KaTeX","jsLaTeX","MathML"],"c":1},{"q":"Per inline rendering all'interno di un TALK si usa:","opts":["\\M...\\M","\\R...\\R","\\K...\\K","$...$"],"c":1},{"q":"Per disegnare molecole la prima riga del blocco è:","opts":["MOL","CHEM","CHEMISTRY","RENDER:CHEM"],"c":1},{"q":"Il legame doppio tra atomi si scrive:","opts":["==","=","//",":"],"c":1},{"q":"Il legame triplo si scrive:","opts":["===","#","-#-","~"],"c":1},{"q":"<code>R3(a3)</code> rappresenta:","opts":["a alla 3 al cubo","Radice cubica di a alla 3","Tre volte a","Vettore di 3 elementi"],"c":1},{"q":"<code>de(f)/de(x)</code> è:","opts":["Una funzione","Una derivata ordinaria","Un differenziale","Una sommatoria"],"c":1},{"q":"<code>s(k=0,n)(k2)</code> rappresenta:","opts":["Un prodotto","Una sommatoria","Un integrale","Un limite"],"c":1},{"q":"<code>S(0,1)(x2)</code> rappresenta:","opts":["Sommatoria","Limite","Integrale definito","Vettore"],"c":2},{"q":"<code>pi</code> in LINE-RENDER rappresenta:","opts":["Una variabile","Il simbolo π","Un commento","Un placeholder"],"c":1},{"q":"La modalità <code>HTML</code> in RENDER:","opts":["Stampa codice HTML come testo","Inserisce HTML grezzo nella console via innerHTML","Esporta in HTML","Disabilita il rendering"],"c":1},{"q":"Quale di questi NON è un tipo di variabile in LINE?","opts":["STAY","IF","RET","Standard"],"c":2},{"q":"Quale di questi NON è un modulo standard?","opts":["math","str","web","rand"],"c":2},{"q":"Cosa accade se si modifica una STAY?","opts":["Cambia valore","Errore CONST_MODIFY","Diventa una IF","Si crea una copia"],"c":1},{"q":"Quante condizioni ammette al massimo un GO con & e &&?","opts":["Una","Due","Illimitate","Tre"],"c":2},{"q":"Cosa stampa <code>TALK ciao @x</code> se x non esiste?","opts":["ciao","ciao @x","Chiede un input per x","Errore"],"c":2},{"q":"In LINE i valori di una lista sono sempre:","opts":["Numerali","Stringhe","Booleani","Misti"],"c":1},{"q":"Una lista può contenere altre liste come elementi?","opts":["No","Sì","Solo se sono numeriche","Solo con tag"],"c":1},{"q":"Cosa fa <code>SCREAM</code> oltre a stampare?","opts":["Stampa in maiuscolo","Mostra anche i tag della lista","Suona un beep","Esporta in console"],"c":1},{"q":"Cosa restituisce <code>\\tnome</code> se nome è una stringa?","opts":["string","str","text","S"],"c":0},{"q":"Cosa restituisce <code>\\tnome</code> se nome è un booleano?","opts":["boolean","bool","V","logic"],"c":1},{"q":"Cosa restituisce <code>\\tnome</code> se nome è un numerale?","opts":["number","num","int","numeric"],"c":0},{"q":"Quale di queste è una conversione corretta a stringa?","opts":["str:var","s:var","string:var","tostr(var)"],"c":1},{"q":"Quale codice di errore segnala un tentativo di modifica di una STAY?","opts":["TYPE_ERROR","STAY_LOCKED","CONST_MODIFY","STAY_ERROR"],"c":2},{"q":"Cosa accade se un TRY senza SHOW genera un errore?","opts":["Il programma continua silenziosamente","LINE stampa ERRMSG e termina","Si attiva YET","Diventa SHOW automaticamente"],"c":1},{"q":"Quante SHOW può avere un singolo TRY?","opts":["Nessuno","Al massimo uno","Almeno due","Illimitate"],"c":1},{"q":"In LINE-DOM, quante esecuzioni JavaScript inline sono ammesse dentro <code>&lt;script type=\"text/line\"&gt;</code>?","opts":["Zero","Una","Tutte quelle che servono","Solo se commentate"],"c":0},{"q":"L'attributo <code>counter=\"id\"</code> inietta la variabile speciale:","opts":["__COUNT__","__N__","__I__","__C__"],"c":1},{"q":"Per gestire un click da codice LINE si scrive:","opts":["ONCLICK:btn nome","THEN:btn-id nomeblocco","HOOK:btn nome","BIND:btn nome"],"c":1},{"q":"Cosa accade alle variabili LINE-DOM ad ogni esecuzione?","opts":["Sono persistenti","Si resettano dall'inizio","Si salvano automaticamente","Diventano costanti"],"c":1},{"q":"Per persistere stato tra esecuzioni in LINE-DOM si usa:","opts":["STAY","localStorage tramite &lt;ls&gt; o input hidden","Cookie","SessionStorage"],"c":1},{"q":"Quale funzione del modulo math calcola la radice quadrata?","opts":["math_root","math_sqrt","math_sq","math_radix"],"c":1},{"q":"Quale modulo include la funzione <code>fact</code> (fattoriale)?","opts":["math","num","conv","io"],"c":1},{"q":"Quale modulo include funzioni <code>fmt</code>, <code>fib</code>, <code>gcd</code>?","opts":["math","num","conv","io"],"c":1},{"q":"Quale modulo gestisce <code>time</code> e <code>date</code>?","opts":["sys","io","time","clock"],"c":1},{"q":"Per vedere la lista di tutti i moduli disponibili si esegue:","opts":[".LIST",".MODS",".MODULES",".HELP"],"c":1},{"q":"Cosa fa il pulsante TXT della console?","opts":["Apre un editor di testo","Salva il testo puro della console","Esporta in formato Word","Cambia font"],"c":1},{"q":"Cosa fa il pulsante PDF della console?","opts":["Apre un PDF","Genera un PDF visivo della console (con formule e grafici)","Stampa il codice","Genera un PDF della pagina HTML"],"c":1},{"q":"Quale operatore in <code>x#(i)</code> rappresenta il pedice?","opts":["#","_","^","|"],"c":0},{"q":"In LINE-RENDER <code>x5</code> significa:","opts":["x volte 5","x con pedice 5","x alla quinta","x diviso 5"],"c":2},{"q":"<code>v(x;y;z)</code> rappresenta:","opts":["Una funzione","Un vettore colonna","Una variabile multipla","Una matrice riga"],"c":1},{"q":"<code>C(n;k)</code> rappresenta:","opts":["Funzione coseno","Coefficiente binomiale","Concatenazione","Costante"],"c":1},{"q":"Il decoratore <code>vc(v)</code> applica:","opts":["Vettore (freccia)","Cappello","Tilde","Barra"],"c":0},{"q":"<code>fl(x)</code> rappresenta:","opts":["Floor","Funzione lineare","Float","Flusso"],"c":0},{"q":"Cosa rappresenta <code>na</code> in LINE-RENDER?","opts":["NaN","Il simbolo del Nabla ∇","Sodio (Na)","null"],"c":1},{"q":"<code>=&gt;</code> in LINE-RENDER rappresenta:","opts":["Assegnazione","→ (freccia semplice)","⇒ (implica)","≥"],"c":2},{"q":"L'output di <code>TALK 5 + 3</code> con due variabili stringa è:","opts":["8","53","Errore","5 + 3"],"c":1},{"q":"L'output di <code>#a = 5</code> seguito da <code>#a += 2</code> seguito da <code>TALK @a</code> è:","opts":["5","52","7","2"],"c":2},{"q":"<code>#x = 10 / 3</code>, quanto vale x?","opts":["3","3.333...","Errore","10"],"c":1},{"q":"<code>#x = 10 // 3</code>, quanto vale x?","opts":["3","3.333...","Errore","9"],"c":0},{"q":"<code>#x = 10 % 3</code>, quanto vale x?","opts":["3","1","0","10"],"c":1},{"q":"<code>#x = 2 ^ 5</code>, quanto vale x?","opts":["10","16","32","25"],"c":2},{"q":"<code>IF cond = V ET F</code>, quanto vale cond?","opts":["V","F","null","Errore"],"c":1},{"q":"<code>IF cond = V VEL F</code>, quanto vale cond?","opts":["V","F","null","Errore"],"c":0},{"q":"<code>IF cond = V AUT V</code>, quanto vale cond?","opts":["V","F","null","Errore"],"c":1},{"q":"<code>IF cond = !V</code>, quanto vale cond?","opts":["V","F","null","Errore"],"c":1},{"q":"Cosa stampa <code>TALK 100\\%</code>?","opts":["100","100%","Errore","100\\%"],"c":1},{"q":"Cosa stampa <code>TALK riga1\\nriga2</code>?","opts":["riga1\\nriga2","riga1 riga2","riga1 a capo riga2","Errore"],"c":2},{"q":"<code>lista = [a ; b ; c]</code>, quale espressione restituisce \"c\"?","opts":["lista[#0]","lista[#2]","lista[#3]","lista[c]"],"c":1},{"q":"<code>lista = [a ; b ; c]</code>, quale restituisce \"c\" usando indice negativo?","opts":["lista[#-3]","lista[#-1]","lista[#0]","lista[#-2]"],"c":1},{"q":"Quante volte viene eseguito <code>GO @cond @then #5</code> se cond è V?","opts":["1","5","Finché cond è V","0"],"c":1},{"q":"Quante volte viene eseguito <code>GO @cond @then</code> se cond è F?","opts":["0","1","Sempre","Errore"],"c":0}];
+
+  const TEST_LEN = 50;
+  const PASS_THRESHOLD = 40;
+  const TIME_LIMIT = 30 * 60; // seconds
+
+  let testActive = false;
+  let submitted = false;
+  let downloaded = false;
+  let selected = []; // selected questions
+  let answers = []; // user answers
+
+  // Pick N random questions from pool
+  function pickRandom(arr, n){
+    const a = [...arr];
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a.slice(0,n);
+  }
+
+  function startTest(){
+    selected = pickRandom(QUESTIONS, TEST_LEN);
+    // Randomize options per question
+    selected = selected.map(q => {
+      const idxs = q.opts.map((_,i)=>i);
+      for(let i=idxs.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idxs[i],idxs[j]]=[idxs[j],idxs[i]]; }
+      return {
+        q: q.q,
+        opts: idxs.map(i => q.opts[i]),
+        c: idxs.indexOf(q.c)
+      };
+    });
+    answers = new Array(TEST_LEN).fill(-1);
+    testActive = true;
+
+    document.getElementById('screen-intro').style.display = 'none';
+    document.getElementById('screen-test').style.display = 'block';
+    document.getElementById('hud').style.display = 'flex';
+
+    renderQuestions();
+    startTimer();
+    enableLockdown();
+  }
+
+  function renderQuestions(){
+    const container = document.getElementById('questions');
+    container.innerHTML = '';
+    selected.forEach((q, i) => {
+      const card = document.createElement('div');
+      card.className = 'q-card';
+      let optsHtml = '';
+      q.opts.forEach((o, j) => {
+        const checked = answers[i] === j ? 'checked' : '';
+        const sel = answers[i] === j ? 'selected' : '';
+        optsHtml += '<label class="opt '+sel+'" data-q="'+i+'" data-o="'+j+'"><input type="radio" name="q'+i+'" value="'+j+'" '+checked+'> '+o+'</label>';
+      });
+      card.innerHTML = '<span class="q-num">Domanda '+(i+1)+' di '+TEST_LEN+'</span>'+
+        '<div class="q-text">'+q.q+'</div>'+optsHtml;
+      container.appendChild(card);
+    });
+    // Click handler
+    container.querySelectorAll('.opt').forEach(el => {
+      el.addEventListener('click', (e) => {
+        const i = +el.dataset.q, j = +el.dataset.o;
+        answers[i] = j;
+        // update visual
+        document.querySelectorAll('label.opt[data-q="'+i+'"]').forEach(l => l.classList.remove('selected'));
+        el.classList.add('selected');
+        const radio = el.querySelector('input');
+        if(radio) radio.checked = true;
+        updateProgress();
+      });
+    });
+    updateProgress();
+  }
+
+  function updateProgress(){
+    const ans = answers.filter(a => a !== -1).length;
+    document.getElementById('answeredCount').textContent = ans + ' / '+TEST_LEN+' risposte';
+    document.getElementById('progress').style.width = ((ans/TEST_LEN)*100)+'%';
+  }
+
+  let timeLeft = TIME_LIMIT;
+  let timerInterval;
+  function startTimer(){
+    updateTimer();
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimer();
+      if(timeLeft <= 0){
+        clearInterval(timerInterval);
+        submitTest(true);
+      }
+    }, 1000);
+  }
+  function updateTimer(){
+    const m = Math.floor(timeLeft/60);
+    const s = timeLeft % 60;
+    const el = document.getElementById('timer');
+    el.innerHTML = '<i class="bi bi-clock"></i> ' + String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    el.classList.remove('warn','danger');
+    if(timeLeft <= 60) el.classList.add('danger');
+    else if(timeLeft <= 5*60) el.classList.add('warn');
+  }
+
+  function submitTest(timeUp){
+    if(submitted) return;
+    if(!timeUp){
+      const unanswered = answers.filter(a => a === -1).length;
+      let msg = 'Sei sicuro di voler consegnare?';
+      if(unanswered > 0) msg += '\nHai ancora '+unanswered+' domande senza risposta.';
+      if(!confirm(msg)) return;
+    }
+    submitted = true;
+    testActive = false;
+    clearInterval(timerInterval);
+
+    let correct = 0;
+    selected.forEach((q,i) => { if(answers[i] === q.c) correct++; });
+
+    document.getElementById('screen-test').style.display = 'none';
+
+    if(correct >= PASS_THRESHOLD){
+      showPass(correct);
+    } else {
+      showFail(correct);
+    }
+  }
+
+  function showPass(correct){
+    document.getElementById('screen-pass').style.display = 'block';
+    const num = document.getElementById('scoreNumPass');
+    const circle = document.getElementById('scorePass');
+    animateScore(num, circle, correct, '#2ecc71');
+  }
+  function showFail(correct){
+    document.getElementById('screen-fail').style.display = 'block';
+    const num = document.getElementById('scoreNumFail');
+    const circle = document.getElementById('scoreFail');
+    animateScore(num, circle, correct, '#e74c3c');
+  }
+  function animateScore(numEl, circleEl, target, color){
+    let cur = 0;
+    const dur = 1200;
+    const step = Math.max(1, Math.ceil(target/30));
+    const t0 = performance.now();
+    function tick(now){
+      const p = Math.min(1, (now-t0)/dur);
+      cur = Math.round(target * p);
+      numEl.textContent = cur;
+      const deg = (cur/TEST_LEN)*360;
+      circleEl.style.background = 'conic-gradient('+color+' '+deg+'deg, var(--card) 0deg)';
+      if(p < 1) requestAnimationFrame(tick);
+      else numEl.textContent = target;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // Certificate
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btnStart').addEventListener('click', startTest);
+    document.getElementById('btnSubmit').addEventListener('click', () => submitTest(false));
+    document.getElementById('btnCert').addEventListener('click', generateCert);
+  });
+
+  function generateCert(){
+    if(downloaded){
+      document.getElementById('certStatus').textContent = 'Hai già scaricato l\'attestato.';
+      return;
+    }
+    const nome = document.getElementById('certNome').value.trim();
+    const cogn = document.getElementById('certCognome').value.trim();
+    if(nome.length < 2 || cogn.length < 2){
+      document.getElementById('certStatus').textContent = 'Inserisci nome e cognome validi.';
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+    const W = 297, H = 210;
+
+    // Background
+    doc.setFillColor(11,18,32);
+    doc.rect(0,0,W,H,'F');
+
+    // Decorative gradient bars (manual)
+    for(let i=0;i<60;i++){
+      const t = i/59;
+      const r = Math.round(13 + (155-13)*t);
+      const g = Math.round(110 + (89-110)*t);
+      const b = Math.round(253 + (182-253)*t);
+      doc.setFillColor(r,g,b);
+      doc.rect(0, i*0.25, W, 0.3, 'F');
+    }
+    for(let i=0;i<60;i++){
+      const t = i/59;
+      const r = Math.round(155 + (255-155)*t);
+      const g = Math.round(89 + (107-89)*t);
+      const b = Math.round(182 + (107-182)*t);
+      doc.setFillColor(r,g,b);
+      doc.rect(0, H-15+i*0.25, W, 0.3, 'F');
+    }
+
+    // Inner border
+    doc.setDrawColor(220,180,90);
+    doc.setLineWidth(1.2);
+    doc.rect(12, 22, W-24, H-44);
+    doc.setLineWidth(0.4);
+    doc.rect(15, 25, W-30, H-50);
+
+    // Top brand
+    doc.setTextColor(220,180,90);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(13);
+    doc.text('LINE 3.0', W/2, 38, {align:'center'});
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(9);
+    doc.setTextColor(180,200,230);
+    doc.text('Language with Intuitive and Natural Expression', W/2, 44, {align:'center'});
+
+    // Title
+    doc.setTextColor(255,255,255);
+    doc.setFont('times','bold');
+    doc.setFontSize(38);
+    doc.text('Attestato di Certificazione', W/2, 68, {align:'center'});
+
+    // Subtitle
+    doc.setFont('helvetica','italic');
+    doc.setFontSize(12);
+    doc.setTextColor(200,210,235);
+    doc.text('Il team ufficiale di LINE 3.0 certifica che', W/2, 82, {align:'center'});
+
+    // Name
+    doc.setFont('times','bold');
+    doc.setFontSize(34);
+    doc.setTextColor(220,180,90);
+    const fullName = (nome+' '+cogn).toUpperCase();
+    doc.text(fullName, W/2, 102, {align:'center'});
+
+    // Underline
+    const nameWidth = doc.getTextWidth(fullName);
+    doc.setDrawColor(220,180,90);
+    doc.setLineWidth(0.5);
+    doc.line(W/2 - nameWidth/2 - 6, 106, W/2 + nameWidth/2 + 6, 106);
+
+    // Body
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(13);
+    doc.setTextColor(230,235,250);
+    const bodyLines = [
+      'ha superato con successo l\'esame ufficiale di certificazione',
+      'del linguaggio di programmazione LINE 3.0,',
+      'dimostrando piena padronanza di sintassi, strutture logiche,',
+      'gestione degli errori, moduli, LINE-DOM e LINE-RENDER.'
+    ];
+    bodyLines.forEach((ln, i) => doc.text(ln, W/2, 122 + i*7, {align:'center'}));
+
+    // Score line
+    const correct = answers.filter((a,i)=> a===selected[i].c).length;
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(11);
+    doc.setTextColor(46,204,113);
+    doc.text('Punteggio finale: '+correct+'/'+TEST_LEN+' — superato con merito', W/2, 158, {align:'center'});
+
+    // Date + Cert ID
+    const today = new Date();
+    const date = String(today.getDate()).padStart(2,'0')+'/'+String(today.getMonth()+1).padStart(2,'0')+'/'+today.getFullYear();
+    const certId = 'LINE-'+today.getFullYear()+'-'+Math.random().toString(36).substring(2,8).toUpperCase();
+
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(10);
+    doc.setTextColor(180,200,230);
+    doc.text('Rilasciato il '+date, 35, 180);
+    doc.text('Cert. ID: '+certId, W-35, 180, {align:'right'});
+
+    // Signature lines
+    doc.setDrawColor(180,200,230);
+    doc.setLineWidth(0.3);
+    doc.line(35, 188, 95, 188);
+    doc.line(W-95, 188, W-35, 188);
+    doc.setFontSize(8);
+    doc.setTextColor(180,200,230);
+    doc.text('Team LINE 3.0', 65, 193, {align:'center'});
+    doc.text('Mirko Somma — Qc-17', W-65, 193, {align:'center'});
+
+    // Seal (decorative circle)
+    doc.setDrawColor(220,180,90);
+    doc.setLineWidth(0.8);
+    doc.circle(W/2, 178, 12, 'S');
+    doc.setLineWidth(0.3);
+    doc.circle(W/2, 178, 14, 'S');
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(8);
+    doc.setTextColor(220,180,90);
+    doc.text('OFFICIAL', W/2, 176, {align:'center'});
+    doc.text('LINE 3.0', W/2, 181, {align:'center'});
+
+    // Save
+    const fname = 'Attestato_LINE_3.0_'+nome.replace(/\s+/g,'_')+'_'+cogn.replace(/\s+/g,'_')+'.pdf';
+    doc.save(fname);
+
+    downloaded = true;
+    document.getElementById('btnCert').disabled = true;
+    document.getElementById('certNome').disabled = true;
+    document.getElementById('certCognome').disabled = true;
+    document.getElementById('certStatus').style.color = '#2ecc71';
+    document.getElementById('certStatus').innerHTML = '<i class="bi bi-check2-circle"></i> Attestato scaricato! Verrai reindirizzato a breve...';
+
+    // Disable lockdown for redirect
+    setTimeout(() => {
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
+      window.location.href = 'bravo.html';
+    }, 2500);
+  }
+
+  // === LOCKDOWN ===
+  function beforeUnloadHandler(e){
+    if(testActive || (submitted && !downloaded && document.getElementById('screen-pass').style.display === 'block')){
+      e.preventDefault();
+      e.returnValue = 'L\'esame è in corso. Se esci perderai il tuo punteggio.';
+      return e.returnValue;
+    }
+  }
+  function enableLockdown(){
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+    // Disable right-click during test
+    document.addEventListener('contextmenu', e => { if(testActive){ e.preventDefault(); return false; } });
+    // Disable common shortcuts
+    document.addEventListener('keydown', e => {
+      if(!testActive) return;
+      // Block F5, Ctrl+R, Ctrl+W, Ctrl+T, Ctrl+N, Ctrl+P, Ctrl+S, Ctrl+U, F12, Ctrl+Shift+I/J/C
+      const key = e.key.toLowerCase();
+      if(key === 'f5' || key === 'f12') { e.preventDefault(); return false; }
+      if(e.ctrlKey || e.metaKey){
+        if(['r','w','n','t','p','s','u'].includes(key)){ e.preventDefault(); return false; }
+        if(e.shiftKey && ['i','j','c','r'].includes(key)){ e.preventDefault(); return false; }
+      }
+    });
+    // Visibility change warning
+    let warnings = 0;
+    document.addEventListener('visibilitychange', () => {
+      if(document.hidden && testActive){
+        warnings++;
+        console.warn('Tab nascosta — avviso #'+warnings);
+      }
+    });
+  }
+  </script>
+  </body>
+  </html>

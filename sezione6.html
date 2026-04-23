@@ -3,7 +3,7 @@
   <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sezione 1: Benvenuto in LINE — Manuale LINE 3.0</title>
+  <title>Sezione 6: Liste, scope e operatore IN — Manuale LINE 3.0</title>
   <link rel="icon" href="favicon.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
@@ -164,80 +164,103 @@
           <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house"></i> Home</a></li>
           <li class="nav-item"><a class="nav-link" href="ide.html"><i class="bi bi-terminal"></i> IDE</a></li>
           <li class="nav-item">
-            <span class="badge bg-primary-subtle text-primary px-3 py-2">Sezione 1/10</span>
+            <span class="badge bg-primary-subtle text-primary px-3 py-2">Sezione 6/10</span>
           </li>
         </ul>
       </div>
     </div>
   </nav>
-  <section class="hero" style="background:linear-gradient(135deg, rgba(13,110,253,.85), rgba(155,89,182,.85)), url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;">
+  <section class="hero" style="background:linear-gradient(135deg, rgba(13,110,253,.85), rgba(155,89,182,.85)), url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;">
     <div class="hero-content fade-in">
-      <span class="badge bg-light text-primary mb-3 px-3 py-2 fs-6">Sezione 1</span>
-      <h1 class="display-4 fw-bold mt-2">Benvenuto in LINE</h1>
-      <p class="lead mt-3">Cos'è LINE, come si scrivono i commenti e i caratteri di escape.</p>
+      <span class="badge bg-light text-primary mb-3 px-3 py-2 fs-6">Sezione 6</span>
+      <h1 class="display-4 fw-bold mt-2">Liste, scope e operatore IN</h1>
+      <p class="lead mt-3">Liste con tag, scope delle variabili e l'operatore IN per la verifica.</p>
     </div>
   </section>
   <div class="container mt-3">
     <div class="d-flex justify-content-between small text-muted mb-1">
       <span>Progresso del corso</span>
-      <span>10%</span>
+      <span>60%</span>
     </div>
     <div class="progress-track" style="height:8px;">
-      <div style="width:10%; height:100%; background:linear-gradient(90deg,#0d6efd,#9b59b6); transition:width .8s ease;"></div>
+      <div style="width:60%; height:100%; background:linear-gradient(90deg,#0d6efd,#9b59b6); transition:width .8s ease;"></div>
     </div>
   </div><div class="container py-5">
   <div class="card section-card p-4 p-md-5 mb-4 reveal">
-  <div class="row align-items-center g-4">
-    <div class="col-lg-6">
-      <div class="icon-circle"><i class="bi bi-stars"></i></div>
-      <h2 class="fw-bold">Cos'è LINE?</h2>
-      <p class="lead">LINE è un linguaggio di programmazione progettato per essere comprensibile e facile da apprendere.</p>
-      <p>La sintassi mette al centro la <strong>logica</strong>, rendendola leggibile quasi come testo naturale. Il nome è un acronimo: <em>Language with Intuitive and Natural Expression</em>.</p>
-      <p class="mb-0">Un programma LINE viene salvato in un file con estensione <code>.line</code> ed eseguito dall'interprete.</p>
-    </div>
-    <div class="col-lg-6">
-      <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80" alt="LINE" class="cover-img mb-3"/>
-    </div>
-  </div>
+  <div class="icon-circle"><i class="bi bi-list-ul"></i></div>
+  <h2 class="fw-bold">Liste</h2>
+  <p>Una lista immagazzina più valori in una sola variabile. I valori sono separati da <code>;</code> e racchiusi tra <code>[]</code>.</p>
+  <pre class="code-block"><code>lista = [ciao ; salve]</code></pre>
+  <p>Ogni elemento ha un <strong>indice</strong> che parte da 0. Gli indici negativi partono da destra: <code>-1</code> è l'ultimo elemento.</p>
+  <p>Si possono aggiungere <strong>tag</strong> agli elementi con <code>|</code>:</p>
+  <pre class="code-block"><code>lista = [saluto | ciao ; salve]
+  lista = [italiano | saluto | ciao ; salve]  &gt;&gt; ciao ha due tag</code></pre>
+  <p>Per accedere a un elemento:</p>
+  <pre class="code-block"><code>lista[#0]          &gt;&gt; per indice
+  lista[saluto]      &gt;&gt; per tag
+  lista[tag1 ; tag2] &gt;&gt; per più tag</code></pre>
+  <p class="text-muted">I valori di una lista sono sempre stringhe.</p>
+
+  <h4 class="mt-4">Aggiungere elementi</h4>
+  <pre class="code-block"><code>ADD nome_lista AT indice = valore   &gt;&gt; inserisce spostando gli altri in avanti
+  ADD nome_lista AT = valore          &gt;&gt; appende in fondo (indice omesso)
+  ADD nome_lista BY indice = valore   &gt;&gt; sostituisce l'elemento a quell'indice</code></pre>
+
+  <h4 class="mt-4">Rimuovere elementi</h4>
+  <pre class="code-block"><code>CANC nome_lista AT indice    &gt;&gt; per indice
+  CANC nome_lista BY tag       &gt;&gt; per tag
+  CANC nome_lista IS valore    &gt;&gt; per valore
+  CANC nome_lista IN [tag1 ; tag2]  &gt;&gt; per lista di tag</code></pre>
+  <div class="alert alert-warning"><strong>Attenzione:</strong> se due elementi hanno lo stesso tag o valore, CANC li rimuove entrambi.</div>
+
+  <h4 class="mt-4">Stampa lista</h4>
+  <pre class="code-block"><code>lista = [saluto | ciao]
+  TALK @lista    &gt;&gt; [ciao]
+  SCREAM @lista  &gt;&gt; [saluto | ciao]</code></pre>
+  <p>Le liste possono contenere altre liste come elementi:</p>
+  <pre class="code-block"><code>dati = [nomi | [Giulio ; Carlo] ; cognomi | [Bianchi ; Ferrari]]</code></pre>
   </div>
 
   <div class="card section-card p-4 p-md-5 mb-4 reveal">
-  <div class="icon-circle"><i class="bi bi-chat-left-text"></i></div>
-  <h2 class="fw-bold">Commenti</h2>
-  <p>I commenti sono ignorati dall'interprete: servono a spiegare il codice. LINE supporta sia commenti su singola riga che multilinea.</p>
-  <pre class="code-block"><code>&gt;&gt; Commento su singola riga
-
-  &lt;* Commento
-     multilinea *&gt;</code></pre>
-  </div>
-
-  <div class="card section-card p-4 p-md-5 mb-4 reveal">
-  <div class="icon-circle"><i class="bi bi-slash-square"></i></div>
-  <h2 class="fw-bold">Escape</h2>
-  <p>Il carattere di escape è il backslash <code>\</code>. Precede caratteri speciali per dargli un significato diverso da quello letterale.</p>
-  <div class="table-responsive">
-  <table class="table table-striped align-middle">
-    <thead class="table-primary"><tr><th>Sequenza</th><th>Significato</th></tr></thead>
+  <div class="icon-circle"><i class="bi bi-bounding-box"></i></div>
+  <h2 class="fw-bold">Scope delle variabili</h2>
+  <p>Per default le variabili dichiarate dentro un blocco sono <strong>locali</strong> — non accessibili dall'esterno.</p>
+  <table class="table table-striped">
+    <thead class="table-primary"><tr><th>Prefisso</th><th>Effetto</th></tr></thead>
     <tbody>
-      <tr><td><code>\n</code></td><td>Vai a capo (newline)</td></tr>
-      <tr><td><code>\\</code></td><td>Backslash letterale</td></tr>
-      <tr><td><code>\@</code></td><td><code>@</code> letterale (non riferimento a variabile)</td></tr>
-      <tr><td><code>\%</code></td><td><code>%</code> letterale (<code>%</code> senza escape è invisibile in TALK)</td></tr>
-      <tr><td><code>\;</code></td><td><code>;</code> letterale in una lista</td></tr>
-      <tr><td><code>\|</code></td><td><code>|</code> letterale in una lista</td></tr>
-      <tr><td><code>\tNOME</code></td><td>Tipo della variabile NOME (<code>string</code>, <code>number</code> o <code>bool</code>)</td></tr>
+      <tr><td><code>RET</code></td><td>Rende la variabile globale</td></tr>
+      <tr><td><code>DEFRET</code></td><td>Messo all'inizio del blocco, rende <strong>tutte</strong> le variabili del blocco globali per default</td></tr>
+      <tr><td><code>TEMP</code></td><td>Con DEFRET attivo, rende la singola variabile locale</td></tr>
     </tbody>
   </table>
+  <pre class="code-block"><code>FUN calcola()
+    RET #risultato = 42   &gt;&gt; accessibile ovunque
+    locale = ciao         &gt;&gt; solo dentro questa funzione
+    FEND
+
+  FUN esempio()
+    DEFRET
+    #due = 2              &gt;&gt; globale (DEFRET)
+    TEMP #quattro = 4     &gt;&gt; locale
+    FEND</code></pre>
   </div>
-  <div class="alert alert-info mt-3"><i class="bi bi-info-circle"></i> <strong>Nota su <code>%</code>:</strong> il simbolo <code>%</code> scritto direttamente in un TALK è invisibile nell'output. Se contenuto in una variabile, viene stampato normalmente. Per stamparlo direttamente usa <code>\%</code>.</div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <div class="icon-circle"><i class="bi bi-search"></i></div>
+  <h2 class="fw-bold">Operatore IN</h2>
+  <p>Verifica se un elemento è presente in una lista. Produce un booleano.</p>
+  <pre class="code-block"><code>lista = [ciao ; salve]
+  IF esiste = ciao IN lista        &gt;&gt; V
+  IF manca  = arrivederci IN lista &gt;&gt; F</code></pre>
   </div>
-  <div class="nav-arrows"><a href="index.html" class="prev">
-        <span class="label">← Indietro</span>
-        <span class="title">Home</span>
+  <div class="nav-arrows">
+      <a href="sezione5.html" class="prev">
+        <span class="label">← Precedente</span>
+        <span class="title">Sezione 5</span>
       </a>
-      <a href="sezione2.html" class="next" style="background:linear-gradient(135deg,#0d6efd,#9b59b6); color:white;">
+      <a href="sezione7.html" class="next" style="background:linear-gradient(135deg,#0d6efd,#9b59b6); color:white;">
         <span class="label" style="color:rgba(255,255,255,.8)">Successiva →</span>
-        <span class="title">Sezione 2</span>
+        <span class="title">Sezione 7</span>
       </a>
     </div></div>
   <footer class="footer">

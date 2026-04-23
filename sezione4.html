@@ -3,7 +3,7 @@
   <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sezione 1: Benvenuto in LINE — Manuale LINE 3.0</title>
+  <title>Sezione 4: Operazioni — Manuale LINE 3.0</title>
   <link rel="icon" href="favicon.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
@@ -164,80 +164,137 @@
           <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house"></i> Home</a></li>
           <li class="nav-item"><a class="nav-link" href="ide.html"><i class="bi bi-terminal"></i> IDE</a></li>
           <li class="nav-item">
-            <span class="badge bg-primary-subtle text-primary px-3 py-2">Sezione 1/10</span>
+            <span class="badge bg-primary-subtle text-primary px-3 py-2">Sezione 4/10</span>
           </li>
         </ul>
       </div>
     </div>
   </nav>
-  <section class="hero" style="background:linear-gradient(135deg, rgba(13,110,253,.85), rgba(155,89,182,.85)), url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;">
+  <section class="hero" style="background:linear-gradient(135deg, rgba(13,110,253,.85), rgba(155,89,182,.85)), url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;">
     <div class="hero-content fade-in">
-      <span class="badge bg-light text-primary mb-3 px-3 py-2 fs-6">Sezione 1</span>
-      <h1 class="display-4 fw-bold mt-2">Benvenuto in LINE</h1>
-      <p class="lead mt-3">Cos'è LINE, come si scrivono i commenti e i caratteri di escape.</p>
+      <span class="badge bg-light text-primary mb-3 px-3 py-2 fs-6">Sezione 4</span>
+      <h1 class="display-4 fw-bold mt-2">Operazioni</h1>
+      <p class="lead mt-3">Matematiche, di comparazione, logiche, priorità degli operatori e operatori incrementali.</p>
     </div>
   </section>
   <div class="container mt-3">
     <div class="d-flex justify-content-between small text-muted mb-1">
       <span>Progresso del corso</span>
-      <span>10%</span>
+      <span>40%</span>
     </div>
     <div class="progress-track" style="height:8px;">
-      <div style="width:10%; height:100%; background:linear-gradient(90deg,#0d6efd,#9b59b6); transition:width .8s ease;"></div>
+      <div style="width:40%; height:100%; background:linear-gradient(90deg,#0d6efd,#9b59b6); transition:width .8s ease;"></div>
     </div>
   </div><div class="container py-5">
   <div class="card section-card p-4 p-md-5 mb-4 reveal">
-  <div class="row align-items-center g-4">
-    <div class="col-lg-6">
-      <div class="icon-circle"><i class="bi bi-stars"></i></div>
-      <h2 class="fw-bold">Cos'è LINE?</h2>
-      <p class="lead">LINE è un linguaggio di programmazione progettato per essere comprensibile e facile da apprendere.</p>
-      <p>La sintassi mette al centro la <strong>logica</strong>, rendendola leggibile quasi come testo naturale. Il nome è un acronimo: <em>Language with Intuitive and Natural Expression</em>.</p>
-      <p class="mb-0">Un programma LINE viene salvato in un file con estensione <code>.line</code> ed eseguito dall'interprete.</p>
-    </div>
-    <div class="col-lg-6">
-      <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80" alt="LINE" class="cover-img mb-3"/>
-    </div>
-  </div>
-  </div>
-
-  <div class="card section-card p-4 p-md-5 mb-4 reveal">
-  <div class="icon-circle"><i class="bi bi-chat-left-text"></i></div>
-  <h2 class="fw-bold">Commenti</h2>
-  <p>I commenti sono ignorati dall'interprete: servono a spiegare il codice. LINE supporta sia commenti su singola riga che multilinea.</p>
-  <pre class="code-block"><code>&gt;&gt; Commento su singola riga
-
-  &lt;* Commento
-     multilinea *&gt;</code></pre>
-  </div>
-
-  <div class="card section-card p-4 p-md-5 mb-4 reveal">
-  <div class="icon-circle"><i class="bi bi-slash-square"></i></div>
-  <h2 class="fw-bold">Escape</h2>
-  <p>Il carattere di escape è il backslash <code>\</code>. Precede caratteri speciali per dargli un significato diverso da quello letterale.</p>
-  <div class="table-responsive">
-  <table class="table table-striped align-middle">
-    <thead class="table-primary"><tr><th>Sequenza</th><th>Significato</th></tr></thead>
+  <div class="icon-circle"><i class="bi bi-calculator"></i></div>
+  <h2 class="fw-bold">Operazioni matematiche</h2>
+  <p>Le operazioni matematiche si svolgono solo tra variabili numeriche, all'interno di una dichiarazione o riassegnazione.</p>
+  <table class="table table-striped">
+    <thead class="table-primary"><tr><th>Operatore</th><th>Operazione</th></tr></thead>
     <tbody>
-      <tr><td><code>\n</code></td><td>Vai a capo (newline)</td></tr>
-      <tr><td><code>\\</code></td><td>Backslash letterale</td></tr>
-      <tr><td><code>\@</code></td><td><code>@</code> letterale (non riferimento a variabile)</td></tr>
-      <tr><td><code>\%</code></td><td><code>%</code> letterale (<code>%</code> senza escape è invisibile in TALK)</td></tr>
-      <tr><td><code>\;</code></td><td><code>;</code> letterale in una lista</td></tr>
-      <tr><td><code>\|</code></td><td><code>|</code> letterale in una lista</td></tr>
-      <tr><td><code>\tNOME</code></td><td>Tipo della variabile NOME (<code>string</code>, <code>number</code> o <code>bool</code>)</td></tr>
+      <tr><td><code>+</code></td><td>Addizione</td></tr>
+      <tr><td><code>-</code></td><td>Sottrazione</td></tr>
+      <tr><td><code>*</code></td><td>Moltiplicazione</td></tr>
+      <tr><td><code>^</code></td><td>Potenza</td></tr>
+      <tr><td><code>/</code></td><td>Divisione</td></tr>
+      <tr><td><code>//</code></td><td>Divisione intera</td></tr>
+      <tr><td><code>%</code></td><td>Resto della divisione (modulo)</td></tr>
     </tbody>
   </table>
+  <p>Il simbolo <code>+</code> funziona anche tra stringhe come concatenazione.</p>
   </div>
-  <div class="alert alert-info mt-3"><i class="bi bi-info-circle"></i> <strong>Nota su <code>%</code>:</strong> il simbolo <code>%</code> scritto direttamente in un TALK è invisibile nell'output. Se contenuto in una variabile, viene stampato normalmente. Per stamparlo direttamente usa <code>\%</code>.</div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <div class="icon-circle"><i class="bi bi-arrow-left-right"></i></div>
+  <h2 class="fw-bold">Operazioni di comparazione</h2>
+  <p>Producono sempre un booleano (V o F). Possono essere usate all'interno di qualsiasi variabile.</p>
+  <table class="table table-striped">
+    <thead class="table-primary"><tr><th>Operatore</th><th>Significato</th><th>Tra</th></tr></thead>
+    <tbody>
+      <tr><td><code>==</code></td><td>Uguale</td><td>Qualsiasi tipo</td></tr>
+      <tr><td><code>!=</code></td><td>Diverso</td><td>Qualsiasi tipo</td></tr>
+      <tr><td><code>&gt;</code></td><td>Maggiore</td><td>Solo numeri</td></tr>
+      <tr><td><code>&lt;</code></td><td>Minore</td><td>Solo numeri</td></tr>
+      <tr><td><code>&gt;=</code></td><td>Maggiore o uguale</td><td>Solo numeri</td></tr>
+      <tr><td><code>&lt;=</code></td><td>Minore o uguale</td><td>Solo numeri</td></tr>
+    </tbody>
+  </table>
+  <p class="text-muted">Un <code>5</code> numerale è diverso da un <code>5</code> stringa — il tipo conta.</p>
+  <pre class="code-block"><code>#var = 5
+  IF uguale   = @var == 5    &gt;&gt; V
+  IF diverso  = @var != 3    &gt;&gt; V
+  IF maggiore = @var &gt; 3     &gt;&gt; V
+  IF tipo     = \tvar == number  &gt;&gt; V</code></pre>
   </div>
-  <div class="nav-arrows"><a href="index.html" class="prev">
-        <span class="label">← Indietro</span>
-        <span class="title">Home</span>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <div class="icon-circle"><i class="bi bi-bezier"></i></div>
+  <h2 class="fw-bold">Operazioni logiche</h2>
+  <p>Operano solo tra booleani e producono un booleano.</p>
+  <table class="table table-striped">
+    <thead class="table-primary"><tr><th>Operatore</th><th>Significato</th></tr></thead>
+    <tbody>
+      <tr><td><code>ET</code></td><td>AND — vero se entrambi veri</td></tr>
+      <tr><td><code>VEL</code></td><td>OR — vero se almeno uno è vero</td></tr>
+      <tr><td><code>AUT</code></td><td>XOR — vero se esattamente uno è vero</td></tr>
+      <tr><td><code>!</code> (prefisso)</td><td>NOT — inverte il booleano</td></tr>
+    </tbody>
+  </table>
+  <pre class="code-block"><code>#n = 7
+  IF tra5e10 = @n &gt; 5 ET @n &lt; 10   &gt;&gt; V
+  IF fuori   = @n &lt; 5 VEL @n &gt; 10  &gt;&gt; F
+  IF negato  = !@tra5e10            &gt;&gt; F</code></pre>
+  </div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <div class="icon-circle"><i class="bi bi-sort-numeric-down"></i></div>
+  <h2 class="fw-bold">Priorità degli operatori</h2>
+  <table class="table table-striped">
+    <thead class="table-primary"><tr><th>Priorità</th><th>Operatori</th></tr></thead>
+    <tbody>
+      <tr><td>1 (massima)</td><td><code>^</code></td></tr>
+      <tr><td>2</td><td><code>*</code> <code>/</code></td></tr>
+      <tr><td>3</td><td><code>//</code></td></tr>
+      <tr><td>4</td><td><code>%</code></td></tr>
+      <tr><td>5</td><td><code>+</code> <code>-</code></td></tr>
+      <tr><td>6</td><td><code>==</code> <code>!=</code></td></tr>
+      <tr><td>7</td><td><code>&lt;=</code> <code>&gt;=</code></td></tr>
+      <tr><td>8</td><td><code>!</code></td></tr>
+      <tr><td>9 (minima)</td><td><code>ET</code> <code>VEL</code> <code>AUT</code></td></tr>
+    </tbody>
+  </table>
+  <p>Le parentesi <code>()</code> funzionano come in matematica per forzare un ordine diverso.</p>
+  </div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <div class="icon-circle"><i class="bi bi-plus-slash-minus"></i></div>
+  <h2 class="fw-bold">Operatori incrementali</h2>
+  <p>Scorciatoie per modificare direttamente una variabile numerica:</p>
+  <table class="table table-striped">
+    <thead class="table-primary"><tr><th>Operatore</th><th>Equivalente a</th></tr></thead>
+    <tbody>
+      <tr><td><code>var += n</code></td><td><code>var = @var + n</code></td></tr>
+      <tr><td><code>var -= n</code></td><td><code>var = @var - n</code></td></tr>
+      <tr><td><code>var *= n</code></td><td><code>var = @var * n</code></td></tr>
+      <tr><td><code>var /= n</code></td><td><code>var = @var / n</code></td></tr>
+      <tr><td><code>var //= n</code></td><td><code>var = @var // n</code></td></tr>
+      <tr><td><code>var %= n</code></td><td><code>var = @var % n</code></td></tr>
+      <tr><td><code>var ^= n</code></td><td><code>var = @var ^ n</code></td></tr>
+    </tbody>
+  </table>
+  <pre class="code-block"><code>#punteggio = 10
+  #punteggio += 5   &gt;&gt; ora vale 15
+  #punteggio *= 2   &gt;&gt; ora vale 30</code></pre>
+  </div>
+  <div class="nav-arrows">
+      <a href="sezione3.html" class="prev">
+        <span class="label">← Precedente</span>
+        <span class="title">Sezione 3</span>
       </a>
-      <a href="sezione2.html" class="next" style="background:linear-gradient(135deg,#0d6efd,#9b59b6); color:white;">
+      <a href="sezione5.html" class="next" style="background:linear-gradient(135deg,#0d6efd,#9b59b6); color:white;">
         <span class="label" style="color:rgba(255,255,255,.8)">Successiva →</span>
-        <span class="title">Sezione 2</span>
+        <span class="title">Sezione 5</span>
       </a>
     </div></div>
   <footer class="footer">

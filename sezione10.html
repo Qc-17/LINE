@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+  <html lang="it">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sezione 10: LINE-RENDER — Manuale LINE 3.0</title>
+  <link rel="icon" href="favicon.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+  :root{
+    --bg:#f5f7fb;
+    --primary:#0d6efd;
+    --primary-dark:#0a4fa8;
+    --accent:#ff6b6b;
+    --code-bg:#0b1220;
+    --code-fg:#e2e8f0;
+  }
+  body{
+    font-family:'Syne',sans-serif;
+    background:var(--bg);
+    color:#111;
+    overflow-x:hidden;
+  }
+  .navbar-brand img{ height:34px; }
+  .hero{
+    position:relative;
+    color:white;
+    text-align:center;
+    padding:90px 20px 70px;
+    background:linear-gradient(135deg, rgba(13,110,253,.85), rgba(155,89,182,.85)),
+               url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+    overflow:hidden;
+  }
+  .hero-content{ position:relative; z-index:2; max-width:900px; margin:auto; }
+  .hero h1{ font-weight:800; letter-spacing:-.5px; }
+  .hero .lead{ opacity:.95; }
+  .section-card{
+    border:0;
+    border-radius:18px;
+    box-shadow:0 12px 30px rgba(0,0,0,.07);
+    background:white;
+  }
+  .code-block{
+    background:var(--code-bg);
+    color:var(--code-fg);
+    padding:18px 22px;
+    border-radius:14px;
+    font-family:'Fira Code',ui-monospace,monospace;
+    font-size:.92rem;
+    overflow-x:auto;
+    white-space:pre;
+    line-height:1.55;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
+  }
+  .code-block .c{ color:#7f8c98; font-style:italic; }
+  .code-block .k{ color:#ff79c6; }
+  .code-block .s{ color:#f1fa8c; }
+  .code-block .n{ color:#bd93f9; }
+  table.table{ background:white; border-radius:12px; overflow:hidden; }
+  .badge-step{
+    display:inline-block;
+    padding:6px 14px;
+    border-radius:50px;
+    background:rgba(13,110,253,.12);
+    color:var(--primary);
+    font-weight:600;
+    font-size:.85rem;
+    letter-spacing:.5px;
+  }
+  .nav-arrows{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    margin:60px 0 20px;
+    flex-wrap:wrap;
+  }
+  .nav-arrows a{
+    flex:1;
+    min-width:200px;
+    padding:18px 22px;
+    border-radius:14px;
+    background:white;
+    box-shadow:0 6px 18px rgba(0,0,0,.06);
+    color:#111;
+    display:flex;
+    flex-direction:column;
+    transition:transform .25s ease, box-shadow .25s ease;
+    border:1px solid rgba(0,0,0,.04);
+  }
+  .nav-arrows a:hover{
+    transform:translateY(-3px);
+    box-shadow:0 12px 28px rgba(0,0,0,.12);
+  }
+  .nav-arrows .label{ font-size:.75rem; text-transform:uppercase; color:#888; letter-spacing:1px;}
+  .nav-arrows .title{ font-weight:700; font-size:1.05rem; margin-top:4px; }
+  .nav-arrows a.next{ text-align:right; align-items:flex-end;}
+  .progress-bar-top{
+    height:6px;
+    background:linear-gradient(90deg, var(--primary), #9b59b6);
+    border-radius:3px;
+    margin-bottom:8px;
+  }
+  .progress-track{
+    background:#e9ecef;
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .footer{
+    background:#0b1220;
+    color:#cbd5e1;
+    padding:40px 20px;
+    margin-top:80px;
+  }
+  a{ text-decoration:none; }
+  .fade-in{ animation: fadeIn .8s ease both; }
+  .slide-up{ animation: slideUp .7s ease both; }
+  .slide-up-d2{ animation: slideUp .7s .15s ease both; }
+  .slide-up-d3{ animation: slideUp .7s .3s ease both; }
+  @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+  @keyframes slideUp{ from{opacity:0; transform:translateY(30px)} to{opacity:1; transform:translateY(0)} }
+  @keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .float{ animation: float 4s ease-in-out infinite; }
+  .reveal{ opacity:0; transform:translateY(30px); transition:all .8s ease; }
+  .reveal.visible{ opacity:1; transform:translateY(0); }
+  .icon-circle{
+    width:64px; height:64px; border-radius:50%;
+    background:linear-gradient(135deg,#0d6efd,#9b59b6);
+    color:white; display:flex; align-items:center; justify-content:center;
+    font-size:28px; margin-bottom:18px;
+    box-shadow:0 8px 20px rgba(13,110,253,.3);
+  }
+  .cover-img{
+    width:100%; border-radius:18px; box-shadow:0 14px 40px rgba(0,0,0,.12);
+    object-fit:cover; max-height:340px;
+  }
+  .tag-pill{
+    display:inline-block; padding:4px 12px; border-radius:50px;
+    background:#e7f1ff; color:#0a4fa8; font-size:.8rem; font-weight:600;
+    margin-right:6px; margin-bottom:6px;
+  }
+  hr.fancy{
+    border:0; height:2px;
+    background:linear-gradient(90deg, transparent, #0d6efd, transparent);
+    margin:36px 0;
+  }
+  </style>
+  </head>
+  <body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top shadow-sm">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <i class="bi bi-code-slash text-primary fs-3"></i>
+        <strong>LINE 3.0</strong>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="nav">
+        <ul class="navbar-nav ms-auto gap-2 align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house"></i> Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="ide.html"><i class="bi bi-terminal"></i> IDE</a></li>
+          <li class="nav-item">
+            <span class="badge bg-primary-subtle text-primary px-3 py-2">Sezione 10/10</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <section class="hero" style="background:linear-gradient(135deg, rgba(13,110,253,.85), rgba(155,89,182,.85)), url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;">
+    <div class="hero-content fade-in">
+      <span class="badge bg-light text-primary mb-3 px-3 py-2 fs-6">Sezione 10</span>
+      <h1 class="display-4 fw-bold mt-2">LINE-RENDER</h1>
+      <p class="lead mt-3">Visualizzare formule matematiche, strutture chimiche e HTML nella console.</p>
+    </div>
+  </section>
+  <div class="container mt-3">
+    <div class="d-flex justify-content-between small text-muted mb-1">
+      <span>Progresso del corso</span>
+      <span>100%</span>
+    </div>
+    <div class="progress-track" style="height:8px;">
+      <div style="width:100%; height:100%; background:linear-gradient(90deg,#0d6efd,#9b59b6); transition:width .8s ease;"></div>
+    </div>
+  </div><div class="container py-5">
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <div class="icon-circle"><i class="bi bi-graph-up"></i></div>
+  <h2 class="fw-bold">LINE-RENDER</h2>
+  <p class="lead">LINE-RENDER è un'estensione dell'IDE che permette di visualizzare formule matematiche e strutture chimiche nella console. Richiede <code>line-render.js</code> e la libreria KaTeX.</p>
+  <p>La notazione è una versione abbreviata che viene compilata in LaTeX prima del rendering.</p>
+  </div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <h3 class="fw-bold">24.1 Blocchi RENDER</h3>
+  <p>Sintassi per il rendering a blocco (su una riga separata, centrato):</p>
+  <pre class="code-block"><code>RENDER{
+    formula
+  }</code></pre>
+  <p>Tutto ciò che è tra <code>{</code> e <code>}</code> viene interpretato come formula e renderizzato nella console.</p>
+  <pre class="code-block"><code>RENDER{
+    s(k=0,n)(k2) = n(n+1)/2
+  }
+
+  RENDER{
+    de(f)/de(x) = lim(h -&gt; 0)((f(x+h) - f(x))/h)
+  }</code></pre>
+  </div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <h3 class="fw-bold">24.2 Render inline <code>\R...\R</code></h3>
+  <p>Per includere una formula direttamente all'interno di una riga di testo si usa la coppia di escape <code>\R</code>:</p>
+  <pre class="code-block"><code>TALK Questo è un integrale \RS(0,1)(f(x))\R, ed è molto interessante.
+  TALK La formula di Eulero è \Reu^(pi*i) + 1 = 0\R.</code></pre>
+  <p>La formula tra i due <code>\R</code> viene renderizzata con KaTeX in modalità inline, allineata verticalmente al testo circostante.</p>
+  </div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <h3 class="fw-bold">24.3 Modalità CHEM — Strutture chimiche</h3>
+  <p>Per disegnare molecole la prima riga del blocco deve essere <code>CHEM</code>. Ogni riga successiva descrive una molecola.</p>
+  <pre class="code-block"><code>RENDER{
+    CHEM
+    C(HHH=O)
+  }</code></pre>
+  <p><strong>Sintassi delle molecole:</strong></p>
+  <ul>
+    <li>Atomi: simboli chimici come <code>C</code>, <code>H</code>, <code>O</code>, <code>N</code>, <code>Cl</code>, ecc.</li>
+    <li>Legami impliciti: <code>-</code> (singolo, default)</li>
+    <li>Legame doppio: <code>=</code></li>
+    <li>Legame triplo: <code>#</code></li>
+    <li>Ramificazioni: <code>(...)</code> per i sostituenti</li>
+  </ul>
+  <pre class="code-block"><code>RENDER{
+    CHEM
+    C(HHH=O)        &gt;&gt; metanale (formaldeide)
+  }
+
+  RENDER{
+    CHEM
+    C(H)(H)(=O)     &gt;&gt; carbonile con due H
+  }</code></pre>
+  </div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <h3 class="fw-bold">24.4 Notazione matematica</h3>
+  <p>La notazione è compatta. Ogni espressione viene tradotta in LaTeX.</p>
+
+  <h5 class="mt-3">Operazioni di base</h5>
+  <table class="table table-sm"><thead class="table-light"><tr><th>Notazione</th><th>Significato</th></tr></thead><tbody>
+  <tr><td><code>a + b</code></td><td>somma</td></tr>
+  <tr><td><code>a - b</code></td><td>differenza</td></tr>
+  <tr><td><code>a * b</code></td><td>prodotto</td></tr>
+  <tr><td><code>a/b</code></td><td>frazione</td></tr>
+  <tr><td><code>(a+b)/(c+d)</code></td><td>frazione composta</td></tr>
+  <tr><td><code>n!</code></td><td>fattoriale</td></tr>
+  </tbody></table>
+
+  <h5 class="mt-3">Potenza e pedice</h5>
+  <table class="table table-sm"><thead class="table-light"><tr><th>Notazione</th><th>Rendering</th></tr></thead><tbody>
+  <tr><td><code>x5</code></td><td>x alla 5</td></tr>
+  <tr><td><code>x^(n+1)</code></td><td>x alla (n+1)</td></tr>
+  <tr><td><code>x#(i)</code></td><td>x con pedice i</td></tr>
+  <tr><td><code>a#(i)^(2)</code></td><td>a con pedice i, alla 2</td></tr>
+  </tbody></table>
+
+  <h5 class="mt-3">Radici</h5>
+  <table class="table table-sm"><thead class="table-light"><tr><th>Notazione</th><th>Rendering</th></tr></thead><tbody>
+  <tr><td><code>R(x2+1)</code></td><td>radice quadrata</td></tr>
+  <tr><td><code>R3(a3)</code></td><td>radice cubica</td></tr>
+  </tbody></table>
+
+  <h5 class="mt-3">Derivate</h5>
+  <table class="table table-sm"><thead class="table-light"><tr><th>Notazione</th><th>Tipo</th></tr></thead><tbody>
+  <tr><td><code>f'</code>, <code>y''</code>, <code>x'''</code></td><td>Notazione di Newton</td></tr>
+  <tr><td><code>de(f)/de(x)</code></td><td>Derivata ordinaria</td></tr>
+  <tr><td><code>dp(f)/dp(x)</code></td><td>Derivata parziale</td></tr>
+  </tbody></table>
+
+  <h5 class="mt-3">Sommatorie, produttorie, integrali, limiti</h5>
+  <table class="table table-sm"><thead class="table-light"><tr><th>Notazione</th><th>Rendering</th></tr></thead><tbody>
+  <tr><td><code>s(k=0,n)(k2)</code></td><td>Sommatoria</td></tr>
+  <tr><td><code>P(k=1,n)(k)</code></td><td>Produttoria</td></tr>
+  <tr><td><code>S(0,1)(x2)</code></td><td>Integrale definito</td></tr>
+  <tr><td><code>L(0)((sin(x))/x)</code></td><td>Limite</td></tr>
+  </tbody></table>
+
+  <h5 class="mt-3">Funzioni standard</h5>
+  <table class="table table-sm"><thead class="table-light"><tr><th>Notazione</th><th>Funzione</th></tr></thead><tbody>
+  <tr><td><code>sin(x)</code>, <code>cos(x)</code>, <code>tan(x)</code></td><td>Trigonometriche</td></tr>
+  <tr><td><code>arcsin(x)</code>, <code>arccos(x)</code>, <code>arctan(x)</code></td><td>Arco-trigonometriche</td></tr>
+  <tr><td><code>sinh(x)</code>, <code>cosh(x)</code>, <code>tanh(x)</code></td><td>Iperboliche</td></tr>
+  <tr><td><code>ln(x)</code>, <code>log(x)</code>, <code>exp(x)</code></td><td>Logaritmi ed esponenziale</td></tr>
+  </tbody></table>
+
+  <h5 class="mt-3">Vettori, matrici e combinatoria</h5>
+  <table class="table table-sm"><thead class="table-light"><tr><th>Notazione</th><th>Rendering</th></tr></thead><tbody>
+  <tr><td><code>v(x;y;z)</code></td><td>Vettore colonna</td></tr>
+  <tr><td><code>M(2;2)(a;b;c;d)</code></td><td>Matrice 2×2</td></tr>
+  <tr><td><code>C(n;k)</code></td><td>Coefficiente binomiale</td></tr>
+  <tr><td><code>Perm(n;k)</code></td><td>Permutazioni</td></tr>
+  <tr><td><code>CombR(n;k)</code></td><td>Combinazioni con ripetizione</td></tr>
+  </tbody></table>
+
+  <h5 class="mt-3">Decoratori, costanti e relazioni</h5>
+  <table class="table table-sm"><thead class="table-light"><tr><th>Notazione</th><th>Effetto</th></tr></thead><tbody>
+  <tr><td><code>vc(v)</code></td><td>Vettore</td></tr>
+  <tr><td><code>ha(x)</code></td><td>Cappello</td></tr>
+  <tr><td><code>ba(x)</code></td><td>Barra</td></tr>
+  <tr><td><code>ti(x)</code></td><td>Tilde</td></tr>
+  <tr><td><code>do(x)</code> / <code>do2(x)</code></td><td>Punto / doppio punto</td></tr>
+  <tr><td><code>fl(x)</code> / <code>ce(x)</code></td><td>Floor / Ceiling</td></tr>
+  <tr><td><code>pi</code>, <code>eu</code>, <code>I</code>, <code>na</code></td><td>π, e, ∞, ∇</td></tr>
+  <tr><td><code>alp</code>, <code>bet</code>, <code>gam</code>...</td><td>Lettere greche minuscole</td></tr>
+  <tr><td><code>Gam</code>, <code>Sig</code>, <code>Phi</code>...</td><td>Lettere greche maiuscole</td></tr>
+  <tr><td><code>-&gt;</code>, <code>=&gt;</code>, <code>&lt;=&gt;</code></td><td>→, ⇒, ⇔</td></tr>
+  <tr><td><code>~</code>, <code>!=</code>, <code>&lt;=</code>, <code>&gt;=</code></td><td>≈, ≠, ≤, ≥</td></tr>
+  </tbody></table>
+  </div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <h3 class="fw-bold">24.5 Salvataggio PDF della console</h3>
+  <p>Il bottone <strong>PDF</strong> nella barra della console genera un PDF visivo della console, conservando il rendering delle formule e dei grafici chimici. Il PDF viene ridimensionato al contenuto effettivo.</p>
+  <p>Il bottone <strong>TXT</strong> salva invece il testo puro della console (le formule appaiono come testo sorgente).</p>
+  </div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <h3 class="fw-bold">24.6 Modalità HTML</h3>
+  <p>La prima riga del blocco può essere <code>HTML</code>. Tutto il contenuto successivo viene interpretato come HTML grezzo e inserito direttamente nella console tramite <code>innerHTML</code>.</p>
+  <pre class="code-block"><code>RENDER{
+    HTML
+    ...codice HTML...
+  }</code></pre>
+  <p>Questo permette di visualizzare nella console qualsiasi struttura HTML: tabelle, liste, immagini, testo stilizzato, componenti arbitrari.</p>
+  <pre class="code-block"><code>RENDER{
+    HTML
+    &lt;table border="1" style="border-collapse:collapse;color:#cdd9e5"&gt;
+      &lt;tr&gt;&lt;th&gt;Nome&lt;/th&gt;&lt;th&gt;Valore&lt;/th&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;pi&lt;/td&gt;&lt;td&gt;3.14159&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;e&lt;/td&gt;&lt;td&gt;2.71828&lt;/td&gt;&lt;/tr&gt;
+    &lt;/table&gt;
+  }
+
+  RENDER{
+    HTML
+    &lt;ul style="color:#80cbc4"&gt;
+      &lt;li&gt;Primo elemento&lt;/li&gt;
+      &lt;li&gt;Secondo elemento&lt;/li&gt;
+    &lt;/ul&gt;
+  }</code></pre>
+  <div class="alert alert-warning mt-3"><strong>Nota:</strong> il contenuto HTML viene inserito senza sanitizzazione. Usare tag di script all'interno non è consigliato — l'HTML viene renderizzato nel contesto della console dell'IDE.</div>
+  </div>
+
+  <div class="card section-card p-4 p-md-5 mb-4 reveal">
+  <div class="text-center py-3">
+    <i class="bi bi-trophy-fill" style="font-size:64px; color:#ffc107;"></i>
+    <h2 class="fw-bold mt-3">Hai completato tutte le sezioni!</h2>
+    <p class="lead">Clicca sul bottone qui sotto per ricevere il tuo riconoscimento.</p>
+  </div>
+  </div>
+  <div class="nav-arrows">
+      <a href="sezione9.html" class="prev">
+        <span class="label">← Precedente</span>
+        <span class="title">Sezione 9</span>
+      </a>
+      <a href="test.html" class="next" style="background:linear-gradient(135deg,#ff6b6b,#9b59b6); color:white;">
+        <span class="label" style="color:rgba(255,255,255,.8)">Esame finale →</span>
+        <span class="title">Sostieni il test</span>
+      </a>
+    </div></div>
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5><i class="bi bi-code-slash"></i> LINE 3.0</h5>
+          <p class="small mb-1">Language with Intuitive and Natural Expression</p>
+          <p class="small text-secondary">Open source GPL 3.0 — Creato da Qc-17 (Mirko Somma)</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <h5>Risorse</h5>
+          <a href="index.html" class="text-info d-block small">Home</a>
+          <a href="ide.html" class="text-info d-block small">Apri l'IDE</a>
+        </div>
+      </div>
+      <hr class="border-secondary">
+      <div class="text-center small">🄯 Qc-17 — Manuale LINE 3.0</div>
+    </div>
+  </footer>
+  <script>
+  // Reveal on scroll
+  const obs=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  </script>
+  </body>
+  </html>
