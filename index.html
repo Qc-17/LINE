@@ -15,21 +15,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LINE</title>
-<script>
-/* Modalità leggera: se la pagina è crashata/bloccata la volta prima, parte senza animazioni.
-   Forzabile con ?lite nell'URL, si riattiva con ?fx */
-(function(){
-  var d=document.documentElement, k='line_fx', s=null, q=location.search;
-  try{
-    if(/[?&]lite\b/.test(q)) localStorage.setItem(k,'lite');
-    else if(/[?&]fx\b/.test(q)) localStorage.removeItem(k);
-    s=localStorage.getItem(k);
-    if(s==='testing'){ s='lite'; localStorage.setItem(k,'lite'); }
-    else if(s!=='lite'){ localStorage.setItem(k,'testing'); }
-  }catch(e){}
-  if(s==='lite') d.classList.add('lite');
-})();
-</script>
 <link rel="icon" href="favicon.png"><!-- Bootstrap --><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script><!-- Bootstrap Icons --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"><style>
@@ -90,73 +75,21 @@ body{
 
 a{text-decoration:none;}
 
-/* ===== NEWS LINE 4.0 ===== */
+/* ===== NEWS LINE 4.0 (pagina intera, statica) ===== */
 .news4{
   background:#0b1220;
   color:#e2e8f0;
   padding:56px 20px 120px;
   border-bottom:3px solid #4da3ff;
   position:relative;
-  overflow:hidden;
   min-height:calc(100vh - 57px);
   min-height:calc(100svh - 57px);
   display:flex;
   align-items:center;
 }
 
-html{scroll-behavior:smooth;}
-
 .news4 .container{
-  position:relative;
-  z-index:1;
-}
-
-/* Spinner di sfondo */
-.news4-bg{
-  position:absolute;
-  top:50%;
-  right:-140px;
-  width:680px;
-  height:680px;
-  transform:translateY(-50%);
-  opacity:.5;
-  pointer-events:none;
-  z-index:0;
-}
-.news4::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  background:radial-gradient(ellipse 45% 70% at 78% 50%,transparent 30%,#0b1220 100%);
-}
-.news4-bg circle{
-  fill:none;
-  stroke-linecap:round;
-  transform-box:fill-box;
-  transform-origin:center;
-}
-.news4-bg .r1{stroke:#4da3ff;stroke-width:5;stroke-dasharray:28 72;animation:spin 3.2s cubic-bezier(.5,.1,.5,.9) infinite;}
-.news4-bg .r2{stroke:#7cc0ff;stroke-width:3;stroke-dasharray:18 82;animation:spin-rev 5s linear infinite;}
-.news4-bg .r3{stroke:#4da3ff;stroke-width:2;stroke-dasharray:1 3.2;opacity:.6;animation:spin 40s linear infinite;}
-.news4-bg .r4{stroke:#2a4a80;stroke-width:1.5;}
-.news4-bg .r5{stroke:#9fd0ff;stroke-width:6;stroke-dasharray:6 94;animation:spin-rev 7s ease-in-out infinite;}
-.news4-bg .core{fill:#4da3ff;stroke:none;animation:core-pulse 2.4s ease-in-out infinite;}
-
-@keyframes spin{to{transform:rotate(360deg);}}
-@keyframes spin-rev{to{transform:rotate(-360deg);}}
-@keyframes core-pulse{
-  0%,100%{opacity:.25;transform:scale(.8);}
-  50%{opacity:.7;transform:scale(1.15);}
-}
-
-@media (max-width:991px){
-  .news4-bg{right:50%;margin-right:-340px;opacity:.35;}
-}
-
-@media (prefers-reduced-motion:reduce){
-  .news4-bg circle{animation:none;}
+  width:100%;
 }
 
 .news4 .badge-live{
@@ -173,7 +106,6 @@ html{scroll-behavior:smooth;}
   height:10px;
   border-radius:50%;
   background:#4da3ff;
-  animation:dot-pulse 1.8s ease-out infinite;
 }
 
 .news4 h2{
@@ -182,73 +114,6 @@ html{scroll-behavior:smooth;}
   color:#fff;
   line-height:1.05;
   margin-bottom:22px;
-}
-
-.news4 .caret{
-  display:inline-block;
-  width:.06em;
-  height:.9em;
-  margin-left:.08em;
-  vertical-align:-.08em;
-  background:#4da3ff;
-  animation:caret-blink 1s steps(1) infinite;
-}
-@keyframes caret-blink{50%{opacity:0;}}
-
-/* Indicatore "scorri" */
-.scroll-hint{
-  position:absolute;
-  left:50%;
-  bottom:26px;
-  transform:translateX(-50%);
-  z-index:2;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
-  color:#b8c4d6;
-  font-weight:600;
-  font-size:.95rem;
-  text-align:center;
-}
-.scroll-hint:hover{color:#fff;}
-.scroll-hint .mouse{
-  width:26px;
-  height:42px;
-  border:2px solid #4da3ff;
-  border-radius:14px;
-  position:relative;
-}
-.scroll-hint .mouse::before{
-  content:'';
-  position:absolute;
-  left:50%;
-  top:8px;
-  width:4px;
-  height:8px;
-  margin-left:-2px;
-  border-radius:2px;
-  background:#4da3ff;
-  animation:wheel 1.8s ease-in-out infinite;
-}
-.scroll-hint .chev{
-  color:#4da3ff;
-  font-size:1.1rem;
-  line-height:1;
-  animation:chev 1.8s ease-in-out infinite;
-}
-@keyframes wheel{
-  0%{opacity:0;transform:translateY(0);}
-  30%{opacity:1;}
-  100%{opacity:0;transform:translateY(14px);}
-}
-@keyframes chev{
-  0%,100%{transform:translateY(-3px);opacity:.4;}
-  50%{transform:translateY(4px);opacity:1;}
-}
-@media (prefers-reduced-motion:reduce){
-  .news4 .caret,.scroll-hint .mouse::before,.scroll-hint .chev{animation:none;}
-  html{scroll-behavior:auto;}
 }
 
 .news4 p{
@@ -293,7 +158,6 @@ html{scroll-behavior:smooth;}
   margin:0 auto;
 }
 
-/* SVG animation */
 .news4-art .grid-lines line{stroke:#1e2b47;stroke-width:1;}
 .news4-art .trace{
   fill:none;
@@ -301,75 +165,39 @@ html{scroll-behavior:smooth;}
   stroke-width:4;
   stroke-linecap:round;
   stroke-linejoin:round;
-  stroke-dasharray:1;
-  stroke-dashoffset:1;
-  animation:draw-line 2.6s cubic-bezier(.6,.05,.2,1) .3s forwards;
 }
 .news4-art .node{
   fill:#0b1220;
   stroke:#4da3ff;
   stroke-width:3;
-  transform-box:fill-box;
-  transform-origin:center;
-  opacity:0;
-  animation:node-in .5s ease-out forwards;
-}
-.news4-art .n1{animation-delay:.3s;}
-.news4-art .n2{animation-delay:1.0s;}
-.news4-art .n3{animation-delay:1.7s;}
-.news4-art .n4{animation-delay:2.4s;}
-.news4-art .halo{
-  fill:none;
-  stroke:#4da3ff;
-  stroke-width:2;
-  transform-box:fill-box;
-  transform-origin:center;
-  opacity:0;
-  animation:halo 2.4s ease-out 3s infinite;
 }
 .news4-art .version{
   font-family:'Syne',sans-serif;
   font-weight:800;
   font-size:78px;
   fill:#fff;
-  opacity:0;
-  animation:fade-in .9s ease-out 2.2s forwards;
 }
 
-@keyframes draw-line{to{stroke-dashoffset:0;}}
-@keyframes node-in{
-  from{opacity:0;transform:scale(.2);}
-  to{opacity:1;transform:scale(1);}
+.scroll-hint{
+  position:absolute;
+  left:50%;
+  bottom:26px;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  color:#b8c4d6;
+  font-weight:600;
+  font-size:.95rem;
+  text-align:center;
 }
-@keyframes fade-in{to{opacity:1;}}
-@keyframes halo{
-  0%{opacity:.8;transform:scale(1);}
-  100%{opacity:0;transform:scale(3.2);}
+.scroll-hint:hover{color:#fff;}
+.scroll-hint i{
+  color:#4da3ff;
+  font-size:1.2rem;
+  line-height:1;
 }
-@keyframes dot-pulse{
-  0%{box-shadow:0 0 0 0 rgba(77,163,255,.7);}
-  100%{box-shadow:0 0 0 14px rgba(77,163,255,0);}
-}
-
-@media (prefers-reduced-motion:reduce){
-  .news4 .dot,.news4-art .halo{animation:none;}
-  .news4-art .trace{animation:none;stroke-dashoffset:0;}
-  .news4-art .node,.news4-art .version{animation:none;opacity:1;}
-}
-
-/* ===== MODALITÀ LEGGERA ===== */
-html.lite{scroll-behavior:auto;}
-html.lite *,
-html.lite *::before,
-html.lite *::after{
-  animation:none !important;
-  transition:none !important;
-}
-html.lite .news4-bg,
-html.lite .news4-art .halo{display:none;}
-html.lite .news4-art .trace{stroke-dashoffset:0;}
-html.lite .news4-art .node,
-html.lite .news4-art .version{opacity:1;}
 </style></head>
 <body><!-- NAVBAR --><nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
   <div class="container">
@@ -393,19 +221,11 @@ html.lite .news4-art .version{opacity:1;}
 
 <!-- NEWS: LINE 4.0 IN SVILUPPO -->
 <section class="news4" aria-labelledby="news4-title">
-  <svg class="news4-bg" viewBox="0 0 680 680" aria-hidden="true" focusable="false">
-    <circle class="r4" cx="340" cy="340" r="320"/>
-    <circle class="r3" pathLength="100" cx="340" cy="340" r="285"/>
-    <circle class="r2" pathLength="100" cx="340" cy="340" r="240"/>
-    <circle class="r1" pathLength="100" cx="340" cy="340" r="190"/>
-    <circle class="r5" pathLength="100" cx="340" cy="340" r="140"/>
-    <circle class="core" cx="340" cy="340" r="36"/>
-  </svg>
   <div class="container">
     <div class="row align-items-center g-5">
       <div class="col-lg-7">
         <div class="badge-live"><span class="dot"></span> IN SVILUPPO</div>
-        <h2 id="news4-title" aria-label="LINE 4.0 è in arrivo"><span class="typed" id="typed" aria-hidden="true">LINE 4.0 è in arrivo</span><span class="caret" aria-hidden="true"></span></h2>
+        <h2 id="news4-title">LINE 4.0 è in arrivo</h2>
         <p>
           Il team di LINE sta lavorando alla nuova versione del linguaggio, con
           l'obiettivo di renderlo più coerente, solido e semplice da usare,
@@ -445,7 +265,7 @@ html.lite .news4-art .version{opacity:1;}
       </div>
 
       <div class="col-lg-5">
-        <svg class="news4-art" viewBox="0 0 400 270" role="img" aria-label="Una linea che si traccia attraverso quattro punti e arriva a LINE 4.0">
+        <svg class="news4-art" viewBox="0 0 400 270" role="img" aria-label="Una linea che attraversa quattro punti e arriva a LINE 4.0">
           <g class="grid-lines">
             <line x1="0" y1="45" x2="400" y2="45"/>
             <line x1="0" y1="115" x2="400" y2="115"/>
@@ -457,13 +277,12 @@ html.lite .news4-art .version{opacity:1;}
             <line x1="315" y1="0" x2="315" y2="270"/>
           </g>
 
-          <path class="trace" pathLength="1" d="M45 205 L135 115 L225 165 L315 55"/>
+          <path class="trace" d="M45 205 L135 115 L225 165 L315 55"/>
 
-          <circle class="node n1" cx="45" cy="205" r="10"/>
-          <circle class="node n2" cx="135" cy="115" r="10"/>
-          <circle class="node n3" cx="225" cy="165" r="10"/>
-          <circle class="node n4" cx="315" cy="55" r="12"/>
-          <circle class="halo" cx="315" cy="55" r="12"/>
+          <circle class="node" cx="45" cy="205" r="10"/>
+          <circle class="node" cx="135" cy="115" r="10"/>
+          <circle class="node" cx="225" cy="165" r="10"/>
+          <circle class="node" cx="315" cy="55" r="12"/>
 
           <text class="version" x="385" y="255" text-anchor="end">4.0</text>
         </svg>
@@ -473,8 +292,7 @@ html.lite .news4-art .version{opacity:1;}
 
   <a class="scroll-hint" href="#hero" aria-label="Scorri in basso per scoprire LINE 3.0">
     <span>Scorri in basso per scoprire LINE 3.0</span>
-    <span class="mouse" aria-hidden="true"></span>
-    <i class="bi bi-chevron-double-down chev" aria-hidden="true"></i>
+    <i class="bi bi-chevron-double-down" aria-hidden="true"></i>
   </a>
 </section>
 
@@ -551,62 +369,5 @@ html.lite .news4-art .version{opacity:1;}
 <div class="text-center small">🄯 Qc-17 — LINE 3.0</div>
 
   </div>
-</footer><script>
-(function(){
-  var el = document.getElementById('typed');
-  if(!el) return;
-  var full = el.textContent;
-  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(reduce || document.documentElement.classList.contains('lite')) return;
-
-  var h2 = el.parentNode;
-  h2.style.minHeight = h2.offsetHeight + 'px';
-  el.textContent = '';
-
-  var i = 0;
-  function type(){
-    i++;
-    el.textContent = full.slice(0, i);
-    if(i < full.length){
-      var ch = full.charAt(i - 1);
-      setTimeout(type, 70 + Math.random() * 70 + (ch === ' ' ? 60 : 0));
-    }
-  }
-  setTimeout(type, 600);
-})();
-</script>
-<script>
-/* Controlla la fluidità: se per 2 secondi di fila va sotto i 22 fps, spegne gli effetti */
-(function(){
-  var d=document.documentElement, k='line_fx';
-  if(d.classList.contains('lite')) return;
-  function set(v){ try{ localStorage.setItem(k,v); }catch(e){} }
-
-  var frames=0, last=performance.now(), start=last, bad=0, done=false;
-
-  function tick(now){
-    if(done) return;
-    frames++;
-    if(now-last>=1000){
-      var fps=frames*1000/(now-last);
-      frames=0; last=now;
-      bad = fps<22 ? bad+1 : 0;
-      if(bad>=2){ d.classList.add('lite'); set('lite'); done=true; return; }
-      if(now-start>6000){ set('ok'); done=true; return; }
-    }
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-
-  document.addEventListener('visibilitychange',function(){
-    frames=0; last=performance.now(); bad=0;
-  });
-
-  /* chiusura normale della pagina = nessun crash */
-  window.addEventListener('pagehide',function(){
-    if(!d.classList.contains('lite')) set('ok');
-  });
-})();
-</script>
-<script data-goatcounter="https://qc17.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script></body>
+</footer><script data-goatcounter="https://qc17.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script></body>
 </html>
