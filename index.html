@@ -75,6 +75,43 @@ body{
 
 a{text-decoration:none;}
 
+/* ===== SELETTORE LINGUA ===== */
+.lang-switch{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:3px 3px 3px 10px;
+  background:#f1f4fa;
+  border:1px solid #dbe2ee;
+  border-radius:999px;
+}
+.lang-switch .globe{
+  color:#64748b;
+  font-size:.95rem;
+  line-height:1;
+}
+.lang-switch button{
+  border:0;
+  background:transparent;
+  color:#475569;
+  font-family:inherit;
+  font-weight:700;
+  font-size:.78rem;
+  letter-spacing:.06em;
+  padding:5px 12px;
+  border-radius:999px;
+  cursor:pointer;
+}
+.lang-switch button:hover{color:#0d6efd;}
+.lang-switch button.active{
+  background:#0d6efd;
+  color:#fff;
+}
+.lang-switch button:focus-visible{
+  outline:2px solid #0d6efd;
+  outline-offset:2px;
+}
+
 /* ===== NEWS LINE 4.0 (pagina intera, statica) ===== */
 .news4{
   background:#0b1220;
@@ -191,6 +228,8 @@ a{text-decoration:none;}
   font-weight:600;
   font-size:.95rem;
   text-align:center;
+  width:max-content;
+  max-width:90vw;
 }
 .scroll-hint:hover{color:#fff;}
 .scroll-hint i{
@@ -204,18 +243,27 @@ a{text-decoration:none;}
     <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
       <img src="favicon.png" alt="LINE">
       <strong>LINE</strong>
-    </a><button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-  <span class="navbar-toggler-icon"></span>
-</button>
+    </a>
 
-<div class="collapse navbar-collapse" id="nav">
-  <ul class="navbar-nav ms-auto gap-2">
-    <li class="nav-item"><a class="nav-link" href="documenti.html">Documenti</a></li>
-    <li class="nav-item"><a class="nav-link" href="https://qc-17.github.io/LINE/ide.html" target="_blank">IDE</a></li>
-    <li class="nav-item"><a class="nav-link" href="sezione1.html">Impara LINE</a></li>
-  </ul>
-</div>
+    <div class="d-flex align-items-center gap-2 ms-auto ms-lg-3 order-lg-3">
+      <div class="lang-switch" role="group" aria-label="Lingua / Language" data-i18n-aria="lang_aria">
+        <i class="bi bi-translate globe" aria-hidden="true"></i>
+        <button type="button" data-lang="it" aria-pressed="true">IT</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
 
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav ms-auto gap-2">
+        <li class="nav-item"><a class="nav-link" href="documenti.html" data-i18n="nav_docs">Documenti</a></li>
+        <li class="nav-item"><a class="nav-link" href="https://qc-17.github.io/LINE/ide.html" target="_blank">IDE</a></li>
+        <li class="nav-item"><a class="nav-link" href="sezione1.html" data-i18n="nav_learn">Impara LINE</a></li>
+      </ul>
+    </div>
   </div>
 </nav>
 
@@ -224,9 +272,9 @@ a{text-decoration:none;}
   <div class="container">
     <div class="row align-items-center g-5">
       <div class="col-lg-7">
-        <div class="badge-live"><span class="dot"></span> IN SVILUPPO</div>
-        <h2 id="news4-title">LINE 4.0 è in arrivo</h2>
-        <p>
+        <div class="badge-live"><span class="dot"></span> <span data-i18n="news_badge">IN SVILUPPO</span></div>
+        <h2 id="news4-title" data-i18n="news_title">LINE 4.0 è in arrivo</h2>
+        <p data-i18n="news_text">
           Il team di LINE sta lavorando alla nuova versione del linguaggio, con
           l'obiettivo di renderlo più coerente, solido e semplice da usare,
           mantenendo al centro la sua vocazione didattica.
@@ -236,36 +284,36 @@ a{text-decoration:none;}
           <div class="area">
             <i class="bi bi-braces"></i>
             <div>
-              <strong>Standardizzazione del rendering</strong>
-              <span>Standard e tecnologie consolidate per i sistemi di rendering.</span>
+              <strong data-i18n="a1_t">Standardizzazione del rendering</strong>
+              <span data-i18n="a1_d">Standard e tecnologie consolidate per i sistemi di rendering.</span>
             </div>
           </div>
           <div class="area">
             <i class="bi bi-diagram-3"></i>
             <div>
-              <strong>Coerenza del linguaggio</strong>
-              <span>Sintassi analizzata, meno ridondanze, più semplicità.</span>
+              <strong data-i18n="a2_t">Coerenza del linguaggio</strong>
+              <span data-i18n="a2_d">Sintassi analizzata, meno ridondanze, più semplicità.</span>
             </div>
           </div>
           <div class="area">
             <i class="bi bi-cpu"></i>
             <div>
-              <strong>Motore JavaScript</strong>
-              <span>Interprete ottimizzato, più robusto e più veloce.</span>
+              <strong data-i18n="a3_t">Motore JavaScript</strong>
+              <span data-i18n="a3_d">Interprete ottimizzato, più robusto e più veloce.</span>
             </div>
           </div>
           <div class="area">
             <i class="bi bi-window"></i>
             <div>
-              <strong>Interfaccia del sito</strong>
-              <span>Un ambiente moderno, intuitivo e adatto all'apprendimento.</span>
+              <strong data-i18n="a4_t">Interfaccia del sito</strong>
+              <span data-i18n="a4_d">Un ambiente moderno, intuitivo e adatto all'apprendimento.</span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="col-lg-5">
-        <svg class="news4-art" viewBox="0 0 400 270" role="img" aria-label="Una linea che attraversa quattro punti e arriva a LINE 4.0">
+        <svg class="news4-art" viewBox="0 0 400 270" role="img" aria-label="Una linea che attraversa quattro punti e arriva a LINE 4.0" data-i18n-aria="svg_aria">
           <g class="grid-lines">
             <line x1="0" y1="45" x2="400" y2="45"/>
             <line x1="0" y1="115" x2="400" y2="115"/>
@@ -290,8 +338,8 @@ a{text-decoration:none;}
     </div>
   </div>
 
-  <a class="scroll-hint" href="#hero" aria-label="Scorri in basso per scoprire LINE 3.0">
-    <span>Scorri in basso per scoprire LINE 3.0</span>
+  <a class="scroll-hint" href="#hero" aria-label="Scorri in basso per scoprire LINE 3.0" data-i18n-aria="scroll_aria">
+    <span data-i18n="scroll">Scorri in basso per scoprire LINE 3.0</span>
     <i class="bi bi-chevron-double-down" aria-hidden="true"></i>
   </a>
 </section>
@@ -300,9 +348,9 @@ a{text-decoration:none;}
   <div class="hero-content">
     <img src="logo.png" alt="LINE" class="hero-logo">
     <h1 class="display-4 fw-bold">LINE</h1>
-    <p class="lead">Il linguaggio di programmazione aperto a tutti, <strong>sempre.</strong></p>
+    <p class="lead" data-i18n="hero_lead">Il linguaggio di programmazione aperto a tutti, <strong>sempre.</strong></p>
     <p class="opacity-75">Language with Intuitive and Natural Expression</p>
-    <a href="sezione1.html" class="btn btn-light btn-lg mt-3">Inizia a imparare →</a>
+    <a href="sezione1.html" class="btn btn-light btn-lg mt-3" data-i18n="hero_cta">Inizia a imparare →</a>
   </div>
 </section><!-- DOWNLOAD SECTION --><div class="container py-5"> <!-- CONTENT -->  <div class="row g-4 align-items-center"><div class="col-lg-6">
   <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80" class="img-fluid rounded-4 shadow-sm" alt="coding">
@@ -310,32 +358,32 @@ a{text-decoration:none;}
 
 <div class="col-lg-6">
   <div class="card section-card p-4">
-    <h3>Cos'è LINE</h3>
-    <p>LINE è un linguaggio di programmazione progettato per essere comprensibile e facile da apprendere. La sintassi è pensata per essere leggibile e chiara anche per chi non ha mai programmato, mettendo comunque al centro le strutture logiche della programmazione. Dispone inoltre di un motore di rendering per equazioni (KaTeX), formule chimiche e integrazione con HTML e LINE-DOM.</p>
-    <p>Ogni file <code>.line</code> è eseguibile tramite interprete web o IDE integrato.</p>
+    <h3 data-i18n="what_t">Cos'è LINE</h3>
+    <p data-i18n="what_p1">LINE è un linguaggio di programmazione progettato per essere comprensibile e facile da apprendere. La sintassi è pensata per essere leggibile e chiara anche per chi non ha mai programmato, mettendo comunque al centro le strutture logiche della programmazione. Dispone inoltre di un motore di rendering per equazioni (KaTeX), formule chimiche e integrazione con HTML e LINE-DOM.</p>
+    <p data-i18n="what_p2">Ogni file <code>.line</code> è eseguibile tramite interprete web o IDE integrato.</p>
   </div>
 </div>
 
   </div>  <div class="row g-4 mt-4"><div class="col-lg-6">
   <div class="card section-card p-4 h-100">
-    <h3>Caratteristiche</h3>
+    <h3 data-i18n="feat_t">Caratteristiche</h3>
     <div class="d-flex flex-column gap-2">
-      <div class="feature"><i class="bi bi-check-circle"></i> Sintassi italiana leggibile</div>
-      <div class="feature"><i class="bi bi-check-circle"></i> Variabili, STAY, IF reattivi</div>
-      <div class="feature"><i class="bi bi-check-circle"></i> Liste e cicli FOR</div>
-      <div class="feature"><i class="bi bi-check-circle"></i> Funzioni FUN e blocchi THEN</div>
-      <div class="feature"><i class="bi bi-check-circle"></i> Gestione errori TRY / SHOW</div>
-      <div class="feature"><i class="bi bi-check-circle"></i> Moduli standard integrati</div>
-      <div class="feature"><i class="bi bi-check-circle"></i> LINE-DOM per web</div>
+      <div class="feature"><i class="bi bi-check-circle"></i> <span data-i18n="f1">Sintassi italiana leggibile</span></div>
+      <div class="feature"><i class="bi bi-check-circle"></i> <span data-i18n="f2">Variabili, STAY, IF reattivi</span></div>
+      <div class="feature"><i class="bi bi-check-circle"></i> <span data-i18n="f3">Liste e cicli FOR</span></div>
+      <div class="feature"><i class="bi bi-check-circle"></i> <span data-i18n="f4">Funzioni FUN e blocchi THEN</span></div>
+      <div class="feature"><i class="bi bi-check-circle"></i> <span data-i18n="f5">Gestione errori TRY / SHOW</span></div>
+      <div class="feature"><i class="bi bi-check-circle"></i> <span data-i18n="f6">Moduli standard integrati</span></div>
+      <div class="feature"><i class="bi bi-check-circle"></i> <span data-i18n="f7">LINE-DOM per web</span></div>
     </div>
   </div>
 </div>
 
 <div class="col-lg-6">
   <div class="card section-card p-4 h-100">
-    <h3>Obiettivo</h3>
-    <p>LINE nasce per rendere la programmazione più accessibile, mantenendo però struttura e potenza di un linguaggio moderno.</p>
-    <p>È pensato per studenti, curiosi e sviluppatori che vogliono un approccio più intuitivo.</p>
+    <h3 data-i18n="goal_t">Obiettivo</h3>
+    <p data-i18n="goal_p1">LINE nasce per rendere la programmazione più accessibile, mantenendo però struttura e potenza di un linguaggio moderno.</p>
+    <p data-i18n="goal_p2">È pensato per studenti, curiosi e sviluppatori che vogliono un approccio più intuitivo.</p>
     <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80" class="img-fluid rounded-3 mt-3" alt="tech">
   </div>
 </div>
@@ -343,24 +391,24 @@ a{text-decoration:none;}
   </div>
 
   <div class="text-center my-5">
-    <h2>Pronto a imparare?</h2>
-    <p class="text-muted">7 sezioni progressive + esercizi</p>
-    <a href="sezione1.html" class="btn btn-primary btn-lg">Inizia ora</a>
-    <a href="https://qc-17.github.io/LINE/ide.html" class="btn btn-outline-secondary btn-lg ms-2" target="_blank">Apri IDE</a>
+    <h2 data-i18n="ready_t">Pronto a imparare?</h2>
+    <p class="text-muted" data-i18n="ready_sub">7 sezioni progressive + esercizi</p>
+    <a href="sezione1.html" class="btn btn-primary btn-lg" data-i18n="ready_start">Inizia ora</a>
+    <a href="https://qc-17.github.io/LINE/ide.html" class="btn btn-outline-secondary btn-lg ms-2" target="_blank" data-i18n="ready_ide">Apri IDE</a>
   </div>
 </div><!-- FOOTER --><footer class="footer">
   <div class="container">
     <div class="row"><div class="col-md-6">
-    <h5>Contatti</h5>
-    <p>Creato da Qc-17 (Mirko Somma)</p>
+    <h5 data-i18n="foot_contacts">Contatti</h5>
+    <p data-i18n="foot_by">Creato da Qc-17 (Mirko Somma)</p>
     <p><a href="mailto:line-help@proton.me" class="text-info">line-help@proton.me</a></p>
     <p class="small">Open source GPL 3.0</p>
   </div>
 
   <div class="col-md-6 text-md-end">
-    <h5>Collabora</h5>
-    <p>Contribuisci su GitHub</p>
-    <a class="btn btn-outline-light" href="https://github.com/qc-17/LINE/issues" target="_blank">Apri Issue</a>
+    <h5 data-i18n="foot_collab">Collabora</h5>
+    <p data-i18n="foot_contrib">Contribuisci su GitHub</p>
+    <a class="btn btn-outline-light" href="https://github.com/qc-17/LINE/issues" target="_blank" data-i18n="foot_issue">Apri Issue</a>
   </div>
 
 </div>
@@ -369,5 +417,116 @@ a{text-decoration:none;}
 <div class="text-center small">🄯 Qc-17 — LINE 3.0</div>
 
   </div>
-</footer><script data-goatcounter="https://qc17.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script></body>
+</footer>
+
+<script>
+/* Bilingue IT/EN. Il testo italiano è quello già presente nell'HTML;
+   qui sotto c'è solo la traduzione inglese. */
+(function(){
+  var KEY = 'line_lang';
+
+  var EN = {
+    title: 'LINE',
+    lang_aria: 'Language',
+    nav_docs: 'Documents',
+    nav_learn: 'Learn LINE',
+    news_badge: 'IN DEVELOPMENT',
+    news_title: 'LINE 4.0 is coming',
+    news_text: "The LINE team is working on the next version of the language, aiming to make it more consistent, solid and easy to use, while keeping its educational mission at the center.",
+    a1_t: 'Rendering standardization',
+    a1_d: 'Established standards and technologies for the rendering systems.',
+    a2_t: 'Language consistency',
+    a2_d: 'Syntax review, fewer redundancies, more simplicity.',
+    a3_t: 'JavaScript engine',
+    a3_d: 'A faster, sturdier and optimized interpreter.',
+    a4_t: 'Website interface',
+    a4_d: 'A modern, intuitive environment built for learning.',
+    svg_aria: 'A line passing through four points and reaching LINE 4.0',
+    scroll_aria: 'Scroll down to discover LINE 3.0',
+    scroll: 'Scroll down to discover LINE 3.0',
+    hero_lead: 'The programming language open to everyone, <strong>always.</strong>',
+    hero_cta: 'Start learning →',
+    what_t: 'What is LINE',
+    what_p1: 'LINE is a programming language designed to be understandable and easy to learn. Its syntax is meant to be readable and clear even for people who have never programmed, while still keeping the logical structures of programming at the core. It also includes a rendering engine for equations (KaTeX), chemical formulas, and integration with HTML and LINE-DOM.',
+    what_p2: 'Every <code>.line</code> file can be run through the web interpreter or the built-in IDE.',
+    feat_t: 'Features',
+    f1: 'Readable Italian-style syntax',
+    f2: 'Variables, reactive STAY and IF',
+    f3: 'Lists and FOR loops',
+    f4: 'FUN functions and THEN blocks',
+    f5: 'TRY / SHOW error handling',
+    f6: 'Built-in standard modules',
+    f7: 'LINE-DOM for the web',
+    goal_t: 'Goal',
+    goal_p1: 'LINE was created to make programming more accessible, while keeping the structure and power of a modern language.',
+    goal_p2: 'It is made for students, curious minds and developers who want a more intuitive approach.',
+    ready_t: 'Ready to learn?',
+    ready_sub: '7 progressive sections + exercises',
+    ready_start: 'Start now',
+    ready_ide: 'Open IDE',
+    foot_contacts: 'Contact',
+    foot_by: 'Created by Qc-17 (Mirko Somma)',
+    foot_collab: 'Collaborate',
+    foot_contrib: 'Contribute on GitHub',
+    foot_issue: 'Open an Issue'
+  };
+
+  var IT = { title: document.title };
+  var textNodes = document.querySelectorAll('[data-i18n]');
+  var ariaNodes = document.querySelectorAll('[data-i18n-aria]');
+
+  /* salva l'italiano originale dalla pagina */
+  for(var i=0;i<textNodes.length;i++){
+    var k = textNodes[i].getAttribute('data-i18n');
+    IT[k] = textNodes[i].innerHTML;
+  }
+  for(var j=0;j<ariaNodes.length;j++){
+    var ka = ariaNodes[j].getAttribute('data-i18n-aria');
+    IT[ka] = ariaNodes[j].getAttribute('aria-label');
+  }
+  IT.lang_aria = 'Lingua';
+
+  var buttons = document.querySelectorAll('.lang-switch button');
+
+  function apply(lang){
+    var D = lang === 'en' ? EN : IT;
+    for(var i=0;i<textNodes.length;i++){
+      var k = textNodes[i].getAttribute('data-i18n');
+      if(D[k] !== undefined) textNodes[i].innerHTML = D[k];
+    }
+    for(var j=0;j<ariaNodes.length;j++){
+      var ka = ariaNodes[j].getAttribute('data-i18n-aria');
+      if(D[ka] !== undefined) ariaNodes[j].setAttribute('aria-label', D[ka]);
+    }
+    document.documentElement.lang = lang;
+    document.title = D.title;
+    for(var b=0;b<buttons.length;b++){
+      var on = buttons[b].getAttribute('data-lang') === lang;
+      buttons[b].classList.toggle('active', on);
+      buttons[b].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  }
+
+  function initial(){
+    try{
+      var s = localStorage.getItem(KEY);
+      if(s === 'it' || s === 'en') return s;
+    }catch(e){}
+    var n = (navigator.language || 'it').toLowerCase();
+    return n.indexOf('it') === 0 ? 'it' : 'en';
+  }
+
+  for(var b=0;b<buttons.length;b++){
+    buttons[b].addEventListener('click', function(){
+      var lang = this.getAttribute('data-lang');
+      try{ localStorage.setItem(KEY, lang); }catch(e){}
+      apply(lang);
+    });
+  }
+
+  apply(initial());
+})();
+</script>
+
+<script data-goatcounter="https://qc17.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script></body>
 </html>
