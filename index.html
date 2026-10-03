@@ -15,6 +15,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LINE</title>
+<script>
+/* Modalità leggera: se la pagina è crashata/bloccata la volta prima, parte senza animazioni.
+   Forzabile con ?lite nell'URL, si riattiva con ?fx */
+(function(){
+  var d=document.documentElement, k='line_fx', s=null, q=location.search;
+  try{
+    if(/[?&]lite\b/.test(q)) localStorage.setItem(k,'lite');
+    else if(/[?&]fx\b/.test(q)) localStorage.removeItem(k);
+    s=localStorage.getItem(k);
+    if(s==='testing'){ s='lite'; localStorage.setItem(k,'lite'); }
+    else if(s!=='lite'){ localStorage.setItem(k,'testing'); }
+  }catch(e){}
+  if(s==='lite') d.classList.add('lite');
+})();
+</script>
 <link rel="icon" href="favicon.png"><!-- Bootstrap --><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script><!-- Bootstrap Icons --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"><style>
@@ -341,6 +356,20 @@ html{scroll-behavior:smooth;}
   .news4-art .trace{animation:none;stroke-dashoffset:0;}
   .news4-art .node,.news4-art .version{animation:none;opacity:1;}
 }
+
+/* ===== MODALITÀ LEGGERA ===== */
+html.lite{scroll-behavior:auto;}
+html.lite *,
+html.lite *::before,
+html.lite *::after{
+  animation:none !important;
+  transition:none !important;
+}
+html.lite .news4-bg,
+html.lite .news4-art .halo{display:none;}
+html.lite .news4-art .trace{stroke-dashoffset:0;}
+html.lite .news4-art .node,
+html.lite .news4-art .version{opacity:1;}
 </style></head>
 <body><!-- NAVBAR --><nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
   <div class="container">
@@ -443,6 +472,7 @@ html{scroll-behavior:smooth;}
   </div>
 
   <a class="scroll-hint" href="#hero" aria-label="Scorri in basso per scoprire LINE 3.0">
+    <span>Scorri in basso per scoprire LINE 3.0</span>
     <span class="mouse" aria-hidden="true"></span>
     <i class="bi bi-chevron-double-down chev" aria-hidden="true"></i>
   </a>
@@ -527,7 +557,7 @@ html{scroll-behavior:smooth;}
   if(!el) return;
   var full = el.textContent;
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(reduce) return;
+  if(reduce || document.documentElement.classList.contains('lite')) return;
 
   var h2 = el.parentNode;
   h2.style.minHeight = h2.offsetHeight + 'px';
@@ -543,6 +573,39 @@ html{scroll-behavior:smooth;}
     }
   }
   setTimeout(type, 600);
+})();
+</script>
+<script>
+/* Controlla la fluidità: se per 2 secondi di fila va sotto i 22 fps, spegne gli effetti */
+(function(){
+  var d=document.documentElement, k='line_fx';
+  if(d.classList.contains('lite')) return;
+  function set(v){ try{ localStorage.setItem(k,v); }catch(e){} }
+
+  var frames=0, last=performance.now(), start=last, bad=0, done=false;
+
+  function tick(now){
+    if(done) return;
+    frames++;
+    if(now-last>=1000){
+      var fps=frames*1000/(now-last);
+      frames=0; last=now;
+      bad = fps<22 ? bad+1 : 0;
+      if(bad>=2){ d.classList.add('lite'); set('lite'); done=true; return; }
+      if(now-start>6000){ set('ok'); done=true; return; }
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  document.addEventListener('visibilitychange',function(){
+    frames=0; last=performance.now(); bad=0;
+  });
+
+  /* chiusura normale della pagina = nessun crash */
+  window.addEventListener('pagehide',function(){
+    if(!d.classList.contains('lite')) set('ok');
+  });
 })();
 </script>
 <script data-goatcounter="https://qc17.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script></body>
