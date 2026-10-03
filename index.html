@@ -1,6 +1,17 @@
 <!DOCTYPE html><html lang="it">
 <head>
   <meta name="google-site-verification" content="7HtA4XRI_jtLQ6oDLbV-CG_SsoATIikXLPU86Yo95Hc" />
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NNHTNPJVTT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NNHTNPJVTT');
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LINE</title>
@@ -63,6 +74,267 @@ body{
 }
 
 a{text-decoration:none;}
+
+/* ===== NEWS LINE 4.0 ===== */
+.news4{
+  background:#0b1220;
+  color:#e2e8f0;
+  padding:56px 20px 120px;
+  border-bottom:3px solid #4da3ff;
+  position:relative;
+  overflow:hidden;
+  min-height:calc(100vh - 57px);
+  min-height:calc(100svh - 57px);
+  display:flex;
+  align-items:center;
+}
+
+html{scroll-behavior:smooth;}
+
+.news4 .container{
+  position:relative;
+  z-index:1;
+}
+
+/* Spinner di sfondo */
+.news4-bg{
+  position:absolute;
+  top:50%;
+  right:-140px;
+  width:680px;
+  height:680px;
+  transform:translateY(-50%);
+  opacity:.55;
+  pointer-events:none;
+  z-index:0;
+  -webkit-mask-image:radial-gradient(circle at center,#000 35%,transparent 72%);
+  mask-image:radial-gradient(circle at center,#000 35%,transparent 72%);
+}
+.news4-bg circle{
+  fill:none;
+  stroke-linecap:round;
+  transform-box:fill-box;
+  transform-origin:center;
+}
+.news4-bg .r1{stroke:#4da3ff;stroke-width:5;stroke-dasharray:28 72;animation:spin 3.2s cubic-bezier(.5,.1,.5,.9) infinite;}
+.news4-bg .r2{stroke:#7cc0ff;stroke-width:3;stroke-dasharray:18 82;animation:spin-rev 5s linear infinite;}
+.news4-bg .r3{stroke:#4da3ff;stroke-width:2;stroke-dasharray:1 3.2;opacity:.6;animation:spin 40s linear infinite;}
+.news4-bg .r4{stroke:#2a4a80;stroke-width:1.5;}
+.news4-bg .r5{stroke:#9fd0ff;stroke-width:6;stroke-dasharray:6 94;animation:spin-rev 7s ease-in-out infinite;}
+.news4-bg .core{fill:#4da3ff;stroke:none;animation:core-pulse 2.4s ease-in-out infinite;}
+
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes spin-rev{to{transform:rotate(-360deg);}}
+@keyframes core-pulse{
+  0%,100%{opacity:.25;transform:scale(.8);}
+  50%{opacity:.7;transform:scale(1.15);}
+}
+
+@media (max-width:991px){
+  .news4-bg{right:50%;margin-right:-340px;opacity:.35;}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .news4-bg circle{animation:none;}
+}
+
+.news4 .badge-live{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  font-weight:700;
+  color:#4da3ff;
+  margin-bottom:14px;
+}
+
+.news4 .dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#4da3ff;
+  animation:dot-pulse 1.8s ease-out infinite;
+}
+
+.news4 h2{
+  font-weight:800;
+  font-size:clamp(2.6rem,7.5vw,5.6rem);
+  color:#fff;
+  line-height:1.05;
+  margin-bottom:22px;
+}
+
+.news4 .caret{
+  display:inline-block;
+  width:.06em;
+  height:.9em;
+  margin-left:.08em;
+  vertical-align:-.08em;
+  background:#4da3ff;
+  animation:caret-blink 1s steps(1) infinite;
+}
+@keyframes caret-blink{50%{opacity:0;}}
+
+/* Indicatore "scorri" */
+.scroll-hint{
+  position:absolute;
+  left:50%;
+  bottom:26px;
+  transform:translateX(-50%);
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  color:#b8c4d6;
+  font-weight:600;
+  font-size:.95rem;
+  text-align:center;
+}
+.scroll-hint:hover{color:#fff;}
+.scroll-hint .mouse{
+  width:26px;
+  height:42px;
+  border:2px solid #4da3ff;
+  border-radius:14px;
+  position:relative;
+}
+.scroll-hint .mouse::before{
+  content:'';
+  position:absolute;
+  left:50%;
+  top:8px;
+  width:4px;
+  height:8px;
+  margin-left:-2px;
+  border-radius:2px;
+  background:#4da3ff;
+  animation:wheel 1.8s ease-in-out infinite;
+}
+.scroll-hint .chev{
+  color:#4da3ff;
+  font-size:1.1rem;
+  line-height:1;
+  animation:chev 1.8s ease-in-out infinite;
+}
+@keyframes wheel{
+  0%{opacity:0;transform:translateY(0);}
+  30%{opacity:1;}
+  100%{opacity:0;transform:translateY(14px);}
+}
+@keyframes chev{
+  0%,100%{transform:translateY(-3px);opacity:.4;}
+  50%{transform:translateY(4px);opacity:1;}
+}
+@media (prefers-reduced-motion:reduce){
+  .news4 .caret,.scroll-hint .mouse::before,.scroll-hint .chev{animation:none;}
+  html{scroll-behavior:auto;}
+}
+
+.news4 p{
+  max-width:60ch;
+  color:#b8c4d6;
+}
+
+.news4 .areas{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:14px 24px;
+  margin-top:26px;
+}
+
+.news4 .area{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+}
+
+.news4 .area i{
+  color:#4da3ff;
+  font-size:1.4rem;
+  line-height:1;
+}
+
+.news4 .area strong{
+  color:#fff;
+  display:block;
+}
+
+.news4 .area span{
+  font-size:.85rem;
+  color:#94a3b8;
+}
+
+.news4-art{
+  width:100%;
+  max-width:420px;
+  height:auto;
+  display:block;
+  margin:0 auto;
+}
+
+/* SVG animation */
+.news4-art .grid-lines line{stroke:#1e2b47;stroke-width:1;}
+.news4-art .trace{
+  fill:none;
+  stroke:#4da3ff;
+  stroke-width:4;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-dasharray:1;
+  stroke-dashoffset:1;
+  animation:draw-line 2.6s cubic-bezier(.6,.05,.2,1) .3s forwards;
+}
+.news4-art .node{
+  fill:#0b1220;
+  stroke:#4da3ff;
+  stroke-width:3;
+  transform-box:fill-box;
+  transform-origin:center;
+  opacity:0;
+  animation:node-in .5s ease-out forwards;
+}
+.news4-art .n1{animation-delay:.3s;}
+.news4-art .n2{animation-delay:1.0s;}
+.news4-art .n3{animation-delay:1.7s;}
+.news4-art .n4{animation-delay:2.4s;}
+.news4-art .halo{
+  fill:none;
+  stroke:#4da3ff;
+  stroke-width:2;
+  transform-box:fill-box;
+  transform-origin:center;
+  opacity:0;
+  animation:halo 2.4s ease-out 3s infinite;
+}
+.news4-art .version{
+  font-family:'Syne',sans-serif;
+  font-weight:800;
+  font-size:78px;
+  fill:#fff;
+  opacity:0;
+  animation:fade-in .9s ease-out 2.2s forwards;
+}
+
+@keyframes draw-line{to{stroke-dashoffset:0;}}
+@keyframes node-in{
+  from{opacity:0;transform:scale(.2);}
+  to{opacity:1;transform:scale(1);}
+}
+@keyframes fade-in{to{opacity:1;}}
+@keyframes halo{
+  0%{opacity:.8;transform:scale(1);}
+  100%{opacity:0;transform:scale(3.2);}
+}
+@keyframes dot-pulse{
+  0%{box-shadow:0 0 0 0 rgba(77,163,255,.7);}
+  100%{box-shadow:0 0 0 14px rgba(77,163,255,0);}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .news4 .dot,.news4-art .halo{animation:none;}
+  .news4-art .trace{animation:none;stroke-dashoffset:0;}
+  .news4-art .node,.news4-art .version{animation:none;opacity:1;}
+}
 </style></head>
 <body><!-- NAVBAR --><nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
   <div class="container">
@@ -82,7 +354,96 @@ a{text-decoration:none;}
 </div>
 
   </div>
-</nav><!-- HERO --><section class="hero">
+</nav>
+
+<!-- NEWS: LINE 4.0 IN SVILUPPO -->
+<section class="news4" aria-labelledby="news4-title">
+  <svg class="news4-bg" viewBox="0 0 680 680" aria-hidden="true" focusable="false">
+    <circle class="r4" cx="340" cy="340" r="320"/>
+    <circle class="r3" pathLength="100" cx="340" cy="340" r="285"/>
+    <circle class="r2" pathLength="100" cx="340" cy="340" r="240"/>
+    <circle class="r1" pathLength="100" cx="340" cy="340" r="190"/>
+    <circle class="r5" pathLength="100" cx="340" cy="340" r="140"/>
+    <circle class="core" cx="340" cy="340" r="36"/>
+  </svg>
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <div class="badge-live"><span class="dot"></span> IN SVILUPPO</div>
+        <h2 id="news4-title" aria-label="LINE 4.0 è in arrivo"><span class="typed" id="typed" aria-hidden="true">LINE 4.0 è in arrivo</span><span class="caret" aria-hidden="true"></span></h2>
+        <p>
+          Il team di LINE sta lavorando alla nuova versione del linguaggio, con
+          l'obiettivo di renderlo più coerente, solido e semplice da usare,
+          mantenendo al centro la sua vocazione didattica.
+        </p>
+
+        <div class="areas">
+          <div class="area">
+            <i class="bi bi-braces"></i>
+            <div>
+              <strong>Standardizzazione del rendering</strong>
+              <span>Standard e tecnologie consolidate per i sistemi di rendering.</span>
+            </div>
+          </div>
+          <div class="area">
+            <i class="bi bi-diagram-3"></i>
+            <div>
+              <strong>Coerenza del linguaggio</strong>
+              <span>Sintassi analizzata, meno ridondanze, più semplicità.</span>
+            </div>
+          </div>
+          <div class="area">
+            <i class="bi bi-cpu"></i>
+            <div>
+              <strong>Motore JavaScript</strong>
+              <span>Interprete ottimizzato, più robusto e più veloce.</span>
+            </div>
+          </div>
+          <div class="area">
+            <i class="bi bi-window"></i>
+            <div>
+              <strong>Interfaccia del sito</strong>
+              <span>Un ambiente moderno, intuitivo e adatto all'apprendimento.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <svg class="news4-art" viewBox="0 0 400 270" role="img" aria-label="Una linea che si traccia attraverso quattro punti e arriva a LINE 4.0">
+          <g class="grid-lines">
+            <line x1="0" y1="45" x2="400" y2="45"/>
+            <line x1="0" y1="115" x2="400" y2="115"/>
+            <line x1="0" y1="185" x2="400" y2="185"/>
+            <line x1="0" y1="255" x2="400" y2="255"/>
+            <line x1="45" y1="0" x2="45" y2="270"/>
+            <line x1="135" y1="0" x2="135" y2="270"/>
+            <line x1="225" y1="0" x2="225" y2="270"/>
+            <line x1="315" y1="0" x2="315" y2="270"/>
+          </g>
+
+          <path class="trace" pathLength="1" d="M45 205 L135 115 L225 165 L315 55"/>
+
+          <circle class="node n1" cx="45" cy="205" r="10"/>
+          <circle class="node n2" cx="135" cy="115" r="10"/>
+          <circle class="node n3" cx="225" cy="165" r="10"/>
+          <circle class="node n4" cx="315" cy="55" r="12"/>
+          <circle class="halo" cx="315" cy="55" r="12"/>
+
+          <text class="version" x="385" y="255" text-anchor="end">4.0</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <a class="scroll-hint" href="#hero" aria-label="Scorri in basso per scoprire LINE 3.0">
+    <span>Scorri in basso per scoprire LINE 3.0</span>
+    <span class="mouse" aria-hidden="true"></span>
+    <i class="bi bi-chevron-double-down chev" aria-hidden="true"></i>
+  </a>
+</section>
+
+<!-- HERO --><section class="hero" id="hero">
   <div class="hero-content">
     <img src="logo.png" alt="LINE" class="hero-logo">
     <h1 class="display-4 fw-bold">LINE</h1>
@@ -128,74 +489,6 @@ a{text-decoration:none;}
 
   </div>
 
-  <!-- LINE 3.0 SPECIFICATION UPDATE -->
-  <div class="card section-card p-4 p-md-5 mt-5">
-    <div class="row align-items-center g-4">
-      <div class="col-lg-8">
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <i class="bi bi-stars text-primary fs-4"></i>
-          <span class="text-primary fw-bold">IN SVILUPPO</span>
-        </div>
-
-        <h2 class="fw-bold mb-3">Una nuova specifica per LINE</h2>
-
-        <p>
-          Il team di LINE sta lavorando a una nuova specifica del linguaggio,
-          con l'obiettivo di rendere LINE più coerente, solido e semplice da utilizzare,
-          mantenendo al centro la sua vocazione didattica.
-        </p>
-
-        <p class="text-muted mb-0">
-          Il lavoro si concentra su quattro aree principali:
-        </p>
-      </div>
-
-      <div class="col-lg-4">
-        <div class="d-flex flex-column gap-3">
-          <div class="d-flex gap-3">
-            <i class="bi bi-braces text-primary fs-4"></i>
-            <div>
-              <strong>Standardizzazione del rendering</strong>
-              <div class="text-muted small">
-                Adozione di standard e tecnologie consolidate per i sistemi di rendering.
-              </div>
-            </div>
-          </div>
-
-          <div class="d-flex gap-3">
-            <i class="bi bi-diagram-3 text-primary fs-4"></i>
-            <div>
-              <strong>Coerenza del linguaggio</strong>
-              <div class="text-muted small">
-                Analisi della sintassi, riduzione delle ridondanze e semplificazione.
-              </div>
-            </div>
-          </div>
-
-          <div class="d-flex gap-3">
-            <i class="bi bi-cpu text-primary fs-4"></i>
-            <div>
-              <strong>Motore JavaScript</strong>
-              <div class="text-muted small">
-                Ottimizzazione, rafforzamento e miglioramento dell'interprete.
-              </div>
-            </div>
-          </div>
-
-          <div class="d-flex gap-3">
-            <i class="bi bi-window text-primary fs-4"></i>
-            <div>
-              <strong>Interfaccia del sito</strong>
-              <div class="text-muted small">
-                Un ambiente più moderno, intuitivo e adatto all'apprendimento.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="text-center my-5">
     <h2>Pronto a imparare?</h2>
     <p class="text-muted">7 sezioni progressive + esercizi</p>
@@ -223,5 +516,29 @@ a{text-decoration:none;}
 <div class="text-center small">🄯 Qc-17 — LINE 3.0</div>
 
   </div>
-</footer><script data-goatcounter="https://qc17.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script></body>
+</footer><script>
+(function(){
+  var el = document.getElementById('typed');
+  if(!el) return;
+  var full = el.textContent;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce) return;
+
+  var h2 = el.parentNode;
+  h2.style.minHeight = h2.offsetHeight + 'px';
+  el.textContent = '';
+
+  var i = 0;
+  function type(){
+    i++;
+    el.textContent = full.slice(0, i);
+    if(i < full.length){
+      var ch = full.charAt(i - 1);
+      setTimeout(type, 70 + Math.random() * 70 + (ch === ' ' ? 60 : 0));
+    }
+  }
+  setTimeout(type, 600);
+})();
+</script>
+<script data-goatcounter="https://qc17.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script></body>
 </html>
