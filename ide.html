@@ -1309,7 +1309,7 @@ document.getElementById("con-pdf").onclick = async function() {
   btn.disabled = true;
   btn.textContent = '…';
 
-  let ghost = null;
+  let ghost = null, styleEl = null;
   try {
     if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
       alert(LT('js_pdf_libs'));
@@ -1317,70 +1317,167 @@ document.getElementById("con-pdf").onclick = async function() {
     }
     const { jsPDF } = window.jspdf;
 
+    /* A4 in punti; 1px CSS = 0.75pt */
+    const PW = 595.28, PH = 841.89, M = 40, PX = 0.75;
+    const gW = Math.floor((PW - 2 * M) / PX);        /* larghezza contenuto (px) */
+    const gPageH = Math.floor((PH - 2 * M) / PX);    /* altezza utile per pagina (px) */
+
+    const name = (document.getElementById("filename").value.trim() || "output");
+    const when = new Date().toLocaleString(window.LINE_LANG === 'en' ? 'en-GB' : 'it-IT');
+
+    /* Tema "carta": nero su bianco, solo dentro il clone */
+    styleEl = document.createElement('style');
+    styleEl.textContent = `
+#pdf-ghost{position:fixed;top:0;left:-99999px;width:${gW}px;background:#fff;color:#111;box-sizing:border-box;font-family:"Share Tech Mono",monospace;font-size:12.5px;line-height:1.65;}
+#pdf-ghost .pdf-title{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:"Syne",sans-serif;font-weight:700;font-size:13px;padding:0 0 8px;margin-bottom:14px;border-bottom:1.5px solid #0d6efd;color:#111;}
+#pdf-ghost .pdf-title span{font-family:"Share Tech Mono",monospace;font-weight:400;font-size:10.5px;color:#64748b;}
+#pdf-ghost .pdf-body{white-space:pre-wrap;word-break:break-word;}
+#pdf-ghost .con-line-out{color:#111;}
+#pdf-ghost .con-line-err{color:#b91c1c;}
+#pdf-ghost .con-line-sys{color:#6b7280;}
+#pdf-ghost .con-line-inp{color:#92400e;}
+#pdf-ghost .con-line-render{display:block;margin:8px 0;padding:8px 0;border:0;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;border-radius:0;background:transparent;overflow:visible;white-space:normal;box-sizing:content-box;}
+#pdf-ghost .lrender-math,#pdf-ghost .lrender-chem{width:max-content;min-width:100%;}
+#pdf-ghost .lrender-line,#pdf-ghost .lrender-line .katex{color:#111;}
+#pdf-ghost .lrender-sep{background:#cbd5e1;opacity:1;}
+#pdf-ghost .lrender-err{color:#b91c1c;}
+#pdf-ghost .lrender-empty{color:#6b7280;}
+`;
+    document.head.appendChild(styleEl);
+
     ghost = document.createElement('div');
-    ghost.style.cssText = [
-      'position:fixed',
-      'top:0',
-      'left:-99999px',
-      'width:' + conOut.offsetWidth + 'px',
-      'height:auto',
-      'overflow:visible',
-      'background:#0b1220',
-      'padding:10px 14px',
-      'font-family:"Share Tech Mono",monospace',
-      'font-size:13px',
-      'line-height:1.7',
-      'color:#cdd9e5',
-      'white-space:pre-wrap',
-      'word-break:break-word',
-      'box-sizing:border-box',
-    ].join(';');
+    ghost.id = 'pdf-ghost';
 
-    ghost.innerHTML = conOut.innerHTML;
+    const title = document.createElement('div');
+    title.className = 'pdf-title';
+    const tName = document.createElement('b');
+    tName.textContent = name + '.line';
+    const tDate = document.createElement('span');
+    tDate.textContent = when;
+    title.appendChild(tName); title.appendChild(tDate);
 
-    ghost.querySelectorAll('*').forEach(el => {
-      el.style.overflow = 'visible';
-      el.style.maxHeight = 'none';
+    const body = document.createElement('div');
+    body.className = 'pdf-body';
+    body.innerHTML = conOut.innerHTML;
+
+    ghost.appendChild(title);
+    ghost.appendChild(body);
+
+    /* I colori scelti con \C{} sono pensati per sfondo scuro: li scurisco per la carta */
+    const darken = css => {
+      const m = css.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+      if (!m) return css;
+      const r = +m[1] / 255, g = +m[2] / 255, b = +m[3] / 255;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      let h = 0, s = 0, l = (mx + mn) / 2;
+      if (mx !== mn) {
+        const d = mx - mn;
+        s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+        if (mx === r) h = (g - b) / d + (g < b ? 6 : 0);
+        else if (mx === g) h = (b - r) / d + 2;
+        else h = (r - g) / d + 4;
+        h /= 6;
+      }
+      l = s < 0.12 ? Math.min(l, 0.15) : Math.min(l, 0.33);
+      return 'hsl(' + Math.round(h * 360) + ',' + Math.round(s * 100) + '%,' + Math.round(l * 100) + '%)';
+    };
+    ghost.querySelectorAll('[style]').forEach(el => {
+      if (el.style.color) el.style.color = darken(el.style.color);
     });
 
     document.body.appendChild(ghost);
-
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
+    /* Formule più larghe della pagina: ridotte in proporzione, mai tagliate */
+    ghost.querySelectorAll('.con-line-render').forEach(el => {
+      const inner = el.firstElementChild;
+      if (!inner) return;
+      const avail = el.clientWidth;
+      const need = inner.scrollWidth;
+      if (need > avail + 1) {
+        const k = avail / need;
+        inner.style.transform = 'scale(' + k + ')';
+        inner.style.transformOrigin = 'top left';
+        el.style.height = Math.ceil(inner.offsetHeight * k) + 'px';
+        el.style.overflow = 'hidden';
+      }
+    });
+
+    /* Punti dove è lecito andare a pagina nuova: l'inizio di ogni riga/blocco */
+    const gTop = ghost.getBoundingClientRect().top;
+    const tops = [...ghost.querySelectorAll('.pdf-title, .pdf-body > *')]
+      .map(e => Math.round(e.getBoundingClientRect().top - gTop));
+    const totalH = Math.ceil(ghost.getBoundingClientRect().height);
+
+    const scale = Math.max(1, Math.min(2, 14000 / totalH));
     const canvas = await html2canvas(ghost, {
-      backgroundColor: '#0b1220',
-      scale: 2,
+      backgroundColor: '#ffffff',
+      scale,
       logging: false,
       useCORS: true,
       allowTaint: true,
-      width: ghost.offsetWidth,
-      height: ghost.scrollHeight,
-      windowWidth: ghost.offsetWidth,
-      windowHeight: ghost.scrollHeight,
+      x: 0, y: 0, scrollX: 0, scrollY: 0,
+      width: gW, height: totalH,
+      windowWidth: gW, windowHeight: totalH,
+      onclone: doc => {
+        const g = doc.getElementById('pdf-ghost');
+        if (g) { g.style.left = '0'; g.style.top = '0'; g.style.position = 'absolute'; }
+      }
     });
 
-    document.body.removeChild(ghost);
-    ghost = null;
+    document.body.removeChild(ghost); ghost = null;
+    document.head.removeChild(styleEl); styleEl = null;
 
-    const ptW = (canvas.width  / 2) * 0.75;
-    const ptH = (canvas.height / 2) * 0.75;
+    /* Impaginazione A4 senza spezzare righe o formule */
+    const slices = [];
+    let start = 0;
+    while (start < totalH - 1) {
+      const limit = start + gPageH;
+      let end;
+      if (totalH <= limit) end = totalH;
+      else {
+        const cands = tops.filter(t => t > start + 20 && t <= limit);
+        end = cands.length ? Math.max(...cands) : limit;
+      }
+      slices.push([start, end]);
+      start = end;
+    }
 
-    const pdf = new jsPDF({
-      orientation: ptW > ptH ? 'l' : 'p',
-      unit: 'pt',
-      format: [ptW, ptH],
-      compress: true,
+    const pdf = new jsPDF({ unit: 'pt', format: 'a4', compress: true });
+    const sc = canvas.width / gW;
+    slices.forEach(([s, e], idx) => {
+      if (idx > 0) pdf.addPage();
+      const sy = Math.round(s * sc);
+      const h = Math.max(1, Math.min(canvas.height - sy, Math.round((e - s) * sc)));
+      const sl = document.createElement('canvas');
+      sl.width = canvas.width; sl.height = h;
+      const cx = sl.getContext('2d');
+      cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, sl.width, h);
+      cx.drawImage(canvas, 0, sy, canvas.width, h, 0, 0, canvas.width, h);
+      pdf.addImage(sl.toDataURL('image/png'), 'PNG', M, M, gW * PX, (h / sc) * PX);
     });
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, ptW, ptH);
 
-    const name = (document.getElementById("filename").value.trim() || "output") + "_log.pdf";
-    pdf.save(name);
+    /* Piè di pagina */
+    const n = pdf.getNumberOfPages();
+    const safeName = name.replace(/[^\x20-\x7E]/g, '') || 'output';
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    pdf.setTextColor(140);
+    for (let p = 1; p <= n; p++) {
+      pdf.setPage(p);
+      pdf.text(safeName + '.line', M, PH - 22);
+      pdf.text(p + ' / ' + n, PW - M, PH - 22, { align: 'right' });
+    }
+
+    pdf.save(name + "_log.pdf");
 
   } catch(e) {
     console.error('[LINE PDF]', e);
     alert(LT('js_pdf_err') + e.message);
   } finally {
     if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
+    if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
     btn.disabled = false;
     btn.textContent = orig;
   }
