@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>LINE 3.0 — Editor</title>
+<link rel="icon" href="favicon.png">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
@@ -15,78 +22,118 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+:root{
+  --nav-h:56px;
+  --page:#f5f7fb; --line:#e2e8f0; --muted:#64748b; --blue:#0d6efd;
+  --card-shadow:0 10px 25px rgba(0,0,0,.06);
 
-:root {
-  --bg0:#07090d; --bg1:#0c1118; --bg2:#111822; --bg3:#192130;
+  /* editor + console (scuri, come il banner/footer di index) */
+  --bg0:#0b1220; --bg1:#0f192b; --bg2:#142036; --bg3:#1b2a45;
   --bdr:#1d2d3e; --bdrg:#273f58;
-  --acc:#00e5ff; --accd:#008ea8; --accg:rgba(0,229,255,.10);
-  --amb:#ffb300; --ambd:#a07200;
-  --grn:#00e676; --pink:#ff4081; --vio:#ce93d8; --teal:#80cbc4; --ora:#ff9100;
-  --t1:#cdd9e5; --t2:#7a8fa8; --t3:#3a5068; --t4:#1e3048;
+  --acc:#4da3ff; --accd:#2f78c4; --accg:rgba(77,163,255,.14);
+  --amb:#ffb300; --pink:#ff4081;
+  --t1:#cdd9e5; --t2:#7a8fa8; --t3:#4a6078;
+
+  /* sintassi (su sfondo scuro) */
   --sk:#00e5ff; --sf:#ff9100; --sc:#3d7a55; --so:#ff4081; --sl:#f06292;
   --sr:#69f0ae; --sh:#b39ddb; --sb:#4fc3f7; --sn:#ffcc02; --sp:#ce93d8;
   --su:#80cbc4; --se:#ff8a65; --slb:#ffa726; --sgo:#64ffda; --snot:#ff4081;
+
+  /* colori per pannelli chiari */
+  --lk:#0e7490; --lf:#c2410c; --ll:#be185d; --lp:#7e22ce; --lu:#0f766e;
+  --le:#b45309; --lb:#0369a1; --lc:#15803d; --lgo:#059669; --llb:#a16207;
+  --lop:#db2777; --lrd:#8a5a1f;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
+
 html,body{height:100%;}
-body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
+body{
+  font-family:'Syne',sans-serif;
+  background:var(--page);
+  color:#111;
+  display:flex;flex-direction:column;
+  height:100dvh;overflow:hidden;margin:0;
+}
 
-/* TOPBAR */
-#topbar{background:var(--bg1);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 12px;height:46px;gap:10px;flex-shrink:0;z-index:100;}
-#logo{font-weight:700;font-size:17px;letter-spacing:4px;color:var(--acc);text-shadow:0 0 16px var(--acc);white-space:nowrap;flex-shrink:0;}
-#logo span{color:var(--amb);}
-.vsep{width:1px;height:20px;background:var(--bdr);flex-shrink:0;}
-#filename-wrap{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--bdr);border-radius:4px;padding:0 8px;height:28px;flex:1;min-width:0;max-width:200px;}
-#filename{background:none;border:none;outline:none;color:var(--t1);font-family:'Share Tech Mono',monospace;font-size:12px;width:100%;min-width:0;}
-#fext{color:var(--accd);font-family:'Share Tech Mono',monospace;font-size:12px;flex-shrink:0;}
-.tbtn{background:transparent;border:1px solid var(--bdr);color:var(--t2);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:0 11px;height:28px;border-radius:3px;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;touch-action:manipulation;}
-.tbtn:hover,.tbtn:active{background:var(--bg3);border-color:var(--bdrg);color:var(--t1);}
-.tbtn.pri{background:var(--accg);border-color:var(--accd);color:var(--acc);}
-.tbtn.pri:hover,.tbtn.pri:active{background:rgba(0,229,255,.18);border-color:var(--acc);box-shadow:0 0 10px rgba(0,229,255,.2);}
-#hambtn{display:none;background:none;border:1px solid var(--bdr);color:var(--t2);width:34px;height:28px;border-radius:3px;cursor:pointer;font-size:16px;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation;}
-#fszbtns{display:flex;gap:3px;flex-shrink:0;}
-.fszbtn{background:var(--bg2);border:1px solid var(--bdr);color:var(--t2);font-family:'Share Tech Mono',monospace;font-size:12px;width:24px;height:24px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;transition:all .15s;}
-.fszbtn:hover{color:var(--acc);border-color:var(--accd);}
+/* ───────── NAVBAR ───────── */
+#topbar{
+  height:var(--nav-h);flex-shrink:0;z-index:100;
+  padding:0 14px;gap:10px;flex-wrap:nowrap;
+}
+#topbar .navbar-brand{margin:0;padding:0;}
+#topbar .navbar-brand img{height:30px;}
+#logo{font-weight:800;font-size:18px;color:#111;white-space:nowrap;}
+#logo span{color:var(--blue);margin-left:5px;}
+.top-links .nav-link{font-weight:600;font-size:.9rem;color:#334155;}
+.top-links .nav-link:hover{color:var(--blue);}
+.tb-actions{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.tb-actions .btn{border-radius:999px;font-weight:600;font-size:.82rem;padding:.3rem .85rem;white-space:nowrap;}
+#fszbtns .btn{font-family:'Share Tech Mono',monospace;font-size:.8rem;}
+#hambtn{display:none;align-items:center;justify-content:center;width:38px;height:34px;padding:0;border-radius:10px;font-size:1.2rem;}
+#btn-run.run{background:#198754;border-color:#198754;color:#fff;}
+.do-flash{box-shadow:0 0 0 4px rgba(13,110,253,.35);}
 
-/* LAYOUT */
-#layout{display:flex;flex:1;overflow:hidden;position:relative;}
+.lang-switch{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 3px 3px 10px;
+  background:#f1f4fa;border:1px solid #dbe2ee;border-radius:999px;
+}
+.lang-switch .globe{color:#64748b;font-size:.95rem;line-height:1;}
+.lang-switch button{
+  border:0;background:transparent;color:#475569;
+  font-family:inherit;font-weight:700;font-size:.75rem;letter-spacing:.06em;
+  padding:5px 11px;border-radius:999px;cursor:pointer;
+}
+.lang-switch button:hover{color:var(--blue);}
+.lang-switch button.active{background:var(--blue);color:#fff;}
+.lang-switch button:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
 
-/* SIDEBAR */
-#sidebar{width:210px;background:var(--bg1);border-right:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;transition:transform .25s ease;}
-.sb-sec{border-bottom:1px solid var(--bdr);padding:5px 0;}
-.sb-hd{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);padding:4px 13px 5px;font-weight:600;}
-.si{display:flex;align-items:center;gap:8px;padding:5px 13px;cursor:pointer;font-size:12px;color:var(--t2);font-family:'Share Tech Mono',monospace;transition:all .1s;border-left:2px solid transparent;touch-action:manipulation;user-select:none;}
-.si:hover,.si:active{background:var(--bg3);color:var(--t1);border-left-color:var(--acc);}
-.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.dot.k{background:var(--sk);box-shadow:0 0 5px var(--sk);}
-.dot.f{background:var(--sf);box-shadow:0 0 5px var(--sf);}
-.dot.l{background:var(--sl);box-shadow:0 0 5px var(--sl);}
-.dot.p{background:var(--sp);box-shadow:0 0 5px var(--sp);}
-.dot.u{background:var(--su);box-shadow:0 0 5px var(--su);}
-.dot.e{background:var(--se);box-shadow:0 0 5px var(--se);}
-.dot.c{background:var(--sc);box-shadow:0 0 5px var(--sc);}
-.dot.b{background:var(--sb);box-shadow:0 0 5px var(--sb);}
-.dot.lb{background:var(--slb);box-shadow:0 0 5px var(--slb);}
-.dot.go{background:var(--sgo);box-shadow:0 0 5px var(--sgo);}
-.dot.rd{background:#d4a96a;box-shadow:0 0 5px #d4a96a;}
-.si-arr{margin-left:auto;font-size:9px;color:var(--t4);opacity:0;transition:opacity .1s;}
+/* ───────── LAYOUT ───────── */
+#layout{display:flex;flex:1;min-height:0;gap:12px;padding:12px;overflow:hidden;position:relative;}
+
+#sidebar,#rpanel{
+  background:#fff;border-radius:16px;box-shadow:var(--card-shadow);
+  display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;
+}
+#sidebar{width:232px;}
+#rpanel{width:228px;font-size:11px;}
+
+/* ───────── SIDEBAR ───────── */
+.sb-sec{border-bottom:1px solid var(--line);padding:6px 0;flex-shrink:0;}
+.sb-sec:last-child{border-bottom:0;}
+.sb-hd{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:6px 16px 4px;font-weight:700;}
+.si{
+  display:flex;align-items:center;gap:9px;padding:6px 16px;cursor:pointer;
+  font-family:'Share Tech Mono',monospace;font-size:12px;color:#334155;
+  border-left:3px solid transparent;touch-action:manipulation;user-select:none;
+}
+.si:hover,.si:active{background:#eef4ff;color:#0b3d91;border-left-color:var(--blue);}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot.k{background:var(--lk);} .dot.f{background:var(--lf);} .dot.l{background:var(--ll);}
+.dot.p{background:var(--lp);} .dot.u{background:var(--lu);} .dot.e{background:var(--le);}
+.dot.c{background:var(--lc);} .dot.b{background:var(--lb);} .dot.lb{background:var(--llb);}
+.dot.go{background:var(--lgo);} .dot.rd{background:var(--lrd);}
+.si-arr{margin-left:auto;font-size:10px;color:#94a3b8;opacity:0;}
 .si:hover .si-arr{opacity:1;}
+.sb-file-row{display:flex;align-items:center;gap:6px;padding:4px 16px 8px;}
+#filename{font-family:'Share Tech Mono',monospace;font-size:12px;min-width:0;}
+.sb-fext{color:var(--blue);font-family:'Share Tech Mono',monospace;font-size:12px;flex-shrink:0;font-weight:700;}
 
-/* EDITOR */
-#ed-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+/* ───────── EDITOR ───────── */
+#ed-wrap{
+  flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;
+  background:var(--bg0);border-radius:16px;box-shadow:var(--card-shadow);
+}
 .CodeMirror{font-family:'Share Tech Mono',monospace!important;font-size:14px;line-height:1.78;height:100%;background:var(--bg0)!important;color:var(--t1)!important;}
 .CodeMirror-scroll{padding-bottom:60px;}
 .CodeMirror-gutters{background:var(--bg1)!important;border-right:1px solid var(--bdr)!important;}
 .CodeMirror-linenumber{color:var(--t3)!important;font-size:11px;padding:0 8px 0 6px;}
-.CodeMirror-activeline-background{background:rgba(0,229,255,.035)!important;}
-.CodeMirror-activeline .CodeMirror-linenumber{color:var(--accd)!important;}
-.CodeMirror-cursor{border-left:2px solid var(--acc)!important;box-shadow:0 0 6px var(--acc);}
-.CodeMirror-selected{background:rgba(0,229,255,.12)!important;}
-.CodeMirror-focused .CodeMirror-selected{background:rgba(0,229,255,.14)!important;}
-.CodeMirror-matchingbracket{color:var(--amb)!important;background:rgba(255,179,0,.14)!important;outline:1px solid var(--ambd);}
+.CodeMirror-activeline-background{background:rgba(77,163,255,.06)!important;}
+.CodeMirror-activeline .CodeMirror-linenumber{color:var(--acc)!important;}
+.CodeMirror-cursor{border-left:2px solid var(--acc)!important;}
+.CodeMirror-selected{background:rgba(77,163,255,.18)!important;}
+.CodeMirror-focused .CodeMirror-selected{background:rgba(77,163,255,.22)!important;}
+.CodeMirror-matchingbracket{color:var(--amb)!important;background:rgba(255,179,0,.14)!important;outline:1px solid #a07200;}
 
-/* SYNTAX */
 .cm-s-line30 .cm-kw     {color:var(--sk);font-weight:500;}
 .cm-s-line30 .cm-flow   {color:var(--sf);}
 .cm-s-line30 .cm-comment{color:var(--sc);font-style:italic;}
@@ -105,8 +152,7 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);dis
 .cm-s-line30 .cm-not    {color:var(--snot);font-weight:700;}
 .cm-s-line30 .cm-render {color:#d4a96a;font-weight:700;}
 
-/* AUTOCOMPLETE */
-.CodeMirror-hints{background:#111820!important;border:1px solid var(--bdrg)!important;border-radius:5px!important;box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 20px rgba(0,229,255,.05)!important;font-family:'Share Tech Mono',monospace!important;font-size:13px!important;padding:4px 0!important;max-height:260px!important;z-index:9999!important;}
+.CodeMirror-hints{background:#0f192b!important;border:1px solid var(--bdrg)!important;border-radius:10px!important;box-shadow:0 12px 32px rgba(0,0,0,.45)!important;font-family:'Share Tech Mono',monospace!important;font-size:13px!important;padding:4px 0!important;max-height:260px!important;z-index:9999!important;}
 .CodeMirror-hint{color:var(--t2)!important;padding:5px 12px!important;}
 .CodeMirror-hint-active{background:var(--accg)!important;color:var(--acc)!important;}
 .h-k{color:var(--sk);} .h-f{color:var(--sf);} .h-l{color:var(--sl);}
@@ -114,183 +160,108 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg0);color:var(--t1);dis
 .h-b{color:var(--sb);} .h-lb{color:var(--slb);} .h-go{color:var(--sgo);}
 .h-op{color:var(--so);} .h-rd{color:#d4a96a;}
 
-/* QUICK BAR (mobile) */
-#quickbar{background:var(--bg1);border-top:1px solid var(--bdr);display:flex;align-items:center;gap:4px;padding:5px 8px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+/* ───────── PANNELLO DESTRO ───────── */
+.rp-hd{
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  padding:14px 16px 10px;border-bottom:1px solid var(--line);font-weight:700;
+  position:sticky;top:0;background:#fff;z-index:1;
+}
+.rp-blk{border-bottom:1px solid var(--line);padding:9px 16px;}
+.rp-blk:last-child{border-bottom:0;}
+.rp-t{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:600;}
+.chip{
+  display:inline-block;padding:2px 7px;border-radius:6px;
+  font-family:'Share Tech Mono',monospace;font-size:11px;margin:2px 3px 2px 0;
+  cursor:pointer;background:#f1f4fa;border:1px solid #e2e8f0;
+}
+.chip:hover{background:#e6eefc;border-color:#bfd3fb;}
+.chip.k{color:var(--lk);} .chip.f{color:var(--lf);} .chip.l{color:var(--ll);}
+.chip.p{color:var(--lp);} .chip.u{color:var(--lu);} .chip.e{color:var(--le);}
+.chip.b{color:var(--lb);} .chip.c{color:var(--lc);} .chip.go{color:var(--lgo);}
+.chip.lb{color:var(--llb);} .chip.op{color:var(--lop);} .chip.rd{color:var(--lrd);}
+.rp-mono{font-family:'Share Tech Mono',monospace;font-size:10.5px;color:#64748b;line-height:1.7;}
+
+/* ───────── QUICKBAR (mobile) ───────── */
+#quickbar{
+  background:#fff;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:6px;padding:7px 10px;
+  overflow-x:auto;flex-shrink:0;scrollbar-width:none;
+}
 #quickbar::-webkit-scrollbar{display:none;}
-.qt{background:var(--bg2);border:1px solid var(--bdr);color:var(--t2);font-family:'Share Tech Mono',monospace;font-size:11px;padding:3px 8px;border-radius:3px;cursor:pointer;white-space:nowrap;flex-shrink:0;touch-action:manipulation;transition:all .12s;}
-.qt:active,.qt:hover{background:var(--bg3);border-color:var(--bdrg);color:var(--t1);}
-.qt.ck{color:var(--sk);border-color:rgba(0,229,255,.2);}
-.qt.cf{color:var(--sf);border-color:rgba(255,145,0,.2);}
-.qt.cl{color:var(--sl);border-color:rgba(240,98,146,.2);}
-.qt.cp{color:var(--sp);border-color:rgba(206,147,216,.2);}
-.qt.cu{color:var(--su);border-color:rgba(128,203,196,.2);}
-.qt.ce{color:var(--se);border-color:rgba(255,138,101,.2);}
-.qt.cgo{color:var(--sgo);border-color:rgba(100,255,218,.2);}
-.qt.clb{color:var(--slb);border-color:rgba(255,167,38,.2);}
-.qt.cb{color:var(--sb);border-color:rgba(79,195,247,.2);}
-.qt.crd{color:#d4a96a;border-color:rgba(212,169,106,.2);}
-.qsep{width:1px;height:16px;background:var(--bdr);flex-shrink:0;margin:0 2px;}
-
-/* STATUS */
-#statusbar{background:var(--bg1);border-top:1px solid var(--bdr);height:24px;display:flex;align-items:center;padding:0 12px;gap:16px;font-size:10.5px;font-family:'Share Tech Mono',monospace;color:var(--t3);flex-shrink:0;}
-.sv{color:var(--t2);}
-.slang{margin-left:auto;color:var(--accd);letter-spacing:1px;}
-
-/* RIGHT PANEL */
-#rpanel{width:190px;background:var(--bg1);border-left:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;font-size:11px;}
-.rp-hd{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);padding:10px 11px 6px;border-bottom:1px solid var(--bdr);font-weight:600;}
-.rp-blk{border-bottom:1px solid var(--bdr);padding:7px 11px;}
-.rp-t{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:4px;}
-.chip{display:inline-block;padding:1px 5px;border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:10.5px;margin:2px 2px 2px 0;cursor:pointer;transition:filter .1s;border:1px solid transparent;}
-.chip:hover{filter:brightness(1.3);}
-.chip.k{background:rgba(0,229,255,.09);color:var(--sk);border-color:rgba(0,229,255,.18);}
-.chip.f{background:rgba(255,145,0,.09);color:var(--sf);border-color:rgba(255,145,0,.18);}
-.chip.l{background:rgba(240,98,146,.09);color:var(--sl);border-color:rgba(240,98,146,.18);}
-.chip.p{background:rgba(206,147,216,.09);color:var(--sp);border-color:rgba(206,147,216,.18);}
-.chip.u{background:rgba(128,203,196,.09);color:var(--su);border-color:rgba(128,203,196,.18);}
-.chip.e{background:rgba(255,138,101,.09);color:var(--se);border-color:rgba(255,138,101,.18);}
-.chip.b{background:rgba(79,195,247,.09);color:var(--sb);border-color:rgba(79,195,247,.18);}
-.chip.c{background:rgba(61,122,85,.12);color:var(--sc);border-color:rgba(61,122,85,.22);}
-.chip.go{background:rgba(100,255,218,.09);color:var(--sgo);border-color:rgba(100,255,218,.18);}
-.chip.lb{background:rgba(255,167,38,.09);color:var(--slb);border-color:rgba(255,167,38,.18);}
-.chip.op{background:rgba(255,64,129,.09);color:var(--so);border-color:rgba(255,64,129,.18);}
-.chip.rd{background:rgba(212,169,106,.09);color:#d4a96a;border-color:rgba(212,169,106,.22);}
-.rp-mono{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--t3);line-height:1.65;}
-
-/* DRAWER OVERLAY */
-#drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;backdrop-filter:blur(2px);}
-
-::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-track{background:var(--bg1);}
-::-webkit-scrollbar-thumb{background:var(--bdrg);border-radius:3px;}
-::-webkit-scrollbar-thumb:hover{background:var(--accd);}
-
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.055) 2px,rgba(0,0,0,.055) 4px);}
-
-.si-action{cursor:pointer;}
-.sb-file-row{display:flex;align-items:center;gap:4px;padding:4px 13px 6px;}
-#filename{background:var(--bg3);border:1px solid var(--bdr);border-radius:3px;outline:none;color:var(--t1);font-family:'Share Tech Mono',monospace;font-size:12px;padding:3px 7px;flex:1;min-width:0;}
-#filename:focus{border-color:var(--accd);}
-.sb-fext{color:var(--accd);font-family:'Share Tech Mono',monospace;font-size:12px;flex-shrink:0;}
-.tbtn.run{background:rgba(0,230,118,.08);border-color:rgba(0,230,118,.3);color:#00e676;}
-.tbtn.run:hover,.tbtn.run:active{background:rgba(0,230,118,.18);border-color:#00e676;box-shadow:0 0 10px rgba(0,230,118,.2);}
-.tbtn.run.disabled{opacity:.35;cursor:not-allowed;}
-@keyframes flash{0%{box-shadow:0 0 0 0 rgba(0,229,255,.7);}100%{box-shadow:0 0 0 12px rgba(0,229,255,0);}}
-.do-flash{animation:flash .4s ease-out;}
-
-/* MOBILE */
-@media(max-width:700px){
-  #hambtn{display:flex;}
-  #sidebar{position:fixed;left:0;top:46px;bottom:0;transform:translateX(-100%);z-index:300;width:230px;box-shadow:4px 0 24px rgba(0,0,0,.5);}
-  #sidebar.open{transform:translateX(0);}
-  #drawer-overlay.open{display:block;}
-  #rpanel{display:none;}
-  #fszbtns{display:none;}
-  .vsep,.hide-m{display:none;}
-  #logo{font-size:15px;letter-spacing:3px;}
-  #filename-wrap{max-width:130px;}
-  .CodeMirror{font-size:13px;}
+.qt{
+  background:#fff;border:1px solid var(--line);color:#475569;
+  font-family:'Share Tech Mono',monospace;font-size:12px;
+  padding:4px 11px;border-radius:999px;cursor:pointer;white-space:nowrap;
+  flex-shrink:0;touch-action:manipulation;
 }
-@media(min-width:701px){
-  #quickbar{display:none;}
-}
+.qt:active,.qt:hover{background:#eef4ff;border-color:#bfd3fb;}
+.qt.ck{color:var(--lk);} .qt.cf{color:var(--lf);} .qt.cl{color:var(--ll);}
+.qt.cp{color:var(--lp);} .qt.cu{color:var(--lu);} .qt.ce{color:var(--le);}
+.qt.cgo{color:var(--lgo);} .qt.clb{color:var(--llb);} .qt.cb{color:var(--lb);}
+.qt.crd{color:var(--lrd);}
+.qsep{width:1px;height:18px;background:var(--line);flex-shrink:0;margin:0 2px;}
 
-/* ── CONSOLE PANEL ─────────────────────────────── */
+/* ───────── STATUSBAR ───────── */
+#statusbar{
+  background:#fff;border-top:1px solid var(--line);height:30px;
+  display:flex;align-items:center;padding:0 16px;gap:18px;
+  font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);flex-shrink:0;
+}
+.sv{color:#111;font-weight:700;}
+.slang{margin-left:auto;color:var(--blue);font-weight:700;letter-spacing:.08em;}
+
+/* ───────── DRAWER OVERLAY ───────── */
+#drawer-overlay{display:none;position:fixed;inset:0;background:rgba(11,18,32,.55);z-index:200;}
+
+/* ───────── CONSOLE ───────── */
 #console-wrap{
-  display:flex;flex-direction:column;
-  background:var(--bg0);
-  border-top:2px solid var(--bdr);
-  flex-shrink:0;
-  height:0;overflow:hidden;
-  transition:height .22s ease;
-  position:relative;
+  display:flex;flex-direction:column;background:var(--bg0);
+  flex-shrink:0;height:0;overflow:hidden;position:relative;
 }
-#console-wrap.open{ height:220px; }
-#console-wrap.open.tall{ height:380px; }
-
-#console-resize{
-  position:absolute;top:0;left:0;right:0;height:4px;
-  cursor:row-resize;z-index:10;
-  background:transparent;
-}
-#console-resize:hover{ background:var(--accd); }
-
+#console-wrap.open{height:220px;margin:0 12px 12px;border:1px solid var(--bdr);border-radius:16px;box-shadow:var(--card-shadow);}
+#console-wrap.open.tall{height:380px;}
+#console-resize{position:absolute;top:0;left:0;right:0;height:5px;cursor:row-resize;z-index:10;background:transparent;}
+#console-resize:hover{background:var(--accd);}
 #console-titlebar{
-  display:flex;align-items:center;gap:8px;
-  padding:0 12px;height:30px;
-  background:var(--bg1);border-bottom:1px solid var(--bdr);
-  flex-shrink:0;
+  display:flex;align-items:center;gap:8px;padding:0 14px;height:36px;
+  background:var(--bg1);border-bottom:1px solid var(--bdr);flex-shrink:0;
 }
-#console-title{
-  font-size:10px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--t3);font-weight:600;flex:1;
-}
+#console-title{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--t2);font-weight:700;flex:1;}
 .con-btn{
-  background:none;border:1px solid var(--bdr);color:var(--t3);
-  font-family:'Rajdhani',sans-serif;font-weight:600;font-size:10px;
-  letter-spacing:1px;text-transform:uppercase;
-  padding:0 8px;height:20px;border-radius:3px;cursor:pointer;
-  transition:all .12s;touch-action:manipulation;
+  background:none;border:1px solid var(--bdr);color:var(--t2);
+  font-family:inherit;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  padding:0 10px;height:22px;border-radius:999px;cursor:pointer;touch-action:manipulation;
 }
 .con-btn:hover{background:var(--bg3);color:var(--t1);border-color:var(--bdrg);}
 .con-btn.danger:hover{color:var(--pink);border-color:var(--pink);}
-#console-status{
-  font-family:'Share Tech Mono',monospace;font-size:10px;
-  padding:0 8px;border-radius:10px;
-  background:transparent;color:var(--t3);
-}
-#console-status.running{
-  background:rgba(0,230,118,.1);color:#00e676;
-  border:1px solid rgba(0,230,118,.3);
-  animation: pulse-run 1.2s ease-in-out infinite;
-}
-#console-status.done{ background:rgba(0,229,255,.08);color:var(--accd);border:1px solid var(--bdr); }
-#console-status.error{ background:rgba(255,64,129,.1);color:var(--pink);border:1px solid rgba(255,64,129,.3); }
-@keyframes pulse-run{ 0%,100%{opacity:1} 50%{opacity:.5} }
+.con-btn.pdf{color:#d4a96a;}
+.con-btn.pdf:hover{color:#d4a96a;border-color:#d4a96a;background:rgba(212,169,106,.08);}
+#console-status{font-family:'Share Tech Mono',monospace;font-size:10px;padding:1px 9px;border-radius:999px;color:var(--t3);}
+#console-status.running{background:rgba(0,230,118,.1);color:#00e676;border:1px solid rgba(0,230,118,.3);}
+#console-status.done{background:rgba(77,163,255,.1);color:var(--acc);border:1px solid var(--bdr);}
+#console-status.error{background:rgba(255,64,129,.1);color:var(--pink);border:1px solid rgba(255,64,129,.3);}
 
 #console-output{
-  flex:1;overflow-y:auto;padding:10px 14px 4px;
-  font-family:'Share Tech Mono',monospace;font-size:13px;
-  line-height:1.7;color:var(--t1);
+  flex:1;overflow-y:auto;padding:10px 16px 4px;
+  font-family:'Share Tech Mono',monospace;font-size:13px;line-height:1.7;color:var(--t1);
   white-space:pre-wrap;word-break:break-word;
 }
-.con-line-out{ color:var(--t1); }
-.con-line-err{ color:var(--pink); }
-.con-line-sys{ color:var(--t3);font-style:italic; }
-.con-line-inp{ color:var(--amb); }
+.con-line-out{color:var(--t1);}
+.con-line-err{color:var(--pink);}
+.con-line-sys{color:var(--t3);font-style:italic;}
+.con-line-inp{color:var(--amb);}
 
-#console-input-row{
-  display:none;align-items:center;gap:8px;
-  padding:6px 12px;border-top:1px solid var(--bdr);
-  background:var(--bg1);flex-shrink:0;
-}
-#console-input-row.visible{ display:flex; }
-#console-prompt{
-  color:var(--acc);font-family:'Share Tech Mono',monospace;
-  font-size:13px;white-space:nowrap;
-}
-#console-input{
-  flex:1;background:transparent;border:none;outline:none;
-  color:var(--amb);font-family:'Share Tech Mono',monospace;
-  font-size:13px;caret-color:var(--amb);
-}
-#console-send{
-  background:none;border:1px solid var(--accd);color:var(--acc);
-  font-family:'Share Tech Mono',monospace;font-size:11px;
-  padding:2px 10px;border-radius:3px;cursor:pointer;
-  touch-action:manipulation;
-}
+#console-input-row{display:none;align-items:center;gap:8px;padding:7px 14px;border-top:1px solid var(--bdr);background:var(--bg1);flex-shrink:0;}
+#console-input-row.visible{display:flex;}
+#console-prompt{color:var(--acc);font-family:'Share Tech Mono',monospace;font-size:13px;white-space:nowrap;}
+#console-input{flex:1;background:transparent;border:none;outline:none;color:var(--amb);font-family:'Share Tech Mono',monospace;font-size:13px;caret-color:var(--amb);}
+#console-send{background:none;border:1px solid var(--accd);color:var(--acc);font-family:'Share Tech Mono',monospace;font-size:11px;padding:2px 12px;border-radius:999px;cursor:pointer;touch-action:manipulation;}
 #console-send:hover{background:var(--accg);}
 
-/* ── RENDER block output in console ────────────── */
 .con-line-render{
-  margin:8px 0;padding:12px 16px;
-  display:flex;justify-content:center;
-  border:1px solid rgba(212,169,106,.2);
-  border-radius:4px;
-  background:rgba(0,0,0,.35);
-  overflow-x:auto;
-  white-space:normal;
+  margin:8px 0;padding:12px 16px;display:flex;justify-content:center;
+  border:1px solid rgba(212,169,106,.2);border-radius:10px;
+  background:rgba(0,0,0,.3);overflow-x:auto;white-space:normal;
 }
 .lrender-math{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;}
 .lrender-line{color:var(--t1);}
@@ -300,49 +271,90 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
 .lrender-mol{display:flex;justify-content:center;}
 .lrender-err{color:#ff4081;font-family:'Share Tech Mono',monospace;font-size:.76rem;}
 .lrender-empty{color:var(--t3);font-family:'Share Tech Mono',monospace;font-size:.76rem;}
+.con-inline-render{display:inline-block;vertical-align:middle;margin:0 3px;line-height:1;}
+.con-inline-render .katex{font-size:.98em;}
 
-/* ── RENDER inline \R...\R ──────────────────────── */
-.con-inline-render{
-  display:inline-block;
-  vertical-align:middle;
-  margin:0 3px;
-  line-height:1;
+/* ───────── SCROLLBAR ───────── */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#c5d0e0;border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:#9fb1cb;}
+#ed-wrap ::-webkit-scrollbar-thumb,#console-wrap ::-webkit-scrollbar-thumb{background:var(--bdrg);}
+
+/* ───────── RESPONSIVE ───────── */
+@media(min-width:768px){
+  #quickbar{display:none;}
 }
-.con-inline-render .katex{ font-size:.98em; }
-
-/* ── PDF button ─────────────────────────────────── */
-.con-btn.pdf{ color:#d4a96a; }
-.con-btn.pdf:hover{ color:#d4a96a;border-color:#d4a96a;background:rgba(212,169,106,.08); }
+@media(max-width:767.98px){
+  #hambtn{display:inline-flex;}
+  #layout{padding:0;gap:0;}
+  #sidebar{
+    position:fixed;left:0;top:var(--nav-h);bottom:0;width:260px;z-index:300;
+    border-radius:0 16px 16px 0;transform:translateX(-100%);
+    box-shadow:6px 0 28px rgba(0,0,0,.25);
+  }
+  #sidebar.open{transform:translateX(0);}
+  #drawer-overlay.open{display:block;}
+  #rpanel{display:none;}
+  #fszbtns{display:none;}
+  .hide-m{display:none!important;}
+  #topbar{padding:0 10px;gap:8px;}
+  #ed-wrap{border-radius:0;box-shadow:none;}
+  .CodeMirror{font-size:13px;}
+  #console-wrap.open{margin:0;border-radius:16px 16px 0 0;border-left:0;border-right:0;border-bottom:0;}
+  #statusbar{padding:0 12px;gap:12px;}
+}
+@media(max-width:575.98px){
+  .lang-switch .globe{display:none;}
+  .lang-switch{padding-left:3px;}
+  .tb-actions{gap:6px;}
+}
 </style>
 </head>
 <body>
 
-<div id="topbar">
-  <button id="hambtn" title="Menu">☰</button>
-  <div id="logo">LINE<span>3.0</span></div>
-  <div id="fszbtns">
-    <div class="fszbtn" id="fsz-dn" title="Riduci font">−</div>
-    <div class="fszbtn" id="fsz-up" title="Aumenta font">+</div>
+<nav id="topbar" class="navbar bg-white border-bottom">
+  <button id="hambtn" class="btn btn-outline-secondary" type="button" title="Menu" aria-label="Menu"><i class="bi bi-list"></i></button>
+
+  <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+    <img src="favicon.png" alt="LINE">
+    <span id="logo">LINE<span>3.0</span></span>
+  </a>
+
+  <div class="top-links d-none d-xl-flex gap-1">
+    <a class="nav-link px-2" href="documenti.html" data-i18n="nav_docs">Documenti</a>
+    <a class="nav-link px-2" href="sezione1.html" data-i18n="nav_learn">Impara LINE</a>
   </div>
-  <div style="margin-left:auto;display:flex;gap:6px;">
-    <button class="tbtn hide-m" id="btn-copy">COPIA</button>
-    <button class="tbtn hide-m" id="btn-clear">PULISCI</button>
-    <button class="tbtn" id="btn-run" title="Esegui (richiede interpreter.js)">▶ ESEGUI</button>
-    <button class="tbtn pri" id="btn-save">SALVA</button>
+
+  <div id="fszbtns" class="btn-group btn-group-sm ms-2" role="group">
+    <button type="button" class="btn btn-outline-secondary" id="fsz-dn" title="Riduci font" data-i18n-title="t_fsz_dn">A−</button>
+    <button type="button" class="btn btn-outline-secondary" id="fsz-up" title="Aumenta font" data-i18n-title="t_fsz_up">A+</button>
+  </div>
+
+  <div class="tb-actions">
+    <div class="lang-switch" role="group" aria-label="Lingua / Language">
+      <i class="bi bi-translate globe" aria-hidden="true"></i>
+      <button type="button" data-lang="it" aria-pressed="true">IT</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm hide-m" id="btn-copy" type="button"><span data-i18n="btn_copy">Copia</span></button>
+    <button class="btn btn-outline-secondary btn-sm hide-m" id="btn-clear" type="button"><span data-i18n="btn_clear">Pulisci</span></button>
+    <button class="btn btn-outline-success btn-sm" id="btn-run" type="button"><i class="bi bi-play-fill"></i><span class="d-none d-sm-inline ms-1" data-i18n="btn_run">Esegui</span></button>
+    <button class="btn btn-primary btn-sm" id="btn-save" type="button"><i class="bi bi-download"></i><span class="d-none d-sm-inline ms-1" data-i18n="btn_save">Salva</span></button>
   </div>
   <input type="file" id="file-input" accept=".line,.txt" style="display:none">
-</div>
+</nav>
 
 <div id="layout">
 
   <div id="sidebar">
     <div class="sb-sec sb-file">
-      <div class="sb-hd">File</div>
+      <div class="sb-hd" data-i18n="sb_file">File</div>
       <div class="sb-file-row">
-        <input id="filename" type="text" value="programma" spellcheck="false" maxlength="40" placeholder="nome file" title="Nome file">
+        <input id="filename" class="form-control form-control-sm" type="text" value="programma" spellcheck="false" maxlength="40" placeholder="nome file" title="Nome file" data-i18n-ph="ph_name" data-i18n-title="t_name">
         <span class="sb-fext">.line</span>
       </div>
-      <div class="si si-action" id="btn-open"><span class="dot k"></span>Apri .line<span class="si-arr">↵</span></div>
+      <div class="si si-action" id="btn-open"><span class="dot k"></span><span data-i18n="sb_open">Apri .line</span><span class="si-arr">↵</span></div>
     </div>
     <div class="sb-sec"><div class="sb-hd">I/O Console</div>
       <div class="si" data-ins="TALK "><span class="dot k"></span>TALK<span class="si-arr">↵</span></div>
@@ -352,46 +364,46 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
       <div class="si" data-ins="TALK:V "><span class="dot lb"></span>TALK:V<span class="si-arr">↵</span></div>
       <div class="si" data-ins="TALK:F"><span class="dot lb"></span>TALK:F<span class="si-arr">↵</span></div>
     </div>
-    <div class="sb-sec"><div class="sb-hd">Variabili</div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_vars">Variabili</div>
       <div class="si" data-ins="STAY "><span class="dot f"></span>STAY<span class="si-arr">↵</span></div>
       <div class="si" data-ins="IF "><span class="dot f"></span>IF<span class="si-arr">↵</span></div>
       <div class="si" data-ins="RET "><span class="dot f"></span>RET<span class="si-arr">↵</span></div>
       <div class="si" data-ins="DEFRET\n"><span class="dot f"></span>DEFRET<span class="si-arr">↵</span></div>
       <div class="si" data-ins="TEMP "><span class="dot f"></span>TEMP<span class="si-arr">↵</span></div>
     </div>
-    <div class="sb-sec"><div class="sb-hd">Funzioni</div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_funs">Funzioni</div>
       <div class="si" data-ins="FUN nome()\n  \n  FEND"><span class="dot f"></span>FUN…FEND<span class="si-arr">↵</span></div>
       <div class="si" data-ins="THEN nome\n  \n  THEND"><span class="dot f"></span>THEN…THEND<span class="si-arr">↵</span></div>
       <div class="si" data-ins="return "><span class="dot f"></span>return<span class="si-arr">↵</span></div>
     </div>
-    <div class="sb-sec"><div class="sb-hd">Controllo</div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_ctrl">Controllo</div>
       <div class="si" data-ins="GO @cond @funzione"><span class="dot f"></span>GO<span class="si-arr">↵</span></div>
       <div class="si" data-ins=" & @cond2 @fun2"><span class="dot go"></span>&amp; (elif)<span class="si-arr">↵</span></div>
       <div class="si" data-ins=" && @fun3"><span class="dot go"></span>&amp;&amp; (else)<span class="si-arr">↵</span></div>
       <div class="si" data-ins="GO @{V} @{\n  \n  }"><span class="dot go"></span>GO inline<span class="si-arr">↵</span></div>
       <div class="si" data-ins="FOR @lista #[;;] = @funzione()"><span class="dot f"></span>FOR<span class="si-arr">↵</span></div>
     </div>
-    <div class="sb-sec"><div class="sb-hd">Gestione Errori</div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_err">Gestione Errori</div>
       <div class="si" data-ins="TRY nome\n  \n  TREND"><span class="dot p"></span>TRY…TREND<span class="si-arr">↵</span></div>
       <div class="si" data-ins="SHOW nome @try\n  \n  SEND"><span class="dot p"></span>SHOW…SEND<span class="si-arr">↵</span></div>
       <div class="si" data-ins="YET @try\n  \n  YEND"><span class="dot p"></span>YET…YEND<span class="si-arr">↵</span></div>
     </div>
-    <div class="sb-sec"><div class="sb-hd">Liste</div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_lists">Liste</div>
       <div class="si" data-ins="lista = [val1 ; val2]"><span class="dot l"></span>[ ; ]<span class="si-arr">↵</span></div>
       <div class="si" data-ins="lista = [tag | val]"><span class="dot l"></span>[tag | val]<span class="si-arr">↵</span></div>
       <div class="si" data-ins="ADD lista AT  = "><span class="dot l"></span>ADD<span class="si-arr">↵</span></div>
       <div class="si" data-ins="CANC lista AT "><span class="dot l"></span>CANC<span class="si-arr">↵</span></div>
     </div>
-    <div class="sb-sec"><div class="sb-hd">Etichette</div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_labels">Etichette</div>
       <div class="si" data-ins="TALK:etichetta "><span class="dot lb"></span>KW:label<span class="si-arr">↵</span></div>
-      <div class="si" data-ins="*etichetta"><span class="dot lb"></span>*richiama<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="*etichetta"><span class="dot lb"></span>*<span data-i18n="sb_recall">richiama</span><span class="si-arr">↵</span></div>
     </div>
-    <div class="sb-sec"><div class="sb-hd">Conversioni</div>
-      <div class="si" data-ins="n:"><span class="dot u"></span>n: (numero)<span class="si-arr">↵</span></div>
-      <div class="si" data-ins="s:"><span class="dot u"></span>s: (stringa)<span class="si-arr">↵</span></div>
-      <div class="si" data-ins="b:"><span class="dot u"></span>b: (booleano)<span class="si-arr">↵</span></div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_conv">Conversioni</div>
+      <div class="si" data-ins="n:"><span class="dot u"></span>n: <span data-i18n="sb_num">(numero)</span><span class="si-arr">↵</span></div>
+      <div class="si" data-ins="s:"><span class="dot u"></span>s: <span data-i18n="sb_str">(stringa)</span><span class="si-arr">↵</span></div>
+      <div class="si" data-ins="b:"><span class="dot u"></span>b: <span data-i18n="sb_bool">(booleano)</span><span class="si-arr">↵</span></div>
     </div>
-    <div class="sb-sec"><div class="sb-hd">Op. Incrementali</div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_inc">Op. Incrementali</div>
       <div class="si" data-ins=" += "><span class="dot l"></span>+=<span class="si-arr">↵</span></div>
       <div class="si" data-ins=" -= "><span class="dot l"></span>-=<span class="si-arr">↵</span></div>
       <div class="si" data-ins=" *= "><span class="dot l"></span>*=<span class="si-arr">↵</span></div>
@@ -400,11 +412,11 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
       <div class="si" data-ins=" //= "><span class="dot l"></span>//=<span class="si-arr">↵</span></div>
       <div class="si" data-ins=" %= "><span class="dot l"></span>%=<span class="si-arr">↵</span></div>
     </div>
-    <div class="sb-sec"><div class="sb-hd">Commenti</div>
-      <div class="si" data-ins=">> "><span class="dot c"></span>&gt;&gt; linea<span class="si-arr">↵</span></div>
-      <div class="si" data-ins="<* \n*>"><span class="dot c"></span>&lt;* blocco *&gt;<span class="si-arr">↵</span></div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_comm">Commenti</div>
+      <div class="si" data-ins=">> "><span class="dot c"></span>&gt;&gt; <span data-i18n="sb_line">linea</span><span class="si-arr">↵</span></div>
+      <div class="si" data-ins="<* \n*>"><span class="dot c"></span>&lt;* <span data-i18n="sb_block">blocco</span> *&gt;<span class="si-arr">↵</span></div>
     </div>
-    <div class="sb-sec"><div class="sb-hd">Moduli</div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_mods">Moduli</div>
       <div class="si" data-ins="TAKE "><span class="dot k"></span>TAKE<span class="si-arr">↵</span></div>
     </div>
     <div class="sb-sec"><div class="sb-hd">Rendering</div>
@@ -416,54 +428,54 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
   <div id="ed-wrap"><textarea id="editor"></textarea></div>
 
   <div id="rpanel">
-    <div class="rp-hd">Riferimento rapido</div>
+    <div class="rp-hd" data-i18n="rp_title">Riferimento rapido</div>
     <div class="rp-blk"><div class="rp-t">I/O</div>
       <span class="chip k">TALK</span><span class="chip k">OUT</span><span class="chip k">INP</span><span class="chip k">SCREAM</span><span class="chip k">TAKE</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">Etichette speciali</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_speclabels">Etichette speciali</div>
       <span class="chip lb">TALK:V</span><span class="chip lb">TALK:F</span><span class="chip lb">KW:label</span><span class="chip lb">*label</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">Variabili</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="sb_vars">Variabili</div>
       <span class="chip f">STAY</span><span class="chip f">IF</span><span class="chip f">RET</span><span class="chip f">TEMP</span><span class="chip f">DEFRET</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">Funzioni</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="sb_funs">Funzioni</div>
       <span class="chip f">FUN</span><span class="chip f">FEND</span><span class="chip f">THEN</span><span class="chip f">THEND</span><span class="chip f">return</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">Controllo</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="sb_ctrl">Controllo</div>
       <span class="chip f">GO</span><span class="chip go">&amp;</span><span class="chip go">&amp;&amp;</span><span class="chip f">FOR</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">Errori</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_errors">Errori</div>
       <span class="chip p">TRY</span><span class="chip p">TREND</span><span class="chip p">SHOW</span><span class="chip p">SEND</span><span class="chip p">YET</span><span class="chip p">YEND</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">Liste</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="sb_lists">Liste</div>
       <span class="chip l">ADD</span><span class="chip l">CANC</span><span class="chip l">AT</span><span class="chip l">BY</span><span class="chip l">IS</span><span class="chip l">IN</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">Logica</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_logic">Logica</div>
       <span class="chip l">ET</span><span class="chip l">VEL</span><span class="chip l">AUT</span><span class="chip op">!</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">Booleani</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_bools">Booleani</div>
       <span class="chip b">V</span><span class="chip b">F</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">Conversioni</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="sb_conv">Conversioni</div>
       <span class="chip u">n:</span><span class="chip u">s:</span><span class="chip u">b:</span><span class="chip e">\t</span>
     </div>
     <div class="rp-blk"><div class="rp-t">Escape</div>
       <span class="chip e">\n</span><span class="chip e">\%</span><span class="chip e">\@</span><span class="chip e">\|</span><span class="chip e">\;</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">Speciali</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_special">Speciali</div>
       <span class="chip p">ONITEM</span><span class="chip p">ONINDEX</span><span class="chip p">ONTAG</span><span class="chip p">THISGO</span><span class="chip p">ASKED</span><span class="chip p">NUMBERS</span><span class="chip p">ERRCODE</span><span class="chip p">ERRMSG</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">Op. incrementali</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_inc">Op. incrementali</div>
       <span class="chip op">+=</span><span class="chip op">-=</span><span class="chip op">*=</span><span class="chip op">/=</span><span class="chip op">^=</span><span class="chip op">//=</span><span class="chip op">%=</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">Commenti</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="sb_comm">Commenti</div>
       <span class="chip c">&gt;&gt;</span><span class="chip c">&lt;* *&gt;</span>
     </div>
     <div class="rp-blk"><div class="rp-t">Rendering</div>
       <span class="chip rd">RENDER{}</span><span class="chip rd">CHEM</span>
       <span class="chip rd">\R</span><span class="chip e">\C{}</span>
     </div>
-    <div class="rp-blk"><div class="rp-t">FOR sintassi</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_for">FOR sintassi</div>
       <div class="rp-mono">FOR @lista #[start;end;step]<br>= @funzione()</div>
     </div>
     <div class="rp-blk"><div class="rp-t">GO chain</div>
@@ -472,24 +484,23 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
     <div class="rp-blk"><div class="rp-t">GO inline</div>
       <div class="rp-mono">GO @{cond} @{<br>  ...<br>  } #ripetizioni</div>
     </div>
-    <div class="rp-blk"><div class="rp-t">Accesso lista</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_access">Accesso lista</div>
       <div class="rp-mono">lista[#0]<br>lista[tag]<br>lista[tag1;tag2]</div>
     </div>
-    <div class="rp-blk"><div class="rp-t">RENDER / colori</div>
-      <div class="rp-mono">RENDER{<br>  formula<br>}<br><br>TALK testo \Rformula\R<br><br>\C{red+bold+_}...\C{}<br>colori: red green blue<br>cyan orange purple…<br>stili: bold italic - _</div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_colors_t">RENDER / colori</div>
+      <div class="rp-mono" data-i18n="rp_colors">RENDER{<br>  formula<br>}<br><br>TALK testo \Rformula\R<br><br>\C{red+bold+_}...\C{}<br>colori: red green blue<br>cyan orange purple…<br>stili: bold italic - _</div>
     </div>
-    <div class="rp-blk"><div class="rp-t">Tasti</div>
-      <div class="rp-mono" style="line-height:2.1">
-        <b style="color:var(--t2)">Ctrl+Space</b> autocomplete<br>
-        <b style="color:var(--t2)">Ctrl+/</b> commenta riga<br>
-        <b style="color:var(--t2)">Tab</b> indenta
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_keys_t">Tasti</div>
+      <div class="rp-mono" style="line-height:2.1" data-i18n="rp_keys">
+        <b style="color:#334155">Ctrl+Space</b> autocomplete<br>
+        <b style="color:#334155">Ctrl+/</b> commenta riga<br>
+        <b style="color:#334155">Tab</b> indenta
       </div>
     </div>
   </div>
 
 </div><!-- /layout -->
 
-<!-- QUICK BAR mobile -->
 <div id="quickbar">
   <span class="qt ck" data-ins="TALK ">TALK</span>
   <span class="qt ck" data-ins="OUT ">OUT</span>
@@ -531,31 +542,152 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
 <div id="statusbar">
   <span>Ln <span class="sv" id="s-ln">1</span></span>
   <span>Col <span class="sv" id="s-co">1</span></span>
-  <span>Righe <span class="sv" id="s-li">1</span></span>
+  <span><span data-i18n="st_lines">Righe</span> <span class="sv" id="s-li">1</span></span>
   <span>Char <span class="sv" id="s-ch">0</span></span>
   <span class="slang">LINE 3.0</span>
 </div>
 
-<!-- CONSOLE PANEL -->
 <div id="console-wrap">
   <div id="console-resize"></div>
   <div id="console-titlebar">
     <span id="console-title">Console</span>
     <span id="console-status"></span>
-    <button class="con-btn" id="con-save" title="Salva output come .txt">TXT</button>
-    <button class="con-btn pdf" id="con-pdf" title="Salva output come PDF (conserva rendering)">PDF</button>
-    <button class="con-btn" id="con-clear" title="Pulisci console">PULISCI</button>
+    <button class="con-btn" id="con-save" title="Salva output come .txt" data-i18n-title="t_con_save">TXT</button>
+    <button class="con-btn pdf" id="con-pdf" title="Salva output come PDF (conserva rendering)" data-i18n-title="t_con_pdf">PDF</button>
+    <button class="con-btn" id="con-clear" title="Pulisci console" data-i18n-title="t_con_clear"><span data-i18n="btn_clear">Pulisci</span></button>
     <button class="con-btn danger" id="con-close">✕</button>
   </div>
   <div id="console-output"></div>
   <div id="console-input-row">
     <span id="console-prompt">&gt;</span>
-    <input id="console-input" type="text" autocomplete="off" spellcheck="false" placeholder="inserisci input…">
+    <input id="console-input" type="text" autocomplete="off" spellcheck="false" placeholder="inserisci input…" data-i18n-ph="ph_input">
     <button id="console-send">↵</button>
   </div>
 </div>
 
 <div id="drawer-overlay"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   Bilingue IT / EN  (stessa chiave di index.html)
+   L'italiano è il testo già presente nell'HTML.
+══════════════════════════════════════════ */
+(function(){
+  var KEY = 'line_lang';
+
+  var EN = {
+    nav_docs:'Documents', nav_learn:'Learn LINE',
+    t_fsz_dn:'Decrease font size', t_fsz_up:'Increase font size',
+    btn_copy:'Copy', btn_clear:'Clear', btn_run:'Run', btn_save:'Save',
+    sb_file:'File', ph_name:'file name', t_name:'File name', sb_open:'Open .line',
+    sb_vars:'Variables', sb_funs:'Functions', sb_ctrl:'Control', sb_err:'Error handling',
+    sb_lists:'Lists', sb_labels:'Labels', sb_recall:'recall', sb_conv:'Conversions',
+    sb_num:'(number)', sb_str:'(string)', sb_bool:'(boolean)', sb_inc:'Increment ops',
+    sb_comm:'Comments', sb_line:'line', sb_block:'block', sb_mods:'Modules',
+    rp_title:'Quick reference', rp_speclabels:'Special labels', rp_errors:'Errors',
+    rp_logic:'Logic', rp_bools:'Booleans', rp_special:'Special', rp_inc:'Increment ops',
+    rp_for:'FOR syntax', rp_access:'List access', rp_colors_t:'RENDER / colors',
+    rp_colors:'RENDER{<br>  formula<br>}<br><br>TALK text \\Rformula\\R<br><br>\\C{red+bold+_}...\\C{}<br>colors: red green blue<br>cyan orange purple…<br>styles: bold italic - _',
+    rp_keys_t:'Keys',
+    rp_keys:'<b style="color:#334155">Ctrl+Space</b> autocomplete<br><b style="color:#334155">Ctrl+/</b> toggle comment<br><b style="color:#334155">Tab</b> indent',
+    st_lines:'Lines',
+    t_con_save:'Save output as .txt', t_con_pdf:'Save output as PDF (keeps rendering)', t_con_clear:'Clear console',
+    ph_input:'enter input…',
+    js_running:'● running', js_done:'✓ finished', js_error:'✕ error',
+    js_end:'end of run', js_err_prefix:'ERROR: ',
+    js_confirm_clear:'Empty the editor?',
+    js_run_title:'Run program', js_no_interp_title:'interpreter.js not found',
+    js_no_interp:'interpreter.js not found.\nPut interpreter.js in the same folder as the editor and reload.',
+    js_pdf_libs:'PDF libraries not loaded. Check your connection and reload the page.',
+    js_pdf_err:'PDF error: ',
+    js_no_render:'[RENDER] line-render.js not found'
+  };
+
+  var IT = {
+    js_running:'● in esecuzione', js_done:'✓ terminato', js_error:'✕ errore',
+    js_end:'fine esecuzione', js_err_prefix:'ERRORE: ',
+    js_confirm_clear:"Svuotare l'editor?",
+    js_run_title:'Esegui programma', js_no_interp_title:'interpreter.js non trovato',
+    js_no_interp:"interpreter.js non trovato.\nMetti interpreter.js nella stessa cartella dell'editor e ricarica.",
+    js_pdf_libs:'Librerie PDF non caricate. Controlla la connessione e ricarica la pagina.',
+    js_pdf_err:'Errore PDF: ',
+    js_no_render:'[RENDER] line-render.js non trovato'
+  };
+
+  var HINT_EN = {
+    "TALK":"output / input","TALK:V":"persistent input","TALK:F":"disable TALK:V",
+    "OUT":"output only","OUT:label":"OUT with label","INP":"input only","INP:label":"INP with label",
+    "SCREAM":"print list + tags","TAKE":"import module","STAY":"constant","IF":"boolean IF variable",
+    "RET":"global variable","DEFRET":"global default in block","TEMP":"forced local variable",
+    "FUN":"defines a function","FEND":"end of FUN","THEN":"then block (no args)","THEND":"end of THEN",
+    "return":"return value","GO":"run if condition","GO:label":"GO with label","&":"GO elif","&&":"GO else",
+    "FOR":"loop over list","FOR:label":"FOR with label","TRY":"try block","TREND":"end of TRY",
+    "SHOW":"handle error","SEND":"end of SHOW","YET":"always run","YEND":"end of YET",
+    "ADD":"add to list","CANC":"remove from list","AT":"by index","BY":"by tag / replace","IS":"by value",
+    "IN":"membership operator","ET":"logical and","VEL":"logical or","AUT":"logical xor","!":"not (prefix)",
+    "ONITEM":"current value (FOR)","ONINDEX":"current index (FOR)","ONTAG":"current tag (FOR)",
+    "THISGO":"inline GO condition","ASKED":"last TALK:V input","NUMBERS":"list of all reals",
+    "ERRCODE":"error code (SHOW)","ERRMSG":"error message (SHOW)",
+    "n:":"convert to number","s:":"convert to string","b:":"convert to boolean",
+    "\\t":"variable type","\\n":"new line","\\%":"print %","\\@":"print @",
+    "\\|":"literal pipe in list","\\;":"literal semicolon","V":"true (boolean)","F":"false (boolean)",
+    "+=":"add and assign","-=":"subtract and assign","*=":"multiply and assign","/=":"divide and assign",
+    "^=":"power and assign","//=":"integer div. and assign","%=":"modulo and assign",
+    "RENDER{}":"math / chemistry rendering","\\R":"start/end inline render","\\C{":"console text color/style"
+  };
+  window.LINE_HINT_EN = HINT_EN;
+
+  var tx  = document.querySelectorAll('[data-i18n]');
+  var ti  = document.querySelectorAll('[data-i18n-title]');
+  var ph  = document.querySelectorAll('[data-i18n-ph]');
+  var btn = document.querySelectorAll('.lang-switch button');
+
+  /* salva l'italiano originale dall'HTML */
+  var i;
+  for(i=0;i<tx.length;i++){ var k=tx[i].getAttribute('data-i18n'); if(IT[k]===undefined) IT[k]=tx[i].innerHTML; }
+  for(i=0;i<ti.length;i++){ var k2=ti[i].getAttribute('data-i18n-title'); if(IT[k2]===undefined) IT[k2]=ti[i].getAttribute('title'); }
+  for(i=0;i<ph.length;i++){ var k3=ph[i].getAttribute('data-i18n-ph'); if(IT[k3]===undefined) IT[k3]=ph[i].getAttribute('placeholder'); }
+
+  window.LINE_LANG = 'it';
+  window.LT = function(key){
+    var d = window.LINE_LANG === 'en' ? EN : IT;
+    return d[key] !== undefined ? d[key] : (IT[key] !== undefined ? IT[key] : key);
+  };
+
+  function apply(lang){
+    window.LINE_LANG = lang;
+    var j;
+    for(j=0;j<tx.length;j++) tx[j].innerHTML = LT(tx[j].getAttribute('data-i18n'));
+    for(j=0;j<ti.length;j++) ti[j].setAttribute('title', LT(ti[j].getAttribute('data-i18n-title')));
+    for(j=0;j<ph.length;j++) ph[j].setAttribute('placeholder', LT(ph[j].getAttribute('data-i18n-ph')));
+    document.documentElement.lang = lang;
+    for(j=0;j<btn.length;j++){
+      var on = btn[j].getAttribute('data-lang') === lang;
+      btn[j].classList.toggle('active', on);
+      btn[j].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    if(typeof window.checkInterpreter === 'function') window.checkInterpreter();
+  }
+
+  function initial(){
+    try{
+      var s = localStorage.getItem(KEY);
+      if(s === 'it' || s === 'en') return s;
+    }catch(e){}
+    var n = (navigator.language || 'it').toLowerCase();
+    return n.indexOf('it') === 0 ? 'it' : 'en';
+  }
+
+  for(i=0;i<btn.length;i++){
+    btn[i].addEventListener('click', function(){
+      var lang = this.getAttribute('data-lang');
+      try{ localStorage.setItem(KEY, lang); }catch(e){}
+      apply(lang);
+    });
+  }
+  apply(initial());
+})();
+</script>
 
 <script>
 /* ══════════════════════════════════════════
@@ -575,22 +707,18 @@ CodeMirror.defineMode("line30", function() {
     startState: () => ({ inMulti: false }),
     token(stream, state) {
 
-      /* ── multiline comment ── */
       if (state.inMulti) {
         if (stream.match("*>")) state.inMulti = false; else stream.next();
         return "comment";
       }
       if (stream.match("<*")) { state.inMulti = true; return "comment"; }
 
-      /* ── single-line comment ── */
       if (stream.match(">>")) { stream.skipToEnd(); return "comment"; }
 
       if (stream.eatSpace()) return null;
 
-      /* ── escape sequences ── */
       if (stream.peek() === '\\') {
         stream.next();
-        // \C{...} color escape — consuma fino alla }
         if (stream.peek() === 'C') {
           stream.next();
           if (stream.peek() === '{') {
@@ -604,14 +732,12 @@ CodeMirror.defineMode("line30", function() {
         return "escape";
       }
 
-      /* ── *label recall ── */
       if (stream.peek() === '*') {
         stream.next();
         stream.eatWhile(/\w/);
         return "label";
       }
 
-      /* ── @ref or @{inline block} ── */
       if (stream.peek() === '@') {
         stream.next();
         if (stream.peek() === '{') { stream.next(); return "ref"; }
@@ -619,25 +745,21 @@ CodeMirror.defineMode("line30", function() {
         return "ref";
       }
 
-      /* ── #var prefix ── */
       if (stream.peek() === '#') {
         stream.next();
         stream.eatWhile(/\w/);
         return "hash";
       }
 
-      /* ── ! not (standalone) or != ── */
       if (stream.peek() === '!') {
         stream.next();
         if (stream.peek() === '=') { stream.next(); return "op"; }
         return "not";
       }
 
-      /* ── GO chain: && before & ── */
       if (stream.match("&&")) return "gochain";
       if (stream.peek() === '&') { stream.next(); return "gochain"; }
 
-      /* ── Multi-char operators ── */
       if (stream.match("//=")) return "op";
       if (stream.match("<="))  return "op";
       if (stream.match(">="))  return "op";
@@ -650,37 +772,29 @@ CodeMirror.defineMode("line30", function() {
       if (stream.match("^="))  return "op";
       if (stream.match("//"))  return "op";
 
-      /* ── single-char math / comparison ── */
       if ("+-*/^%<>=".indexOf(stream.peek()) !== -1) {
         stream.next(); return "op";
       }
 
-      /* ── numbers ── */
       if (stream.match(/^-?\d+(\.\d+)?/)) return "number";
 
-      /* ── | tag separator ── */
       if (stream.peek() === '|') { stream.next(); return "tag"; }
 
-      /* ── { } per RENDER ── */
       if (stream.peek() === '{' || stream.peek() === '}') {
         stream.next(); return "render";
       }
 
-      /* ── word tokens ── */
       const m = stream.match(/^[a-zA-Z_][a-zA-Z0-9_]*/);
       if (m) {
         const w = m[0];
 
-        /* conversion: n: s: b: t: */
         if (["n","s","b","t"].includes(w) && stream.peek() === ':') {
           stream.next();
           return "builtin";
         }
 
-        /* RENDER keyword */
         if (RENDER.has(w)) return "render";
 
-        /* keywords with optional :label suffix */
         if (KW.has(w) || FLOW.has(w)) {
           if (stream.peek() === ':') {
             stream.next();
@@ -797,7 +911,8 @@ function line30Hint(cm) {
       n.textContent = h.d; n.className = h.c;
       n.style.cssText = "font-weight:600;min-width:72px;";
       const i = document.createElement("span");
-      i.textContent = h.i; i.style.cssText = "color:#1e3048;font-size:10.5px;";
+      i.textContent = (window.LINE_LANG === "en" && window.LINE_HINT_EN[h.d]) || h.i;
+      i.style.cssText = "color:#7a8fa8;font-size:10.5px;";
       el.appendChild(n); el.appendChild(i);
     },
     hint(cm) { cm.replaceRange(h.t, {line:cur.line,ch:start}, {line:cur.line,ch:end}); }
@@ -817,7 +932,6 @@ const AUTO_CLOSE = {
   "RENDER": "}"
 };
 
-/* Smart Enter */
 function handleEnter(cm) {
   if (cm.somethingSelected()) {
     cm.replaceSelection("\n", "end");
@@ -834,7 +948,6 @@ function handleEnter(cm) {
 
   if (kw && AUTO_CLOSE[kw]) {
     const closer = AUTO_CLOSE[kw];
-    /* RENDER{} ha la graffa sulla stessa riga — inserisce riga vuota + } */
     if (kw === "RENDER") {
       cm.operation(() => {
         cm.replaceRange("\n" + innerIndent + "\n" + currentIndent + closer, cur);
@@ -855,7 +968,6 @@ function handleEnter(cm) {
   });
 }
 
-/* Smart Backspace */
 function handleBackspace(cm) {
   if (cm.somethingSelected()) { cm.execCommand("delCharBefore"); return; }
   const cur  = cm.getCursor();
@@ -924,7 +1036,6 @@ function updateStatus() {
 }
 updateStatus();
 
-/* Font size */
 let fontSize = 14;
 document.getElementById("fsz-up").onclick = () => {
   fontSize = Math.min(22,fontSize+1);
@@ -935,7 +1046,6 @@ document.getElementById("fsz-dn").onclick = () => {
   document.querySelector(".CodeMirror").style.fontSize = fontSize+"px";
 };
 
-/* Buttons */
 document.getElementById("btn-save").onclick = function(){
   const name = document.getElementById("filename").value.trim() || "programma";
   const a = document.createElement("a");
@@ -946,32 +1056,29 @@ document.getElementById("btn-save").onclick = function(){
 };
 document.getElementById("btn-copy").onclick = function(){
   navigator.clipboard.writeText(editor.getValue()).then(()=>{
-    const o=this.textContent; this.textContent="✓ OK";
-    setTimeout(()=>this.textContent=o,1200);
+    const lbl = this.querySelector("span");
+    const o = lbl.innerHTML; lbl.textContent = "✓ OK";
+    setTimeout(()=>lbl.innerHTML = LT("btn_copy"),1200);
   });
 };
 document.getElementById("btn-clear").onclick = ()=>{
-  if(confirm("Svuotare l'editor?")){ editor.setValue(""); editor.focus(); }
+  if(confirm(LT("js_confirm_clear"))){ editor.setValue(""); editor.focus(); }
 };
 
-/* Insert snippet helper */
 function insertSnippet(raw){
   const s = raw.replace(/\\n/g,"\n");
   editor.getDoc().replaceRange(s, editor.getCursor());
   editor.focus();
 }
 
-/* Sidebar items */
 document.querySelectorAll(".si[data-ins]").forEach(el=>
   el.addEventListener("click",()=>{ insertSnippet(el.dataset.ins); closeSidebar(); })
 );
 
-/* Quickbar (mobile) */
 document.querySelectorAll(".qt[data-ins]").forEach(el=>
   el.addEventListener("click",()=>insertSnippet(el.dataset.ins))
 );
 
-/* Right panel chips */
 document.querySelectorAll(".chip").forEach(chip=>
   chip.addEventListener("click",()=>{
     const map={">>":">> ","<* *>":"<* \n*>","&":"& ","&&":"&& ","RENDER{}":"RENDER{\n  \n}"};
@@ -980,7 +1087,6 @@ document.querySelectorAll(".chip").forEach(chip=>
   })
 );
 
-/* Mobile drawer */
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("drawer-overlay");
 document.getElementById("hambtn").onclick = ()=>{
@@ -993,7 +1099,6 @@ function closeSidebar(){
 }
 overlay.onclick = closeSidebar;
 
-/* ── APRI file .line ── */
 const fileInput = document.getElementById("file-input");
 document.getElementById("btn-open").onclick = () => { fileInput.click(); closeSidebar(); };
 fileInput.onchange = function() {
@@ -1022,13 +1127,8 @@ const conSend   = document.getElementById("console-send");
 
 let inputResolve = null;
 
-/* ══════════════════════════════════════════
-   CONSOLE TEXT FORMATTING
-   Supporta \R...formula...\R  (render inline KaTeX)
-   e \C{color+bold+_+italic+-}  (colori e stili)
-   \C{} ripristina lo stile di default
-══════════════════════════════════════════ */
-let _conStyle = null; // null = default
+/* Formattazione testo console: \R...\R (KaTeX inline) e \C{colore+stile} */
+let _conStyle = null;
 
 const _CCOLORS = {
   red:    '#ff5370', green:  '#69f0ae', blue:   '#82aaff',
@@ -1040,7 +1140,7 @@ const _CCOLORS = {
 };
 
 function _parseColorSpec(spec) {
-  if (!spec.trim()) return null; // vuoto → reset
+  if (!spec.trim()) return null;
   const parts = spec.split('+').map(p => p.trim().toLowerCase());
   const s = { color:null, bold:false, italic:false, strike:false, underline:false };
   for (const p of parts) {
@@ -1066,7 +1166,6 @@ function _applyStyle(el, s) {
   if (css.length)  el.style.cssText = css.join(';');
 }
 
-/* Costruisce un elemento riga con \R e \C{} interpretati */
 function _buildLine(rawText, cls) {
   const el = document.createElement('div');
   el.className = cls;
@@ -1086,7 +1185,6 @@ function _buildLine(rawText, cls) {
   while (i < rawText.length) {
     const c = rawText[i];
 
-    /* ── \R...formula...\R  ─────────────────── */
     if (c === '\\' && rawText[i+1] === 'R') {
       flush();
       i += 2;
@@ -1109,7 +1207,6 @@ function _buildLine(rawText, cls) {
       continue;
     }
 
-    /* ── \C{spec}  ──────────────────────────── */
     if (c === '\\' && rawText[i+1] === 'C' && rawText[i+2] === '{') {
       flush();
       i += 3;
@@ -1146,7 +1243,7 @@ function conAppend(text, cls = "con-line-out") {
 
 function conAppendRender(content) {
   if (typeof LINE_render_html !== "function") {
-    conAppend("[RENDER] line-render.js non trovato", "con-line-err");
+    conAppend(LT("js_no_render"), "con-line-err");
     return;
   }
   const wrap = document.createElement("div");
@@ -1163,7 +1260,7 @@ function conSetStatus(state, text) {
 
 function conClear() {
   conOut.innerHTML = "";
-  _conStyle = null; // reset stile colore
+  _conStyle = null;
 }
 
 function conShowInput(prompt) {
@@ -1193,9 +1290,7 @@ conInp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefa
 document.getElementById("con-close").onclick = conClose;
 document.getElementById("con-clear").onclick = conClear;
 
-/* ── Salva TXT ── */
 document.getElementById("con-save").onclick = () => {
-  // Estrae testo puro (rimuove eventuali sequenze \R \C{} residue)
   const lines = [...conOut.children].map(el => {
     if (el.classList.contains('con-line-render')) return '[RENDER]';
     return el.textContent;
@@ -1206,7 +1301,6 @@ document.getElementById("con-save").onclick = () => {
   a.download = name; a.click(); URL.revokeObjectURL(a.href);
 };
 
-/* ── Salva PDF — intero log ── */
 document.getElementById("con-pdf").onclick = async function() {
   const btn = this;
   const orig = btn.textContent;
@@ -1216,25 +1310,20 @@ document.getElementById("con-pdf").onclick = async function() {
   let ghost = null;
   try {
     if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
-      alert('Librerie PDF non caricate. Controlla la connessione e ricarica la pagina.');
+      alert(LT('js_pdf_libs'));
       return;
     }
     const { jsPDF } = window.jspdf;
 
-    /*
-     * Clona il contenuto della console in un div off-screen
-     * senza nessuna restrizione di altezza, così html2canvas
-     * cattura TUTTO il log indipendentemente dallo scroll.
-     */
     ghost = document.createElement('div');
     ghost.style.cssText = [
       'position:fixed',
       'top:0',
-      'left:-99999px',          /* fuori schermo — non visibile */
+      'left:-99999px',
       'width:' + conOut.offsetWidth + 'px',
-      'height:auto',            /* altezza libera: tutto il contenuto */
+      'height:auto',
       'overflow:visible',
-      'background:#07090d',
+      'background:#0b1220',
       'padding:10px 14px',
       'font-family:"Share Tech Mono",monospace',
       'font-size:13px',
@@ -1245,10 +1334,8 @@ document.getElementById("con-pdf").onclick = async function() {
       'box-sizing:border-box',
     ].join(';');
 
-    /* Copia profonda di tutti i figli (inclusi gli iframe KaTeX e gli SVG CHEM) */
     ghost.innerHTML = conOut.innerHTML;
 
-    /* Forza ogni elemento figlio a non avere overflow nascosto */
     ghost.querySelectorAll('*').forEach(el => {
       el.style.overflow = 'visible';
       el.style.maxHeight = 'none';
@@ -1256,17 +1343,16 @@ document.getElementById("con-pdf").onclick = async function() {
 
     document.body.appendChild(ghost);
 
-    /* Aspetta un frame per assicurarsi che il layout sia calcolato */
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
     const canvas = await html2canvas(ghost, {
-      backgroundColor: '#07090d',
+      backgroundColor: '#0b1220',
       scale: 2,
       logging: false,
       useCORS: true,
       allowTaint: true,
       width: ghost.offsetWidth,
-      height: ghost.scrollHeight,   /* altezza reale completa */
+      height: ghost.scrollHeight,
       windowWidth: ghost.offsetWidth,
       windowHeight: ghost.scrollHeight,
     });
@@ -1274,11 +1360,9 @@ document.getElementById("con-pdf").onclick = async function() {
     document.body.removeChild(ghost);
     ghost = null;
 
-    /* Dimensioni in pt per jsPDF (scala 2× → ÷2, poi 96dpi→72pt → ×0.75) */
     const ptW = (canvas.width  / 2) * 0.75;
     const ptH = (canvas.height / 2) * 0.75;
 
-    /* PDF con dimensioni custom uguali al contenuto */
     const pdf = new jsPDF({
       orientation: ptW > ptH ? 'l' : 'p',
       unit: 'pt',
@@ -1292,7 +1376,7 @@ document.getElementById("con-pdf").onclick = async function() {
 
   } catch(e) {
     console.error('[LINE PDF]', e);
-    alert('Errore PDF: ' + e.message);
+    alert(LT('js_pdf_err') + e.message);
   } finally {
     if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
     btn.disabled = false;
@@ -1300,7 +1384,6 @@ document.getElementById("con-pdf").onclick = async function() {
   }
 };
 
-/* Resize drag */
 (function(){
   const handle = document.getElementById("console-resize");
   let dragging = false, startY = 0, startH = 0;
@@ -1318,32 +1401,33 @@ document.getElementById("con-pdf").onclick = async function() {
   document.addEventListener("mouseup", () => { dragging = false; });
 })();
 
-/* ── ESEGUI ────────────────────────────────────── */
+/* ── ESEGUI ── */
 const runBtn = document.getElementById("btn-run");
 
 function checkInterpreter() {
   if (typeof LINE_run === "function") {
     runBtn.classList.add("run");
-    runBtn.title = "Esegui programma";
+    runBtn.style.opacity = "";
+    runBtn.title = LT("js_run_title");
   } else {
     runBtn.style.opacity = "0.4";
-    runBtn.title = "interpreter.js non trovato";
+    runBtn.title = LT("js_no_interp_title");
   }
 }
 checkInterpreter();
+window.addEventListener("load", checkInterpreter);
 
 runBtn.onclick = async function() {
   if (typeof LINE_run !== "function") {
-    alert("interpreter.js non trovato.\nMetti interpreter.js nella stessa cartella dell'editor e ricarica.");
+    alert(LT("js_no_interp"));
     return;
   }
 
   conOpen();
   conClear();
   conHideInput();
-  conSetStatus("running", "● in esecuzione");
+  conSetStatus("running", LT("js_running"));
 
-  /* ── Pre-processa i blocchi RENDER{} ── */
   let renderBlocks = {};
   let sourceToRun = editor.getValue();
   if (typeof LINE_render_preprocess === "function") {
@@ -1357,7 +1441,6 @@ runBtn.onclick = async function() {
   try {
     await LINE_run(sourceToRun, {
       output(text) {
-        /* Intercetta i marker RENDER */
         if (typeof LINE_RENDER_MARKER !== "undefined" &&
             text.startsWith(LINE_RENDER_MARKER)) {
           const idx = parseInt(text.slice(LINE_RENDER_MARKER.length));
@@ -1374,11 +1457,11 @@ runBtn.onclick = async function() {
       }
     });
     const ms = Date.now() - startTime;
-    conSetStatus("done", `✓ terminato (${ms}ms)`);
-    conAppend(`\n── fine esecuzione (${ms}ms) ──`, "con-line-sys");
+    conSetStatus("done", `${LT("js_done")} (${ms}ms)`);
+    conAppend(`\n── ${LT("js_end")} (${ms}ms) ──`, "con-line-sys");
   } catch(e) {
-    conSetStatus("error", "✕ errore");
-    conAppend("ERRORE: " + e.message, "con-line-err");
+    conSetStatus("error", LT("js_error"));
+    conAppend(LT("js_err_prefix") + e.message, "con-line-err");
     console.error("[LINE]", e);
   } finally {
     conHideInput();
