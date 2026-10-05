@@ -1188,7 +1188,9 @@ function _buildLine(rawText, cls) {
     if (c === '\\' && rawText[i+1] === 'R') {
       flush();
       i += 2;
-      const end = rawText.indexOf('\\R', i);
+      const _re = /\\R(?![A-Za-z])/g; _re.lastIndex = i;
+      const _m = _re.exec(rawText);
+      const end = _m ? _m.index : -1;
       const mathSrc = end >= 0 ? rawText.slice(i, end) : rawText.slice(i);
       i = end >= 0 ? end + 2 : rawText.length;
 
@@ -1472,6 +1474,7 @@ setTimeout(()=>editor.focus(),80);
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/mhchem.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="line-render.js" onerror="console.warn('[LINE-RENDER] line-render.js non trovato')"></script>
