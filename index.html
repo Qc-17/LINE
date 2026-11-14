@@ -112,8 +112,8 @@ a{text-decoration:none;}
   outline-offset:2px;
 }
 
-/* ===== NEWS LINE 4.0 (pagina intera, statica) ===== */
-.news4{
+/* ===== ANNUNCIO LINE ABEL (pagina intera, statica) ===== */
+.news-abel{
   background:#0b1220;
   color:#e2e8f0;
   padding:56px 20px 120px;
@@ -125,11 +125,11 @@ a{text-decoration:none;}
   align-items:center;
 }
 
-.news4 .container{
+.news-abel .container{
   width:100%;
 }
 
-.news4 .badge-live{
+.news-abel .badge-live{
   display:inline-flex;
   align-items:center;
   gap:10px;
@@ -138,14 +138,14 @@ a{text-decoration:none;}
   margin-bottom:14px;
 }
 
-.news4 .dot{
+.news-abel .dot{
   width:10px;
   height:10px;
   border-radius:50%;
   background:#4da3ff;
 }
 
-.news4 h2{
+.news-abel h2{
   font-weight:800;
   font-size:clamp(2.6rem,7.5vw,5.6rem);
   color:#fff;
@@ -153,41 +153,41 @@ a{text-decoration:none;}
   margin-bottom:22px;
 }
 
-.news4 p{
+.news-abel p{
   max-width:60ch;
   color:#b8c4d6;
 }
 
-.news4 .areas{
+.news-abel .areas{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
   gap:14px 24px;
   margin-top:26px;
 }
 
-.news4 .area{
+.news-abel .area{
   display:flex;
   gap:12px;
   align-items:flex-start;
 }
 
-.news4 .area i{
+.news-abel .area i{
   color:#4da3ff;
   font-size:1.4rem;
   line-height:1;
 }
 
-.news4 .area strong{
+.news-abel .area strong{
   color:#fff;
   display:block;
 }
 
-.news4 .area span{
+.news-abel .area span{
   font-size:.85rem;
   color:#94a3b8;
 }
 
-.news4-art{
+.news-abel-art{
   width:100%;
   max-width:420px;
   height:auto;
@@ -195,20 +195,20 @@ a{text-decoration:none;}
   margin:0 auto;
 }
 
-.news4-art .grid-lines line{stroke:#1e2b47;stroke-width:1;}
-.news4-art .trace{
+.news-abel-art .grid-lines line{stroke:#1e2b47;stroke-width:1;}
+.news-abel-art .trace{
   fill:none;
   stroke:#4da3ff;
   stroke-width:4;
   stroke-linecap:round;
   stroke-linejoin:round;
 }
-.news4-art .node{
+.news-abel-art .node{
   fill:#0b1220;
   stroke:#4da3ff;
   stroke-width:3;
 }
-.news4-art .version{
+.news-abel-art .version{
   font-family:'Syne',sans-serif;
   font-weight:800;
   font-size:78px;
@@ -267,53 +267,53 @@ a{text-decoration:none;}
   </div>
 </nav>
 
-<!-- NEWS: LINE 4.0 IN SVILUPPO -->
-<section class="news4" aria-labelledby="news4-title">
+<!-- NEWS: LINE ABEL IN SVILUPPO -->
+<section class="news-abel" aria-labelledby="news-abel-title">
   <div class="container">
     <div class="row align-items-center g-5">
       <div class="col-lg-7">
         <div class="badge-live"><span class="dot"></span> <span data-i18n="news_badge">IN SVILUPPO</span></div>
-        <h2 id="news4-title" data-i18n="news_title">LINE 4.0 è in arrivo</h2>
+        <h2 id="news-abel-title" data-i18n="news_title">LINE Abel è in sviluppo</h2>
         <p data-i18n="news_text">
-          Il team di LINE sta lavorando alla nuova versione del linguaggio, con
-          l'obiettivo di renderlo più coerente, solido e semplice da usare,
-          mantenendo al centro la sua vocazione didattica.
+          LINE Abel è la prossima evoluzione del linguaggio. Il lavoro è
+          concentrato sul consolidamento delle sue fondamenta: una sintassi
+          coerente, un interprete robusto e strumenti più chiari per imparare.
         </p>
 
         <div class="areas">
           <div class="area">
             <i class="bi bi-braces"></i>
             <div>
-              <strong data-i18n="a1_t">Standardizzazione del rendering</strong>
-              <span data-i18n="a1_d">Standard e tecnologie consolidate per i sistemi di rendering.</span>
+              <strong data-i18n="a1_t">Rendering e integrazione</strong>
+              <span data-i18n="a1_d">Un sistema di rendering più coerente e basato su tecnologie consolidate.</span>
             </div>
           </div>
           <div class="area">
             <i class="bi bi-diagram-3"></i>
             <div>
-              <strong data-i18n="a2_t">Coerenza del linguaggio</strong>
-              <span data-i18n="a2_d">Sintassi analizzata, meno ridondanze, più semplicità.</span>
+              <strong data-i18n="a2_t">Coerenza della sintassi</strong>
+              <span data-i18n="a2_d">Revisione dei costrutti per ridurre le ridondanze e chiarire la semantica.</span>
             </div>
           </div>
           <div class="area">
             <i class="bi bi-cpu"></i>
             <div>
-              <strong data-i18n="a3_t">Motore JavaScript</strong>
-              <span data-i18n="a3_d">Interprete ottimizzato, più robusto e più veloce.</span>
+              <strong data-i18n="a3_t">Interprete</strong>
+              <span data-i18n="a3_d">Una struttura più solida, con attenzione a robustezza e gestione degli errori.</span>
             </div>
           </div>
           <div class="area">
             <i class="bi bi-window"></i>
             <div>
-              <strong data-i18n="a4_t">Interfaccia del sito</strong>
-              <span data-i18n="a4_d">Un ambiente moderno, intuitivo e adatto all'apprendimento.</span>
+              <strong data-i18n="a4_t">Strumenti e interfaccia</strong>
+              <span data-i18n="a4_d">IDE, sito e materiali didattici più intuitivi e coordinati.</span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="col-lg-5">
-        <svg class="news4-art" viewBox="0 0 400 270" role="img" aria-label="Una linea che attraversa quattro punti e arriva a LINE 4.0" data-i18n-aria="svg_aria">
+        <svg class="news-abel-art" viewBox="0 0 400 270" role="img" aria-label="Una linea che attraversa quattro punti e arriva a LINE Abel" data-i18n-aria="svg_aria">
           <g class="grid-lines">
             <line x1="0" y1="45" x2="400" y2="45"/>
             <line x1="0" y1="115" x2="400" y2="115"/>
@@ -332,14 +332,14 @@ a{text-decoration:none;}
           <circle class="node" cx="225" cy="165" r="10"/>
           <circle class="node" cx="315" cy="55" r="12"/>
 
-          <text class="version" x="385" y="255" text-anchor="end">4.0</text>
+          <text class="version" x="385" y="255" text-anchor="end">Abel</text>
         </svg>
       </div>
     </div>
   </div>
 
-  <a class="scroll-hint" href="#hero" aria-label="Scorri in basso per scoprire LINE 3.0" data-i18n-aria="scroll_aria">
-    <span data-i18n="scroll">Scorri in basso per scoprire LINE 3.0</span>
+  <a class="scroll-hint" href="#hero" aria-label="Scorri in basso per scoprire LINE" data-i18n-aria="scroll_aria">
+    <span data-i18n="scroll">Scorri in basso per scoprire LINE</span>
     <i class="bi bi-chevron-double-down" aria-hidden="true"></i>
   </a>
 </section>
@@ -414,7 +414,7 @@ a{text-decoration:none;}
 </div>
 
 <hr class="border-secondary">
-<div class="text-center small">🄯 Qc-17 — LINE 3.0</div>
+<div class="text-center small">🄯 Qc-17 — LINE · Abel in sviluppo</div>
 
   </div>
 </footer>
@@ -431,19 +431,19 @@ a{text-decoration:none;}
     nav_docs: 'Documents',
     nav_learn: 'Learn LINE',
     news_badge: 'IN DEVELOPMENT',
-    news_title: 'LINE 4.0 is coming',
-    news_text: "The LINE team is working on the next version of the language, aiming to make it more consistent, solid and easy to use, while keeping its educational mission at the center.",
-    a1_t: 'Rendering standardization',
-    a1_d: 'Established standards and technologies for the rendering systems.',
-    a2_t: 'Language consistency',
-    a2_d: 'Syntax review, fewer redundancies, more simplicity.',
-    a3_t: 'JavaScript engine',
-    a3_d: 'A faster, sturdier and optimized interpreter.',
-    a4_t: 'Website interface',
-    a4_d: 'A modern, intuitive environment built for learning.',
-    svg_aria: 'A line passing through four points and reaching LINE 4.0',
-    scroll_aria: 'Scroll down to discover LINE 3.0',
-    scroll: 'Scroll down to discover LINE 3.0',
+    news_title: 'LINE Abel is in development',
+    news_text: "LINE Abel is the next evolution of the language. Development is focused on strengthening its foundations: consistent syntax, a robust interpreter, and clearer learning tools.",
+    a1_t: 'Rendering and integration',
+    a1_d: 'A more consistent rendering system based on established technologies.',
+    a2_t: 'Syntax consistency',
+    a2_d: 'Reviewing constructs to reduce redundancy and clarify semantics.',
+    a3_t: 'Interpreter',
+    a3_d: 'A stronger architecture focused on robustness and error handling.',
+    a4_t: 'Tools and interface',
+    a4_d: 'A more intuitive and coordinated IDE, website, and learning material.',
+    svg_aria: 'A line passing through four points and reaching LINE Abel',
+    scroll_aria: 'Scroll down to discover LINE',
+    scroll: 'Scroll down to discover LINE',
     hero_lead: 'The programming language open to everyone, <strong>always.</strong>',
     hero_cta: 'Start learning →',
     what_t: 'What is LINE',
