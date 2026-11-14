@@ -20,8 +20,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
 body{
   font-family:'DM Sans',sans-serif;
-  background:#f5f7fb;
-  color:#111;
+  background:#faf8f4;
+  color:#29262a;
 }
 
 .navbar-brand img{
@@ -29,8 +29,8 @@ body{
 }
 .navbar-brand strong{
   font-family:'Cormorant Garamond',serif;
-  font-size:1.65rem;
-  font-weight:700;
+  font-size:1.8rem;
+  font-weight:600;
   letter-spacing:.015em;
 }
 
@@ -69,13 +69,13 @@ body{
 
 .feature i{
   font-size:20px;
-  color:#0d6efd;
+  color:#b17c52;
   margin-right:8px;
 }
 
 .footer{
-  background:#0b1220;
-  color:#cbd5e1;
+  background:#191a22;
+  color:#d9cfc5;
   padding:40px 20px;
 }
 
@@ -87,8 +87,8 @@ a{text-decoration:none;}
   align-items:center;
   gap:6px;
   padding:3px 3px 3px 10px;
-  background:#f1f4fa;
-  border:1px solid #dbe2ee;
+  background:#f6f0e8;
+  border:1px solid #e7d9c8;
   border-radius:999px;
 }
 .lang-switch .globe{
@@ -120,10 +120,10 @@ a{text-decoration:none;}
 
 /* ===== ANNUNCIO LINE ABEL (pagina intera, statica) ===== */
 .news-abel{
-  background:#0b1220;
-  color:#e2e8f0;
+  background:linear-gradient(135deg,#191a22 0%,#252532 58%,#302a30 100%);
+  color:#f4eee7;
   padding:56px 20px 120px;
-  border-bottom:3px solid #4da3ff;
+  border-bottom:3px solid #d5ad80;
   position:relative;
   min-height:calc(100vh - 57px);
   min-height:calc(100svh - 57px);
@@ -140,7 +140,7 @@ a{text-decoration:none;}
   align-items:center;
   gap:10px;
   font-weight:700;
-  color:#4da3ff;
+  color:#dfb889;
   margin-bottom:14px;
 }
 
@@ -148,14 +148,14 @@ a{text-decoration:none;}
   width:10px;
   height:10px;
   border-radius:50%;
-  background:#4da3ff;
+  background:#dfb889;
 }
 
 .news-abel h2{
   font-family:'Cormorant Garamond',serif;
   font-weight:600;
-  font-size:clamp(3.2rem,8vw,6.2rem);
-  letter-spacing:-.035em;
+  font-size:clamp(3.5rem,8.5vw,6.6rem);
+  letter-spacing:-.045em;
   color:#fff;
   line-height:1.05;
   margin-bottom:22px;
@@ -163,7 +163,7 @@ a{text-decoration:none;}
 
 .news-abel p{
   max-width:60ch;
-  color:#b8c4d6;
+  color:#d9cfc5;
 }
 
 .news-abel .areas{
@@ -192,7 +192,7 @@ a{text-decoration:none;}
 
 .news-abel .area span{
   font-size:.85rem;
-  color:#94a3b8;
+  color:#c3b8ae;
 }
 
 .abel-portrait-card{
@@ -226,7 +226,7 @@ a{text-decoration:none;}
   font-size:1.65rem;
   font-weight:600;
 }
-.abel-caption a{color:#8fc7ff;text-decoration:underline;text-underline-offset:3px;}
+.abel-caption a{color:#e4c39d;text-decoration:underline;text-underline-offset:3px;}
 .naming-note{
   max-width:390px;
   margin:18px auto 0;
@@ -245,14 +245,14 @@ a{text-decoration:none;}
 .news-abel-art .grid-lines line{stroke:#1e2b47;stroke-width:1;}
 .news-abel-art .trace{
   fill:none;
-  stroke:#4da3ff;
+  stroke:#dfb889;
   stroke-width:4;
   stroke-linecap:round;
   stroke-linejoin:round;
 }
 .news-abel-art .node{
   fill:#0b1220;
-  stroke:#4da3ff;
+  stroke:#dfb889;
   stroke-width:3;
 }
 .news-abel-art .version{
@@ -320,12 +320,9 @@ a{text-decoration:none;}
     <div class="row align-items-center g-5">
       <div class="col-lg-7">
         <div class="badge-live"><span class="dot"></span> <span data-i18n="news_badge">IN SVILUPPO</span></div>
-        <h2 id="news-abel-title" data-i18n="news_title">LINE Abel è in sviluppo</h2>
+        <h2 id="news-abel-title" data-i18n="news_title">LINE Abel, un nuovo capitolo</h2>
         <p data-i18n="news_text">
-          LINE Abel è il prossimo capitolo di un progetto che continua a
-          crescere. Stiamo lavorando per rendere il linguaggio più coerente,
-          l'interprete più solido e gli strumenti più accoglienti per chi
-          vuole imparare, sperimentare e creare.
+          LINE è nato da un'idea semplice: la programmazione dovrebbe essere una porta aperta, un linguaggio da avvicinare con curiosità. Con Abel ci prendiamo cura di ciò che abbiamo costruito e proviamo a renderlo un luogo ancora più chiaro e accogliente in cui imparare, sperimentare e creare.
         </p>
 
         <div class="areas">
@@ -433,7 +430,7 @@ a{text-decoration:none;}
   </div>
 
   <div class="text-center my-5">
-    <h2 data-i18n="ready_t">Pronto a imparare?</h2>
+    <h2 data-i18n="ready_t">Ti va di cominciare?</h2>
     <p class="text-muted" data-i18n="ready_sub">7 sezioni progressive + esercizi</p>
     <a href="sezione1.html" class="btn btn-primary btn-lg" data-i18n="ready_start">Inizia ora</a>
     <a href="https://qc-17.github.io/LINE/ide.html" class="btn btn-outline-secondary btn-lg ms-2" target="_blank" data-i18n="ready_ide">Apri IDE</a>
@@ -473,8 +470,8 @@ a{text-decoration:none;}
     nav_docs: 'Documents',
     nav_learn: 'Learn LINE',
     news_badge: 'IN DEVELOPMENT',
-    news_title: 'LINE Abel is in development',
-    news_text: "LINE Abel is the next chapter in a project that keeps growing. We are making the language more coherent, the interpreter more dependable, and the tools more welcoming to everyone who wants to learn, experiment and create.",
+    news_title: 'LINE Abel, a new chapter',
+    news_text: "LINE began with a simple idea: programming should feel like an open door, a language to approach with curiosity. With Abel, we are taking care of what we have built and shaping a clearer, more welcoming place to learn, experiment and create.",
     naming_note: "<em>A name, a story.</em><br>From Abel onward, each new LINE release will bear the name of a great mathematician from the past: a way to remember the people who expanded how we think.",
     a1_t: 'Rendering and integration',
     a1_d: 'A more consistent rendering system based on established technologies.',
@@ -503,7 +500,7 @@ a{text-decoration:none;}
     goal_t: 'Goal',
     goal_p1: "We believe learning to program should above all mean understanding, experimenting and giving shape to ideas. LINE aims to make that journey clearer without taking away the depth of programming.",
     goal_p2: "It is for first-time learners, for curious minds who want to understand how things work, and for anyone looking for new ways to express ideas through code.",
-    ready_t: 'Ready to learn?',
+    ready_t: 'Curious to begin?',
     ready_sub: '7 progressive sections + exercises',
     ready_start: 'Start now',
     ready_ide: 'Open IDE',
