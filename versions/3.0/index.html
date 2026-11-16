@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LINE 3.0 — Documenti</title><link rel="icon" href="favicon.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Syne',sans-serif;background:#f5f7fb;color:#101827;min-height:100vh;display:flex;flex-direction:column}
+.navbar-brand img{height:32px}.hero{background:linear-gradient(135deg,#0b1220,#17345c);color:#fff;padding:64px 20px;text-align:center}
+.doc-card{border:0;border-radius:16px;box-shadow:0 10px 28px #0b12200d;height:100%}
+.doc-icon{font-size:42px;color:#dc3545}footer{margin-top:auto;background:#0b1220;color:#cbd5e1;padding:28px 16px}a{text-decoration:none}
+</style></head>
+<body>
+<nav class="navbar bg-white border-bottom"><div class="container"><a class="navbar-brand d-flex align-items-center gap-2" href="../../index.html"><img src="favicon.png" alt="LINE"><strong>LINE 3.0</strong></a><a class="btn btn-outline-secondary btn-sm" href="../../documenti.html"><i class="bi bi-arrow-left"></i> Versioni</a></div></nav>
+<header class="hero"><div class="container"><p class="small text-uppercase fw-bold opacity-75 mb-2">Documentazione della versione</p><h1 class="display-5 fw-bold">LINE 3.0</h1><p class="lead opacity-75 mb-0">Manuali e strumenti della versione 3.0.</p></div></header>
+<main class="container py-5"><div class="row g-4">
+<div class="col-md-6"><article class="card doc-card p-4 text-center"><i class="bi bi-file-earmark-pdf doc-icon"></i><h2 class="h4 mt-3">Manuale Italiano</h2><p class="text-muted">Documentazione completa del linguaggio LINE in italiano.</p><a class="btn btn-primary mt-auto" href="manuale.pdf" download><i class="bi bi-download"></i> Scarica PDF</a></article></div>
+<div class="col-md-6"><article class="card doc-card p-4 text-center"><i class="bi bi-file-earmark-pdf doc-icon"></i><h2 class="h4 mt-3">English Manual</h2><p class="text-muted">Full documentation of the LINE programming language.</p><a class="btn btn-outline-primary mt-auto" href="manual.pdf" download><i class="bi bi-download"></i> Download PDF</a></article></div>
+<div class="col-md-6"><article class="card doc-card p-4 text-center"><i class="bi bi-code-square text-primary" style="font-size:42px"></i><h2 class="h4 mt-3">IDE LINE 3.0</h2><p class="text-muted">Apri l'ambiente di sviluppo originale di LINE 3.0.</p><a class="btn btn-outline-primary mt-auto" href="ide.html" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Apri IDE</a></article></div>
+<div class="col-md-6"><article class="card doc-card p-4 text-center"><i class="bi bi-file-zip text-primary" style="font-size:42px"></i><h2 class="h4 mt-3">Pacchetto sorgenti IDE</h2><p class="text-muted">Scarica in un unico archivio ZIP l'HTML dell'IDE e i file JavaScript necessari al suo funzionamento.</p><button id="download-zip" class="btn btn-primary mt-auto"><i class="bi bi-download"></i> Scarica ZIP</button><small id="zip-status" class="text-muted mt-2" aria-live="polite"></small></article></div>
+</div><div class="text-center mt-5"><a href="../../documenti.html" class="btn btn-link"><i class="bi bi-arrow-left"></i> Torna alle versioni</a></div></main>
+<footer class="text-center"><div class="container"><p class="mb-1">© Qc-17 — LINE 3.0</p><small>Open source GPL 3.0</small></div></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+document.getElementById('download-zip').addEventListener('click', async function(){
+ const btn=this,status=document.getElementById('zip-status');
+ if(typeof JSZip==='undefined'){status.textContent='Impossibile caricare il generatore ZIP. Controlla la connessione.';return;}
+ btn.disabled=true;status.textContent='Preparazione archivio…';
+ try{
+  const files=['ide.html','interpreter.js','line-render.js','line-dom.js'];
+  const zip=new JSZip();
+  for(const file of files){
+   const response=await fetch(file);
+   if(!response.ok) throw new Error('Download non riuscito: '+file);
+   zip.file(file,await response.blob());
+  }
+  const blob=await zip.generateAsync({type:'blob'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='LINE-3.0-IDE-sorgenti.zip';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);status.textContent='Archivio pronto.';
+ }catch(error){console.error(error);status.textContent='Errore durante la creazione dello ZIP: '+error.message;}
+ finally{btn.disabled=false;}
+});
+</script>
+<script data-goatcounter="https://qc17.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body></html>

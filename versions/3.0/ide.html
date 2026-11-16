@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>LINE 3.0 — Editor</title>
+<link rel="icon" href="favicon.png">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+
+<style>
+:root{
+  --nav-h:56px;
+  --page:#f5f7fb; --line:#e2e8f0; --muted:#64748b; --blue:#0d6efd;
+  --card-shadow:0 10px 25px rgba(0,0,0,.06);
+
+  /* editor + console (scuri, come il banner/footer di index) */
+  --bg0:#0b1220; --bg1:#0f192b; --bg2:#142036; --bg3:#1b2a45;
+  --bdr:#1d2d3e; --bdrg:#273f58;
+  --acc:#4da3ff; --accd:#2f78c4; --accg:rgba(77,163,255,.14);
+  --amb:#ffb300; --pink:#ff4081;
+  --t1:#cdd9e5; --t2:#7a8fa8; --t3:#4a6078;
+
+  /* sintassi (su sfondo scuro) */
+  --sk:#00e5ff; --sf:#ff9100; --sc:#3d7a55; --so:#ff4081; --sl:#f06292;
+  --sr:#69f0ae; --sh:#b39ddb; --sb:#4fc3f7; --sn:#ffcc02; --sp:#ce93d8;
+  --su:#80cbc4; --se:#ff8a65; --slb:#ffa726; --sgo:#64ffda; --snot:#ff4081;
+
+  /* colori per pannelli chiari */
+  --lk:#0e7490; --lf:#c2410c; --ll:#be185d; --lp:#7e22ce; --lu:#0f766e;
+  --le:#b45309; --lb:#0369a1; --lc:#15803d; --lgo:#059669; --llb:#a16207;
+  --lop:#db2777; --lrd:#8a5a1f;
+}
+
+html,body{height:100%;}
+body{
+  font-family:'Syne',sans-serif;
+  background:var(--page);
+  color:#111;
+  display:flex;flex-direction:column;
+  height:100dvh;overflow:hidden;margin:0;
+}
+
+/* ───────── NAVBAR ───────── */
+#topbar{
+  height:var(--nav-h);flex-shrink:0;z-index:100;
+  padding:0 14px;gap:10px;flex-wrap:nowrap;
+}
+#topbar .navbar-brand{margin:0;padding:0;}
+#topbar .navbar-brand img{height:30px;}
+#logo{font-weight:800;font-size:18px;color:#111;white-space:nowrap;}
+#logo span{color:var(--blue);margin-left:5px;}
+.top-links .nav-link{font-weight:600;font-size:.9rem;color:#334155;}
+.top-links .nav-link:hover{color:var(--blue);}
+.tb-actions{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.tb-actions .btn{border-radius:999px;font-weight:600;font-size:.82rem;padding:.3rem .85rem;white-space:nowrap;}
+#fszbtns .btn{font-family:'Share Tech Mono',monospace;font-size:.8rem;}
+#hambtn{display:none;align-items:center;justify-content:center;width:38px;height:34px;padding:0;border-radius:10px;font-size:1.2rem;}
+#btn-run.run{background:#198754;border-color:#198754;color:#fff;}
+.do-flash{box-shadow:0 0 0 4px rgba(13,110,253,.35);}
+
+.lang-switch{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 3px 3px 10px;
+  background:#f1f4fa;border:1px solid #dbe2ee;border-radius:999px;
+}
+.lang-switch .globe{color:#64748b;font-size:.95rem;line-height:1;}
+.lang-switch button{
+  border:0;background:transparent;color:#475569;
+  font-family:inherit;font-weight:700;font-size:.75rem;letter-spacing:.06em;
+  padding:5px 11px;border-radius:999px;cursor:pointer;
+}
+.lang-switch button:hover{color:var(--blue);}
+.lang-switch button.active{background:var(--blue);color:#fff;}
+.lang-switch button:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+
+/* ───────── LAYOUT ───────── */
+#layout{display:flex;flex:1;min-height:0;gap:12px;padding:12px;overflow:hidden;position:relative;}
+
+#sidebar,#rpanel{
+  background:#fff;border-radius:16px;box-shadow:var(--card-shadow);
+  display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;
+}
+#sidebar{width:232px;}
+#rpanel{width:228px;font-size:11px;}
+
+/* ───────── SIDEBAR ───────── */
+.sb-sec{border-bottom:1px solid var(--line);padding:6px 0;flex-shrink:0;}
+.sb-sec:last-child{border-bottom:0;}
+.sb-hd{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:6px 16px 4px;font-weight:700;}
+.si{
+  display:flex;align-items:center;gap:9px;padding:6px 16px;cursor:pointer;
+  font-family:'Share Tech Mono',monospace;font-size:12px;color:#334155;
+  border-left:3px solid transparent;touch-action:manipulation;user-select:none;
+}
+.si:hover,.si:active{background:#eef4ff;color:#0b3d91;border-left-color:var(--blue);}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot.k{background:var(--lk);} .dot.f{background:var(--lf);} .dot.l{background:var(--ll);}
+.dot.p{background:var(--lp);} .dot.u{background:var(--lu);} .dot.e{background:var(--le);}
+.dot.c{background:var(--lc);} .dot.b{background:var(--lb);} .dot.lb{background:var(--llb);}
+.dot.go{background:var(--lgo);} .dot.rd{background:var(--lrd);}
+.si-arr{margin-left:auto;font-size:10px;color:#94a3b8;opacity:0;}
+.si:hover .si-arr{opacity:1;}
+.sb-file-row{display:flex;align-items:center;gap:6px;padding:4px 16px 8px;}
+#filename{font-family:'Share Tech Mono',monospace;font-size:12px;min-width:0;}
+.sb-fext{color:var(--blue);font-family:'Share Tech Mono',monospace;font-size:12px;flex-shrink:0;font-weight:700;}
+
+/* ───────── EDITOR ───────── */
+#ed-wrap{
+  flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;
+  background:var(--bg0);border-radius:16px;box-shadow:var(--card-shadow);
+}
+.CodeMirror{font-family:'Share Tech Mono',monospace!important;font-size:14px;line-height:1.78;height:100%;background:var(--bg0)!important;color:var(--t1)!important;}
+.CodeMirror-scroll{padding-bottom:60px;}
+.CodeMirror-gutters{background:var(--bg1)!important;border-right:1px solid var(--bdr)!important;}
+.CodeMirror-linenumber{color:var(--t3)!important;font-size:11px;padding:0 8px 0 6px;}
+.CodeMirror-activeline-background{background:rgba(77,163,255,.06)!important;}
+.CodeMirror-activeline .CodeMirror-linenumber{color:var(--acc)!important;}
+.CodeMirror-cursor{border-left:2px solid var(--acc)!important;}
+.CodeMirror-selected{background:rgba(77,163,255,.18)!important;}
+.CodeMirror-focused .CodeMirror-selected{background:rgba(77,163,255,.22)!important;}
+.CodeMirror-matchingbracket{color:var(--amb)!important;background:rgba(255,179,0,.14)!important;outline:1px solid #a07200;}
+
+.cm-s-line30 .cm-kw     {color:var(--sk);font-weight:500;}
+.cm-s-line30 .cm-flow   {color:var(--sf);}
+.cm-s-line30 .cm-comment{color:var(--sc);font-style:italic;}
+.cm-s-line30 .cm-op     {color:var(--so);}
+.cm-s-line30 .cm-logic  {color:var(--sl);font-weight:500;}
+.cm-s-line30 .cm-ref    {color:var(--sr);}
+.cm-s-line30 .cm-hash   {color:var(--sh);}
+.cm-s-line30 .cm-atom   {color:var(--sb);}
+.cm-s-line30 .cm-number {color:var(--sn);}
+.cm-s-line30 .cm-special{color:var(--sp);}
+.cm-s-line30 .cm-builtin{color:var(--su);}
+.cm-s-line30 .cm-escape {color:var(--se);}
+.cm-s-line30 .cm-label  {color:var(--slb);}
+.cm-s-line30 .cm-gochain{color:var(--sgo);font-weight:700;}
+.cm-s-line30 .cm-tag    {color:#ffa726;}
+.cm-s-line30 .cm-not    {color:var(--snot);font-weight:700;}
+.cm-s-line30 .cm-render {color:#d4a96a;font-weight:700;}
+
+.CodeMirror-hints{background:#0f192b!important;border:1px solid var(--bdrg)!important;border-radius:10px!important;box-shadow:0 12px 32px rgba(0,0,0,.45)!important;font-family:'Share Tech Mono',monospace!important;font-size:13px!important;padding:4px 0!important;max-height:260px!important;z-index:9999!important;}
+.CodeMirror-hint{color:var(--t2)!important;padding:5px 12px!important;}
+.CodeMirror-hint-active{background:var(--accg)!important;color:var(--acc)!important;}
+.h-k{color:var(--sk);} .h-f{color:var(--sf);} .h-l{color:var(--sl);}
+.h-p{color:var(--sp);} .h-u{color:var(--su);} .h-e{color:var(--se);}
+.h-b{color:var(--sb);} .h-lb{color:var(--slb);} .h-go{color:var(--sgo);}
+.h-op{color:var(--so);} .h-rd{color:#d4a96a;}
+
+/* ───────── PANNELLO DESTRO ───────── */
+.rp-hd{
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  padding:14px 16px 10px;border-bottom:1px solid var(--line);font-weight:700;
+  position:sticky;top:0;background:#fff;z-index:1;
+}
+.rp-blk{border-bottom:1px solid var(--line);padding:9px 16px;}
+.rp-blk:last-child{border-bottom:0;}
+.rp-t{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-weight:600;}
+.chip{
+  display:inline-block;padding:2px 7px;border-radius:6px;
+  font-family:'Share Tech Mono',monospace;font-size:11px;margin:2px 3px 2px 0;
+  cursor:pointer;background:#f1f4fa;border:1px solid #e2e8f0;
+}
+.chip:hover{background:#e6eefc;border-color:#bfd3fb;}
+.chip.k{color:var(--lk);} .chip.f{color:var(--lf);} .chip.l{color:var(--ll);}
+.chip.p{color:var(--lp);} .chip.u{color:var(--lu);} .chip.e{color:var(--le);}
+.chip.b{color:var(--lb);} .chip.c{color:var(--lc);} .chip.go{color:var(--lgo);}
+.chip.lb{color:var(--llb);} .chip.op{color:var(--lop);} .chip.rd{color:var(--lrd);}
+.rp-mono{font-family:'Share Tech Mono',monospace;font-size:10.5px;color:#64748b;line-height:1.7;}
+
+/* ───────── QUICKBAR (mobile) ───────── */
+#quickbar{
+  background:#fff;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:6px;padding:7px 10px;
+  overflow-x:auto;flex-shrink:0;scrollbar-width:none;
+}
+#quickbar::-webkit-scrollbar{display:none;}
+.qt{
+  background:#fff;border:1px solid var(--line);color:#475569;
+  font-family:'Share Tech Mono',monospace;font-size:12px;
+  padding:4px 11px;border-radius:999px;cursor:pointer;white-space:nowrap;
+  flex-shrink:0;touch-action:manipulation;
+}
+.qt:active,.qt:hover{background:#eef4ff;border-color:#bfd3fb;}
+.qt.ck{color:var(--lk);} .qt.cf{color:var(--lf);} .qt.cl{color:var(--ll);}
+.qt.cp{color:var(--lp);} .qt.cu{color:var(--lu);} .qt.ce{color:var(--le);}
+.qt.cgo{color:var(--lgo);} .qt.clb{color:var(--llb);} .qt.cb{color:var(--lb);}
+.qt.crd{color:var(--lrd);}
+.qsep{width:1px;height:18px;background:var(--line);flex-shrink:0;margin:0 2px;}
+
+/* ───────── STATUSBAR ───────── */
+#statusbar{
+  background:#fff;border-top:1px solid var(--line);height:30px;
+  display:flex;align-items:center;padding:0 16px;gap:18px;
+  font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);flex-shrink:0;
+}
+.sv{color:#111;font-weight:700;}
+.slang{margin-left:auto;color:var(--blue);font-weight:700;letter-spacing:.08em;}
+
+/* ───────── DRAWER OVERLAY ───────── */
+#drawer-overlay{display:none;position:fixed;inset:0;background:rgba(11,18,32,.55);z-index:200;}
+
+/* ───────── CONSOLE ───────── */
+#console-wrap{
+  display:flex;flex-direction:column;background:var(--bg0);
+  flex-shrink:0;height:0;overflow:hidden;position:relative;
+}
+#console-wrap.open{height:220px;margin:0 12px 12px;border:1px solid var(--bdr);border-radius:16px;box-shadow:var(--card-shadow);}
+#console-wrap.open.tall{height:380px;}
+#console-resize{position:absolute;top:0;left:0;right:0;height:5px;cursor:row-resize;z-index:10;background:transparent;}
+#console-resize:hover{background:var(--accd);}
+#console-titlebar{
+  display:flex;align-items:center;gap:8px;padding:0 14px;height:36px;
+  background:var(--bg1);border-bottom:1px solid var(--bdr);flex-shrink:0;
+}
+#console-title{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--t2);font-weight:700;flex:1;}
+.con-btn{
+  background:none;border:1px solid var(--bdr);color:var(--t2);
+  font-family:inherit;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  padding:0 10px;height:22px;border-radius:999px;cursor:pointer;touch-action:manipulation;
+}
+.con-btn:hover{background:var(--bg3);color:var(--t1);border-color:var(--bdrg);}
+.con-btn.danger:hover{color:var(--pink);border-color:var(--pink);}
+.con-btn.pdf{color:#d4a96a;}
+.con-btn.pdf:hover{color:#d4a96a;border-color:#d4a96a;background:rgba(212,169,106,.08);}
+#console-status{font-family:'Share Tech Mono',monospace;font-size:10px;padding:1px 9px;border-radius:999px;color:var(--t3);}
+#console-status.running{background:rgba(0,230,118,.1);color:#00e676;border:1px solid rgba(0,230,118,.3);}
+#console-status.done{background:rgba(77,163,255,.1);color:var(--acc);border:1px solid var(--bdr);}
+#console-status.error{background:rgba(255,64,129,.1);color:var(--pink);border:1px solid rgba(255,64,129,.3);}
+
+#console-output{
+  flex:1;overflow-y:auto;padding:10px 16px 4px;
+  font-family:'Share Tech Mono',monospace;font-size:13px;line-height:1.7;color:var(--t1);
+  white-space:pre-wrap;word-break:break-word;
+}
+.con-line-out{color:var(--t1);}
+.con-line-err{color:var(--pink);}
+.con-line-sys{color:var(--t3);font-style:italic;}
+.con-line-inp{color:var(--amb);}
+
+#console-input-row{display:none;align-items:center;gap:8px;padding:7px 14px;border-top:1px solid var(--bdr);background:var(--bg1);flex-shrink:0;}
+#console-input-row.visible{display:flex;}
+#console-prompt{color:var(--acc);font-family:'Share Tech Mono',monospace;font-size:13px;white-space:nowrap;}
+#console-input{flex:1;background:transparent;border:none;outline:none;color:var(--amb);font-family:'Share Tech Mono',monospace;font-size:13px;caret-color:var(--amb);}
+#console-send{background:none;border:1px solid var(--accd);color:var(--acc);font-family:'Share Tech Mono',monospace;font-size:11px;padding:2px 12px;border-radius:999px;cursor:pointer;touch-action:manipulation;}
+#console-send:hover{background:var(--accg);}
+
+.con-line-render{
+  margin:8px 0;padding:12px 16px;display:flex;justify-content:center;
+  border:1px solid rgba(212,169,106,.2);border-radius:10px;
+  background:rgba(0,0,0,.3);overflow-x:auto;white-space:normal;
+}
+.lrender-math{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;}
+.lrender-line{color:var(--t1);}
+.lrender-line .katex{font-size:1.3rem;}
+.lrender-sep{width:50%;height:1px;background:var(--bdrg);margin:3px auto;opacity:.35;}
+.lrender-chem{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.lrender-mol{display:flex;justify-content:center;}
+.lrender-err{color:#ff4081;font-family:'Share Tech Mono',monospace;font-size:.76rem;}
+.lrender-empty{color:var(--t3);font-family:'Share Tech Mono',monospace;font-size:.76rem;}
+.con-inline-render{display:inline-block;vertical-align:middle;margin:0 3px;line-height:1;}
+.con-inline-render .katex{font-size:.98em;}
+
+/* ───────── SCROLLBAR ───────── */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#c5d0e0;border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:#9fb1cb;}
+#ed-wrap ::-webkit-scrollbar-thumb,#console-wrap ::-webkit-scrollbar-thumb{background:var(--bdrg);}
+
+/* ───────── RESPONSIVE ───────── */
+@media(min-width:768px){
+  #quickbar{display:none;}
+}
+@media(max-width:767.98px){
+  #hambtn{display:inline-flex;}
+  #layout{padding:0;gap:0;}
+  #sidebar{
+    position:fixed;left:0;top:var(--nav-h);bottom:0;width:260px;z-index:300;
+    border-radius:0 16px 16px 0;transform:translateX(-100%);
+    box-shadow:6px 0 28px rgba(0,0,0,.25);
+  }
+  #sidebar.open{transform:translateX(0);}
+  #drawer-overlay.open{display:block;}
+  #rpanel{display:none;}
+  #fszbtns{display:none;}
+  .hide-m{display:none!important;}
+  #topbar{padding:0 10px;gap:8px;}
+  #ed-wrap{border-radius:0;box-shadow:none;}
+  .CodeMirror{font-size:13px;}
+  #console-wrap.open{margin:0;border-radius:16px 16px 0 0;border-left:0;border-right:0;border-bottom:0;}
+  #statusbar{padding:0 12px;gap:12px;}
+}
+@media(max-width:575.98px){
+  .lang-switch .globe{display:none;}
+  .lang-switch{padding-left:3px;}
+  .tb-actions{gap:6px;}
+}
+</style>
+</head>
+<body>
+
+<nav id="topbar" class="navbar bg-white border-bottom">
+  <button id="hambtn" class="btn btn-outline-secondary" type="button" title="Menu" aria-label="Menu"><i class="bi bi-list"></i></button>
+
+  <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+    <img src="favicon.png" alt="LINE">
+    <span id="logo">LINE<span>3.0</span></span>
+  </a>
+
+  <div class="top-links d-none d-xl-flex gap-1">
+    <a class="nav-link px-2" href="documenti.html" data-i18n="nav_docs">Documenti</a>
+    <a class="nav-link px-2" href="sezione1.html" data-i18n="nav_learn">Impara LINE</a>
+  </div>
+
+  <div id="fszbtns" class="btn-group btn-group-sm ms-2" role="group">
+    <button type="button" class="btn btn-outline-secondary" id="fsz-dn" title="Riduci font" data-i18n-title="t_fsz_dn">A−</button>
+    <button type="button" class="btn btn-outline-secondary" id="fsz-up" title="Aumenta font" data-i18n-title="t_fsz_up">A+</button>
+  </div>
+
+  <div class="tb-actions">
+    <div class="lang-switch" role="group" aria-label="Lingua / Language">
+      <i class="bi bi-translate globe" aria-hidden="true"></i>
+      <button type="button" data-lang="it" aria-pressed="true">IT</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm hide-m" id="btn-copy" type="button"><span data-i18n="btn_copy">Copia</span></button>
+    <button class="btn btn-outline-secondary btn-sm hide-m" id="btn-clear" type="button"><span data-i18n="btn_clear">Pulisci</span></button>
+    <button class="btn btn-outline-success btn-sm" id="btn-run" type="button"><i class="bi bi-play-fill"></i><span class="d-none d-sm-inline ms-1" data-i18n="btn_run">Esegui</span></button>
+    <button class="btn btn-primary btn-sm" id="btn-save" type="button"><i class="bi bi-download"></i><span class="d-none d-sm-inline ms-1" data-i18n="btn_save">Salva</span></button>
+  </div>
+  <input type="file" id="file-input" accept=".line,.txt" style="display:none">
+</nav>
+
+<div id="layout">
+
+  <div id="sidebar">
+    <div class="sb-sec sb-file">
+      <div class="sb-hd" data-i18n="sb_file">File</div>
+      <div class="sb-file-row">
+        <input id="filename" class="form-control form-control-sm" type="text" value="programma" spellcheck="false" maxlength="40" placeholder="nome file" title="Nome file" data-i18n-ph="ph_name" data-i18n-title="t_name">
+        <span class="sb-fext">.line</span>
+      </div>
+      <div class="si si-action" id="btn-open"><span class="dot k"></span><span data-i18n="sb_open">Apri .line</span><span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">I/O Console</div>
+      <div class="si" data-ins="TALK "><span class="dot k"></span>TALK<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="OUT "><span class="dot k"></span>OUT<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="INP "><span class="dot k"></span>INP<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="SCREAM "><span class="dot k"></span>SCREAM<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="TALK:V "><span class="dot lb"></span>TALK:V<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="TALK:F"><span class="dot lb"></span>TALK:F<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_vars">Variabili</div>
+      <div class="si" data-ins="STAY "><span class="dot f"></span>STAY<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="IF "><span class="dot f"></span>IF<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="RET "><span class="dot f"></span>RET<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="DEFRET\n"><span class="dot f"></span>DEFRET<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="TEMP "><span class="dot f"></span>TEMP<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_funs">Funzioni</div>
+      <div class="si" data-ins="FUN nome()\n  \n  FEND"><span class="dot f"></span>FUN…FEND<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="THEN nome\n  \n  THEND"><span class="dot f"></span>THEN…THEND<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="return "><span class="dot f"></span>return<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_ctrl">Controllo</div>
+      <div class="si" data-ins="GO @cond @funzione"><span class="dot f"></span>GO<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" & @cond2 @fun2"><span class="dot go"></span>&amp; (elif)<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" && @fun3"><span class="dot go"></span>&amp;&amp; (else)<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="GO @{V} @{\n  \n  }"><span class="dot go"></span>GO inline<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="FOR @lista #[;;] = @funzione()"><span class="dot f"></span>FOR<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_err">Gestione Errori</div>
+      <div class="si" data-ins="TRY nome\n  \n  TREND"><span class="dot p"></span>TRY…TREND<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="SHOW nome @try\n  \n  SEND"><span class="dot p"></span>SHOW…SEND<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="YET @try\n  \n  YEND"><span class="dot p"></span>YET…YEND<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_lists">Liste</div>
+      <div class="si" data-ins="lista = [val1 ; val2]"><span class="dot l"></span>[ ; ]<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="lista = [tag | val]"><span class="dot l"></span>[tag | val]<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="ADD lista AT  = "><span class="dot l"></span>ADD<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="CANC lista AT "><span class="dot l"></span>CANC<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_labels">Etichette</div>
+      <div class="si" data-ins="TALK:etichetta "><span class="dot lb"></span>KW:label<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="*etichetta"><span class="dot lb"></span>*<span data-i18n="sb_recall">richiama</span><span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_conv">Conversioni</div>
+      <div class="si" data-ins="n:"><span class="dot u"></span>n: <span data-i18n="sb_num">(numero)</span><span class="si-arr">↵</span></div>
+      <div class="si" data-ins="s:"><span class="dot u"></span>s: <span data-i18n="sb_str">(stringa)</span><span class="si-arr">↵</span></div>
+      <div class="si" data-ins="b:"><span class="dot u"></span>b: <span data-i18n="sb_bool">(booleano)</span><span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_inc">Op. Incrementali</div>
+      <div class="si" data-ins=" += "><span class="dot l"></span>+=<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" -= "><span class="dot l"></span>-=<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" *= "><span class="dot l"></span>*=<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" /= "><span class="dot l"></span>/=<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" ^= "><span class="dot l"></span>^=<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" //= "><span class="dot l"></span>//=<span class="si-arr">↵</span></div>
+      <div class="si" data-ins=" %= "><span class="dot l"></span>%=<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_comm">Commenti</div>
+      <div class="si" data-ins=">> "><span class="dot c"></span>&gt;&gt; <span data-i18n="sb_line">linea</span><span class="si-arr">↵</span></div>
+      <div class="si" data-ins="<* \n*>"><span class="dot c"></span>&lt;* <span data-i18n="sb_block">blocco</span> *&gt;<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd" data-i18n="sb_mods">Moduli</div>
+      <div class="si" data-ins="TAKE "><span class="dot k"></span>TAKE<span class="si-arr">↵</span></div>
+    </div>
+    <div class="sb-sec"><div class="sb-hd">Rendering</div>
+      <div class="si" data-ins="RENDER{\n  \n}"><span class="dot rd"></span>RENDER{…}<span class="si-arr">↵</span></div>
+      <div class="si" data-ins="RENDER{\n  CHEM\n  \n}"><span class="dot rd"></span>RENDER CHEM<span class="si-arr">↵</span></div>
+    </div>
+  </div>
+
+  <div id="ed-wrap"><textarea id="editor"></textarea></div>
+
+  <div id="rpanel">
+    <div class="rp-hd" data-i18n="rp_title">Riferimento rapido</div>
+    <div class="rp-blk"><div class="rp-t">I/O</div>
+      <span class="chip k">TALK</span><span class="chip k">OUT</span><span class="chip k">INP</span><span class="chip k">SCREAM</span><span class="chip k">TAKE</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_speclabels">Etichette speciali</div>
+      <span class="chip lb">TALK:V</span><span class="chip lb">TALK:F</span><span class="chip lb">KW:label</span><span class="chip lb">*label</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="sb_vars">Variabili</div>
+      <span class="chip f">STAY</span><span class="chip f">IF</span><span class="chip f">RET</span><span class="chip f">TEMP</span><span class="chip f">DEFRET</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="sb_funs">Funzioni</div>
+      <span class="chip f">FUN</span><span class="chip f">FEND</span><span class="chip f">THEN</span><span class="chip f">THEND</span><span class="chip f">return</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="sb_ctrl">Controllo</div>
+      <span class="chip f">GO</span><span class="chip go">&amp;</span><span class="chip go">&amp;&amp;</span><span class="chip f">FOR</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_errors">Errori</div>
+      <span class="chip p">TRY</span><span class="chip p">TREND</span><span class="chip p">SHOW</span><span class="chip p">SEND</span><span class="chip p">YET</span><span class="chip p">YEND</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="sb_lists">Liste</div>
+      <span class="chip l">ADD</span><span class="chip l">CANC</span><span class="chip l">AT</span><span class="chip l">BY</span><span class="chip l">IS</span><span class="chip l">IN</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_logic">Logica</div>
+      <span class="chip l">ET</span><span class="chip l">VEL</span><span class="chip l">AUT</span><span class="chip op">!</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_bools">Booleani</div>
+      <span class="chip b">V</span><span class="chip b">F</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="sb_conv">Conversioni</div>
+      <span class="chip u">n:</span><span class="chip u">s:</span><span class="chip u">b:</span><span class="chip e">\t</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Escape</div>
+      <span class="chip e">\n</span><span class="chip e">\%</span><span class="chip e">\@</span><span class="chip e">\|</span><span class="chip e">\;</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_special">Speciali</div>
+      <span class="chip p">ONITEM</span><span class="chip p">ONINDEX</span><span class="chip p">ONTAG</span><span class="chip p">THISGO</span><span class="chip p">ASKED</span><span class="chip p">NUMBERS</span><span class="chip p">ERRCODE</span><span class="chip p">ERRMSG</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_inc">Op. incrementali</div>
+      <span class="chip op">+=</span><span class="chip op">-=</span><span class="chip op">*=</span><span class="chip op">/=</span><span class="chip op">^=</span><span class="chip op">//=</span><span class="chip op">%=</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="sb_comm">Commenti</div>
+      <span class="chip c">&gt;&gt;</span><span class="chip c">&lt;* *&gt;</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t">Rendering</div>
+      <span class="chip rd">RENDER{}</span><span class="chip rd">CHEM</span>
+      <span class="chip rd">\R</span><span class="chip e">\C{}</span>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_for">FOR sintassi</div>
+      <div class="rp-mono">FOR @lista #[start;end;step]<br>= @funzione()</div>
+    </div>
+    <div class="rp-blk"><div class="rp-t">GO chain</div>
+      <div class="rp-mono">GO @if1 @fun1 #n<br>&amp; @if2 @fun2<br>&amp;&amp; @fun3</div>
+    </div>
+    <div class="rp-blk"><div class="rp-t">GO inline</div>
+      <div class="rp-mono">GO @{cond} @{<br>  ...<br>  } #ripetizioni</div>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_access">Accesso lista</div>
+      <div class="rp-mono">lista[#0]<br>lista[tag]<br>lista[tag1;tag2]</div>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_colors_t">RENDER / colori</div>
+      <div class="rp-mono" data-i18n="rp_colors">RENDER{<br>  formula<br>}<br><br>TALK testo \Rformula\R<br><br>\C{red+bold+_}...\C{}<br>colori: red green blue<br>cyan orange purple…<br>stili: bold italic - _</div>
+    </div>
+    <div class="rp-blk"><div class="rp-t" data-i18n="rp_keys_t">Tasti</div>
+      <div class="rp-mono" style="line-height:2.1" data-i18n="rp_keys">
+        <b style="color:#334155">Ctrl+Space</b> autocomplete<br>
+        <b style="color:#334155">Ctrl+/</b> commenta riga<br>
+        <b style="color:#334155">Tab</b> indenta
+      </div>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+
+<div id="quickbar">
+  <span class="qt ck" data-ins="TALK ">TALK</span>
+  <span class="qt ck" data-ins="OUT ">OUT</span>
+  <span class="qt ck" data-ins="INP ">INP</span>
+  <span class="qsep"></span>
+  <span class="qt cf" data-ins="IF ">IF</span>
+  <span class="qt cf" data-ins="STAY ">STAY</span>
+  <span class="qt cf" data-ins="FUN nome()\n  \n  FEND">FUN</span>
+  <span class="qt cf" data-ins="THEN nome\n  \n  THEND">THEN</span>
+  <span class="qt cf" data-ins="GO @cond @fun">GO</span>
+  <span class="qt cgo" data-ins=" & "> &amp; </span>
+  <span class="qt cgo" data-ins=" && "> &amp;&amp; </span>
+  <span class="qt cf" data-ins="FOR @lista #[;;] = @fun()">FOR</span>
+  <span class="qsep"></span>
+  <span class="qt cp" data-ins="TRY nome\n  \n  TREND">TRY</span>
+  <span class="qt cp" data-ins="SHOW nome @try\n  \n  SEND">SHOW</span>
+  <span class="qt cp" data-ins="YET @try\n  \n  YEND">YET</span>
+  <span class="qsep"></span>
+  <span class="qt cl" data-ins="ET ">ET</span>
+  <span class="qt cl" data-ins="VEL ">VEL</span>
+  <span class="qt cl" data-ins="AUT ">AUT</span>
+  <span class="qt cl" data-ins="!">!</span>
+  <span class="qsep"></span>
+  <span class="qt cb" data-ins="V">V</span>
+  <span class="qt cb" data-ins="F">F</span>
+  <span class="qsep"></span>
+  <span class="qt cu" data-ins="n:">n:</span>
+  <span class="qt cu" data-ins="s:">s:</span>
+  <span class="qt cu" data-ins="b:">b:</span>
+  <span class="qsep"></span>
+  <span class="qt ce" data-ins="@">@</span>
+  <span class="qt ce" data-ins="#">#</span>
+  <span class="qt clb" data-ins="*">*</span>
+  <span class="qt" data-ins=">> ">»</span>
+  <span class="qsep"></span>
+  <span class="qt crd" data-ins="RENDER{\n  \n}">RENDER</span>
+</div>
+
+<div id="statusbar">
+  <span>Ln <span class="sv" id="s-ln">1</span></span>
+  <span>Col <span class="sv" id="s-co">1</span></span>
+  <span><span data-i18n="st_lines">Righe</span> <span class="sv" id="s-li">1</span></span>
+  <span>Char <span class="sv" id="s-ch">0</span></span>
+  <span class="slang">LINE 3.0</span>
+</div>
+
+<div id="console-wrap">
+  <div id="console-resize"></div>
+  <div id="console-titlebar">
+    <span id="console-title">Console</span>
+    <span id="console-status"></span>
+    <button class="con-btn" id="con-save" title="Salva output come .txt" data-i18n-title="t_con_save">TXT</button>
+    <button class="con-btn pdf" id="con-pdf" title="Salva output come PDF (conserva rendering)" data-i18n-title="t_con_pdf">PDF</button>
+    <button class="con-btn" id="con-clear" title="Pulisci console" data-i18n-title="t_con_clear"><span data-i18n="btn_clear">Pulisci</span></button>
+    <button class="con-btn danger" id="con-close">✕</button>
+  </div>
+  <div id="console-output"></div>
+  <div id="console-input-row">
+    <span id="console-prompt">&gt;</span>
+    <input id="console-input" type="text" autocomplete="off" spellcheck="false" placeholder="inserisci input…" data-i18n-ph="ph_input">
+    <button id="console-send">↵</button>
+  </div>
+</div>
+
+<div id="drawer-overlay"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   Bilingue IT / EN  (stessa chiave di index.html)
+   L'italiano è il testo già presente nell'HTML.
+══════════════════════════════════════════ */
+(function(){
+  var KEY = 'line_lang';
+
+  var EN = {
+    nav_docs:'Documents', nav_learn:'Learn LINE',
+    t_fsz_dn:'Decrease font size', t_fsz_up:'Increase font size',
+    btn_copy:'Copy', btn_clear:'Clear', btn_run:'Run', btn_save:'Save',
+    sb_file:'File', ph_name:'file name', t_name:'File name', sb_open:'Open .line',
+    sb_vars:'Variables', sb_funs:'Functions', sb_ctrl:'Control', sb_err:'Error handling',
+    sb_lists:'Lists', sb_labels:'Labels', sb_recall:'recall', sb_conv:'Conversions',
+    sb_num:'(number)', sb_str:'(string)', sb_bool:'(boolean)', sb_inc:'Increment ops',
+    sb_comm:'Comments', sb_line:'line', sb_block:'block', sb_mods:'Modules',
+    rp_title:'Quick reference', rp_speclabels:'Special labels', rp_errors:'Errors',
+    rp_logic:'Logic', rp_bools:'Booleans', rp_special:'Special', rp_inc:'Increment ops',
+    rp_for:'FOR syntax', rp_access:'List access', rp_colors_t:'RENDER / colors',
+    rp_colors:'RENDER{<br>  formula<br>}<br><br>TALK text \\Rformula\\R<br><br>\\C{red+bold+_}...\\C{}<br>colors: red green blue<br>cyan orange purple…<br>styles: bold italic - _',
+    rp_keys_t:'Keys',
+    rp_keys:'<b style="color:#334155">Ctrl+Space</b> autocomplete<br><b style="color:#334155">Ctrl+/</b> toggle comment<br><b style="color:#334155">Tab</b> indent',
+    st_lines:'Lines',
+    t_con_save:'Save output as .txt', t_con_pdf:'Save output as PDF (keeps rendering)', t_con_clear:'Clear console',
+    ph_input:'enter input…',
+    js_running:'● running', js_done:'✓ finished', js_error:'✕ error',
+    js_end:'end of run', js_err_prefix:'ERROR: ',
+    js_confirm_clear:'Empty the editor?',
+    js_run_title:'Run program', js_no_interp_title:'interpreter.js not found',
+    js_no_interp:'interpreter.js not found.\nPut interpreter.js in the same folder as the editor and reload.',
+    js_pdf_libs:'PDF libraries not loaded. Check your connection and reload the page.',
+    js_pdf_err:'PDF error: ',
+    js_no_render:'[RENDER] line-render.js not found'
+  };
+
+  var IT = {
+    js_running:'● in esecuzione', js_done:'✓ terminato', js_error:'✕ errore',
+    js_end:'fine esecuzione', js_err_prefix:'ERRORE: ',
+    js_confirm_clear:"Svuotare l'editor?",
+    js_run_title:'Esegui programma', js_no_interp_title:'interpreter.js non trovato',
+    js_no_interp:"interpreter.js non trovato.\nMetti interpreter.js nella stessa cartella dell'editor e ricarica.",
+    js_pdf_libs:'Librerie PDF non caricate. Controlla la connessione e ricarica la pagina.',
+    js_pdf_err:'Errore PDF: ',
+    js_no_render:'[RENDER] line-render.js non trovato'
+  };
+
+  var HINT_EN = {
+    "TALK":"output / input","TALK:V":"persistent input","TALK:F":"disable TALK:V",
+    "OUT":"output only","OUT:label":"OUT with label","INP":"input only","INP:label":"INP with label",
+    "SCREAM":"print list + tags","TAKE":"import module","STAY":"constant","IF":"boolean IF variable",
+    "RET":"global variable","DEFRET":"global default in block","TEMP":"forced local variable",
+    "FUN":"defines a function","FEND":"end of FUN","THEN":"then block (no args)","THEND":"end of THEN",
+    "return":"return value","GO":"run if condition","GO:label":"GO with label","&":"GO elif","&&":"GO else",
+    "FOR":"loop over list","FOR:label":"FOR with label","TRY":"try block","TREND":"end of TRY",
+    "SHOW":"handle error","SEND":"end of SHOW","YET":"always run","YEND":"end of YET",
+    "ADD":"add to list","CANC":"remove from list","AT":"by index","BY":"by tag / replace","IS":"by value",
+    "IN":"membership operator","ET":"logical and","VEL":"logical or","AUT":"logical xor","!":"not (prefix)",
+    "ONITEM":"current value (FOR)","ONINDEX":"current index (FOR)","ONTAG":"current tag (FOR)",
+    "THISGO":"inline GO condition","ASKED":"last TALK:V input","NUMBERS":"list of all reals",
+    "ERRCODE":"error code (SHOW)","ERRMSG":"error message (SHOW)",
+    "n:":"convert to number","s:":"convert to string","b:":"convert to boolean",
+    "\\t":"variable type","\\n":"new line","\\%":"print %","\\@":"print @",
+    "\\|":"literal pipe in list","\\;":"literal semicolon","V":"true (boolean)","F":"false (boolean)",
+    "+=":"add and assign","-=":"subtract and assign","*=":"multiply and assign","/=":"divide and assign",
+    "^=":"power and assign","//=":"integer div. and assign","%=":"modulo and assign",
+    "RENDER{}":"math / chemistry rendering","\\R":"start/end inline render","\\C{":"console text color/style"
+  };
+  window.LINE_HINT_EN = HINT_EN;
+
+  var tx  = document.querySelectorAll('[data-i18n]');
+  var ti  = document.querySelectorAll('[data-i18n-title]');
+  var ph  = document.querySelectorAll('[data-i18n-ph]');
+  var btn = document.querySelectorAll('.lang-switch button');
+
+  /* salva l'italiano originale dall'HTML */
+  var i;
+  for(i=0;i<tx.length;i++){ var k=tx[i].getAttribute('data-i18n'); if(IT[k]===undefined) IT[k]=tx[i].innerHTML; }
+  for(i=0;i<ti.length;i++){ var k2=ti[i].getAttribute('data-i18n-title'); if(IT[k2]===undefined) IT[k2]=ti[i].getAttribute('title'); }
+  for(i=0;i<ph.length;i++){ var k3=ph[i].getAttribute('data-i18n-ph'); if(IT[k3]===undefined) IT[k3]=ph[i].getAttribute('placeholder'); }
+
+  window.LINE_LANG = 'it';
+  window.LT = function(key){
+    var d = window.LINE_LANG === 'en' ? EN : IT;
+    return d[key] !== undefined ? d[key] : (IT[key] !== undefined ? IT[key] : key);
+  };
+
+  function apply(lang){
+    window.LINE_LANG = lang;
+    var j;
+    for(j=0;j<tx.length;j++) tx[j].innerHTML = LT(tx[j].getAttribute('data-i18n'));
+    for(j=0;j<ti.length;j++) ti[j].setAttribute('title', LT(ti[j].getAttribute('data-i18n-title')));
+    for(j=0;j<ph.length;j++) ph[j].setAttribute('placeholder', LT(ph[j].getAttribute('data-i18n-ph')));
+    document.documentElement.lang = lang;
+    for(j=0;j<btn.length;j++){
+      var on = btn[j].getAttribute('data-lang') === lang;
+      btn[j].classList.toggle('active', on);
+      btn[j].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    if(typeof window.checkInterpreter === 'function') window.checkInterpreter();
+  }
+
+  function initial(){
+    try{
+      var s = localStorage.getItem(KEY);
+      if(s === 'it' || s === 'en') return s;
+    }catch(e){}
+    var n = (navigator.language || 'it').toLowerCase();
+    return n.indexOf('it') === 0 ? 'it' : 'en';
+  }
+
+  for(i=0;i<btn.length;i++){
+    btn[i].addEventListener('click', function(){
+      var lang = this.getAttribute('data-lang');
+      try{ localStorage.setItem(KEY, lang); }catch(e){}
+      apply(lang);
+    });
+  }
+  apply(initial());
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════
+   LINE 3.0  CodeMirror Mode — Completo
+══════════════════════════════════════════ */
+CodeMirror.defineMode("line30", function() {
+  const KW      = new Set(["TALK","OUT","INP","SCREAM","TAKE"]);
+  const FLOW    = new Set(["STAY","IF","THEN","THEND","FUN","FEND","GO","FOR",
+                           "TRY","SHOW","YET","TREND","SEND","YEND",
+                           "RET","DEFRET","TEMP","return","ADD","CANC"]);
+  const RENDER  = new Set(["RENDER"]);
+  const LOGIC   = new Set(["ET","VEL","AUT","IN","AT","BY","IS"]);
+  const SPECIAL = new Set(["ONITEM","ONINDEX","ONTAG","THISGO","ASKED",
+                           "NUMBERS","ERRCODE","ERRMSG"]);
+
+  return {
+    startState: () => ({ inMulti: false }),
+    token(stream, state) {
+
+      if (state.inMulti) {
+        if (stream.match("*>")) state.inMulti = false; else stream.next();
+        return "comment";
+      }
+      if (stream.match("<*")) { state.inMulti = true; return "comment"; }
+
+      if (stream.match(">>")) { stream.skipToEnd(); return "comment"; }
+
+      if (stream.eatSpace()) return null;
+
+      if (stream.peek() === '\\') {
+        stream.next();
+        if (stream.peek() === 'C') {
+          stream.next();
+          if (stream.peek() === '{') {
+            stream.next();
+            while (!stream.eol() && stream.peek() !== '}') stream.next();
+            if (stream.peek() === '}') stream.next();
+          }
+          return "escape";
+        }
+        if (!stream.eol()) stream.next();
+        return "escape";
+      }
+
+      if (stream.peek() === '*') {
+        stream.next();
+        stream.eatWhile(/\w/);
+        return "label";
+      }
+
+      if (stream.peek() === '@') {
+        stream.next();
+        if (stream.peek() === '{') { stream.next(); return "ref"; }
+        stream.eatWhile(/\w/);
+        return "ref";
+      }
+
+      if (stream.peek() === '#') {
+        stream.next();
+        stream.eatWhile(/\w/);
+        return "hash";
+      }
+
+      if (stream.peek() === '!') {
+        stream.next();
+        if (stream.peek() === '=') { stream.next(); return "op"; }
+        return "not";
+      }
+
+      if (stream.match("&&")) return "gochain";
+      if (stream.peek() === '&') { stream.next(); return "gochain"; }
+
+      if (stream.match("//=")) return "op";
+      if (stream.match("<="))  return "op";
+      if (stream.match(">="))  return "op";
+      if (stream.match("=="))  return "op";
+      if (stream.match("+="))  return "op";
+      if (stream.match("-="))  return "op";
+      if (stream.match("*="))  return "op";
+      if (stream.match("/="))  return "op";
+      if (stream.match("%="))  return "op";
+      if (stream.match("^="))  return "op";
+      if (stream.match("//"))  return "op";
+
+      if ("+-*/^%<>=".indexOf(stream.peek()) !== -1) {
+        stream.next(); return "op";
+      }
+
+      if (stream.match(/^-?\d+(\.\d+)?/)) return "number";
+
+      if (stream.peek() === '|') { stream.next(); return "tag"; }
+
+      if (stream.peek() === '{' || stream.peek() === '}') {
+        stream.next(); return "render";
+      }
+
+      const m = stream.match(/^[a-zA-Z_][a-zA-Z0-9_]*/);
+      if (m) {
+        const w = m[0];
+
+        if (["n","s","b","t"].includes(w) && stream.peek() === ':') {
+          stream.next();
+          return "builtin";
+        }
+
+        if (RENDER.has(w)) return "render";
+
+        if (KW.has(w) || FLOW.has(w)) {
+          if (stream.peek() === ':') {
+            stream.next();
+            stream.eatWhile(/\w/);
+          }
+          return KW.has(w) ? "kw" : "flow";
+        }
+
+        if (LOGIC.has(w))   return "logic";
+        if (SPECIAL.has(w)) return "special";
+        if (w === "V" || w === "F") return "atom";
+        return null;
+      }
+
+      stream.next();
+      return null;
+    },
+    lineComment: ">>",
+    blockCommentStart: "<*",
+    blockCommentEnd: "*>"
+  };
+});
+CodeMirror.defineMIME("text/x-line30","line30");
+
+/* ══════════════════════════════════════════
+   Hint data
+══════════════════════════════════════════ */
+const HINTS = [
+  {t:"TALK ",     d:"TALK",     c:"h-k",  i:"output / input"},
+  {t:"TALK:V ",   d:"TALK:V",   c:"h-lb", i:"input persistente"},
+  {t:"TALK:F",    d:"TALK:F",   c:"h-lb", i:"disattiva TALK:V"},
+  {t:"OUT ",      d:"OUT",      c:"h-k",  i:"solo output"},
+  {t:"OUT:",      d:"OUT:label",c:"h-lb", i:"OUT con etichetta"},
+  {t:"INP ",      d:"INP",      c:"h-k",  i:"solo input"},
+  {t:"INP:",      d:"INP:label",c:"h-lb", i:"INP con etichetta"},
+  {t:"SCREAM ",   d:"SCREAM",   c:"h-k",  i:"stampa lista + tag"},
+  {t:"TAKE ",     d:"TAKE",     c:"h-k",  i:"importa modulo"},
+  {t:"STAY ",     d:"STAY",     c:"h-f",  i:"costante"},
+  {t:"IF ",       d:"IF",       c:"h-f",  i:"variabile booleana IF"},
+  {t:"RET ",      d:"RET",      c:"h-f",  i:"variabile globale"},
+  {t:"DEFRET\n",  d:"DEFRET",   c:"h-f",  i:"default globale nel blocco"},
+  {t:"TEMP ",     d:"TEMP",     c:"h-f",  i:"variabile locale forzata"},
+  {t:"FUN ",      d:"FUN",      c:"h-f",  i:"definisce funzione"},
+  {t:"FEND",      d:"FEND",     c:"h-f",  i:"fine FUN"},
+  {t:"THEN ",     d:"THEN",     c:"h-f",  i:"blocco then (no args)"},
+  {t:"THEND",     d:"THEND",    c:"h-f",  i:"fine THEN"},
+  {t:"return ",   d:"return",   c:"h-f",  i:"valore di ritorno"},
+  {t:"GO ",       d:"GO",       c:"h-f",  i:"esegui se condizione"},
+  {t:"GO:",       d:"GO:label", c:"h-lb", i:"GO con etichetta"},
+  {t:" & ",       d:"&",        c:"h-go", i:"GO elif (elif)"},
+  {t:" && ",      d:"&&",       c:"h-go", i:"GO else (else)"},
+  {t:"FOR ",      d:"FOR",      c:"h-f",  i:"ciclo su lista"},
+  {t:"FOR:",      d:"FOR:label",c:"h-lb", i:"FOR con etichetta"},
+  {t:"TRY ",      d:"TRY",      c:"h-p",  i:"blocco try"},
+  {t:"TREND",     d:"TREND",    c:"h-p",  i:"fine TRY"},
+  {t:"SHOW ",     d:"SHOW",     c:"h-p",  i:"gestisci errore"},
+  {t:"SEND",      d:"SEND",     c:"h-p",  i:"fine SHOW"},
+  {t:"YET ",      d:"YET",      c:"h-p",  i:"esegui sempre"},
+  {t:"YEND",      d:"YEND",     c:"h-p",  i:"fine YET"},
+  {t:"ADD ",      d:"ADD",      c:"h-l",  i:"aggiunge a lista"},
+  {t:"CANC ",     d:"CANC",     c:"h-l",  i:"rimuove da lista"},
+  {t:"AT ",       d:"AT",       c:"h-l",  i:"per indice"},
+  {t:"BY ",       d:"BY",       c:"h-l",  i:"per tag / sostituisci"},
+  {t:"IS ",       d:"IS",       c:"h-l",  i:"per valore"},
+  {t:"IN ",       d:"IN",       c:"h-l",  i:"operatore appartenenza"},
+  {t:"ET ",       d:"ET",       c:"h-l",  i:"and logico"},
+  {t:"VEL ",      d:"VEL",      c:"h-l",  i:"or logico"},
+  {t:"AUT ",      d:"AUT",      c:"h-l",  i:"xor logico"},
+  {t:"!",         d:"!",        c:"h-op", i:"not (prefisso)"},
+  {t:"ONITEM",    d:"ONITEM",   c:"h-p",  i:"valore corrente (FOR)"},
+  {t:"ONINDEX",   d:"ONINDEX",  c:"h-p",  i:"indice corrente (FOR)"},
+  {t:"ONTAG",     d:"ONTAG",    c:"h-p",  i:"tag corrente (FOR)"},
+  {t:"THISGO",    d:"THISGO",   c:"h-p",  i:"condizione GO inline"},
+  {t:"ASKED",     d:"ASKED",    c:"h-p",  i:"ultimo input TALK:V"},
+  {t:"NUMBERS",   d:"NUMBERS",  c:"h-p",  i:"lista di tutti i reali"},
+  {t:"ERRCODE",   d:"ERRCODE",  c:"h-p",  i:"codice errore (SHOW)"},
+  {t:"ERRMSG",    d:"ERRMSG",   c:"h-p",  i:"messaggio errore (SHOW)"},
+  {t:"n:",        d:"n:",       c:"h-u",  i:"converti in numero"},
+  {t:"s:",        d:"s:",       c:"h-u",  i:"converti in stringa"},
+  {t:"b:",        d:"b:",       c:"h-u",  i:"converti in booleano"},
+  {t:"\\t",       d:"\\t",      c:"h-e",  i:"tipo variabile"},
+  {t:"\\n",       d:"\\n",      c:"h-e",  i:"a capo"},
+  {t:"\\%",       d:"\\%",      c:"h-e",  i:"stampa %"},
+  {t:"\\@",       d:"\\@",      c:"h-e",  i:"stampa @"},
+  {t:"\\|",       d:"\\|",      c:"h-e",  i:"pipe letterale in lista"},
+  {t:"\\;",       d:"\\;",      c:"h-e",  i:"punto e virgola letterale"},
+  {t:"V",         d:"V",        c:"h-b",  i:"vero (booleano)"},
+  {t:"F",         d:"F",        c:"h-b",  i:"falso (booleano)"},
+  {t:" += ",      d:"+=",       c:"h-op", i:"somma e assegna"},
+  {t:" -= ",      d:"-=",       c:"h-op", i:"sottrai e assegna"},
+  {t:" *= ",      d:"*=",       c:"h-op", i:"moltiplica e assegna"},
+  {t:" /= ",      d:"/=",       c:"h-op", i:"dividi e assegna"},
+  {t:" ^= ",      d:"^=",       c:"h-op", i:"potenza e assegna"},
+  {t:" //= ",     d:"//=",      c:"h-op", i:"div. intera e assegna"},
+  {t:" %= ",      d:"%=",       c:"h-op", i:"resto div. e assegna"},
+  {t:"RENDER{\n  \n}", d:"RENDER{}", c:"h-rd", i:"rendering matematico/chimico"},
+  {t:"\\R",       d:"\\R",      c:"h-rd", i:"inizio/fine render inline"},
+  {t:"\\C{",      d:"\\C{",     c:"h-e",  i:"colore/stile testo console"},
+];
+
+function line30Hint(cm) {
+  const cur = cm.getCursor();
+  const tok = cm.getTokenAt(cur);
+  let start = tok.start, end = cur.ch;
+  let word = tok.string;
+  if (!word || /^\s+$/.test(word)) { start = end; word = ""; }
+  const lc = word.toLowerCase();
+  const list = HINTS.filter(h => h.d.toLowerCase().startsWith(lc)).map(h => ({
+    text: h.t,
+    displayText: h.d,
+    render(el) {
+      el.style.cssText = "display:flex;align-items:center;gap:10px;padding:5px 12px;";
+      const n = document.createElement("span");
+      n.textContent = h.d; n.className = h.c;
+      n.style.cssText = "font-weight:600;min-width:72px;";
+      const i = document.createElement("span");
+      i.textContent = (window.LINE_LANG === "en" && window.LINE_HINT_EN[h.d]) || h.i;
+      i.style.cssText = "color:#7a8fa8;font-size:10.5px;";
+      el.appendChild(n); el.appendChild(i);
+    },
+    hint(cm) { cm.replaceRange(h.t, {line:cur.line,ch:start}, {line:cur.line,ch:end}); }
+  }));
+  return { list, from: CodeMirror.Pos(cur.line,start), to: CodeMirror.Pos(cur.line,end) };
+}
+
+/* ══════════════════════════════════════════
+   Auto-close map
+══════════════════════════════════════════ */
+const AUTO_CLOSE = {
+  "FUN":    "FEND",
+  "THEN":   "THEND",
+  "TRY":    "TREND",
+  "SHOW":   "SEND",
+  "YET":    "YEND",
+  "RENDER": "}"
+};
+
+function handleEnter(cm) {
+  if (cm.somethingSelected()) {
+    cm.replaceSelection("\n", "end");
+    return;
+  }
+  const cur           = cm.getCursor();
+  const lineText      = cm.getLine(cur.line);
+  const currentIndent = lineText.match(/^(\s*)/)[1];
+  const trimmed       = lineText.slice(0, cur.ch).trim();
+  const innerIndent   = currentIndent + "  ";
+
+  const kwMatch = trimmed.match(/^([A-Z]+)/);
+  const kw = kwMatch ? kwMatch[1] : null;
+
+  if (kw && AUTO_CLOSE[kw]) {
+    const closer = AUTO_CLOSE[kw];
+    if (kw === "RENDER") {
+      cm.operation(() => {
+        cm.replaceRange("\n" + innerIndent + "\n" + currentIndent + closer, cur);
+        cm.setCursor({ line: cur.line + 1, ch: innerIndent.length });
+      });
+      return;
+    }
+    cm.operation(() => {
+      cm.replaceRange("\n" + innerIndent + "\n" + currentIndent + closer, cur);
+      cm.setCursor({ line: cur.line + 1, ch: innerIndent.length });
+    });
+    return;
+  }
+
+  cm.operation(() => {
+    cm.replaceRange("\n" + currentIndent, cur);
+    cm.setCursor({ line: cur.line + 1, ch: currentIndent.length });
+  });
+}
+
+function handleBackspace(cm) {
+  if (cm.somethingSelected()) { cm.execCommand("delCharBefore"); return; }
+  const cur  = cm.getCursor();
+  const line = cm.getLine(cur.line);
+  const before = line.slice(0, cur.ch);
+  if (cur.ch === 0) { cm.execCommand("delCharBefore"); return; }
+  if (/^ +$/.test(before) && before.length % 2 === 0) {
+    cm.operation(() => {
+      cm.replaceRange("", { line: cur.line, ch: cur.ch - 2 }, cur);
+    });
+    return;
+  }
+  cm.execCommand("delCharBefore");
+}
+
+/* ══════════════════════════════════════════
+   Init editor
+══════════════════════════════════════════ */
+const editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+  mode: "line30",
+  theme: "line30",
+  lineNumbers: true,
+  matchBrackets: true,
+  autoCloseBrackets: true,
+  styleActiveLine: true,
+  indentWithTabs: false,
+  indentUnit: 2,
+  tabSize: 2,
+  extraKeys: {
+    "Ctrl-Space":  cm => cm.showHint({hint:line30Hint, completeSingle:false}),
+    "Ctrl-/":      "toggleComment",
+    "Enter":       handleEnter,
+    "Backspace":   handleBackspace,
+    "Tab": cm => {
+      if (cm.somethingSelected()) cm.indentSelection("add");
+      else cm.replaceSelection("  ", "end");
+    },
+    "Shift-Tab": cm => cm.indentSelection("subtract")
+  }
+});
+editor.setValue("");
+editor.setSize("100%","100%");
+
+let hintTimer;
+editor.on("change",(cm,ch) => {
+  clearTimeout(hintTimer);
+  if (ch.origin === "+input") {
+    const tok = cm.getTokenAt(cm.getCursor());
+    if (tok.string.trim().length >= 1 && /[A-Za-z\\&!n]/.test(tok.string)) {
+      hintTimer = setTimeout(() => {
+        if (!cm.state.completionActive)
+          cm.showHint({hint:line30Hint, completeSingle:false});
+      }, 320);
+    }
+  }
+  updateStatus();
+});
+editor.on("cursorActivity", updateStatus);
+
+function updateStatus() {
+  const c = editor.getCursor(), v = editor.getValue();
+  document.getElementById("s-ln").textContent = c.line+1;
+  document.getElementById("s-co").textContent = c.ch+1;
+  document.getElementById("s-li").textContent = editor.lineCount();
+  document.getElementById("s-ch").textContent = v.length;
+}
+updateStatus();
+
+let fontSize = 14;
+document.getElementById("fsz-up").onclick = () => {
+  fontSize = Math.min(22,fontSize+1);
+  document.querySelector(".CodeMirror").style.fontSize = fontSize+"px";
+};
+document.getElementById("fsz-dn").onclick = () => {
+  fontSize = Math.max(10,fontSize-1);
+  document.querySelector(".CodeMirror").style.fontSize = fontSize+"px";
+};
+
+document.getElementById("btn-save").onclick = function(){
+  const name = document.getElementById("filename").value.trim() || "programma";
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([editor.getValue()],{type:"text/plain"}));
+  a.download = name+".line"; a.click(); URL.revokeObjectURL(a.href);
+  this.classList.add("do-flash");
+  setTimeout(()=>this.classList.remove("do-flash"),500);
+};
+document.getElementById("btn-copy").onclick = function(){
+  navigator.clipboard.writeText(editor.getValue()).then(()=>{
+    const lbl = this.querySelector("span");
+    const o = lbl.innerHTML; lbl.textContent = "✓ OK";
+    setTimeout(()=>lbl.innerHTML = LT("btn_copy"),1200);
+  });
+};
+document.getElementById("btn-clear").onclick = ()=>{
+  if(confirm(LT("js_confirm_clear"))){ editor.setValue(""); editor.focus(); }
+};
+
+function insertSnippet(raw){
+  const s = raw.replace(/\\n/g,"\n");
+  editor.getDoc().replaceRange(s, editor.getCursor());
+  editor.focus();
+}
+
+document.querySelectorAll(".si[data-ins]").forEach(el=>
+  el.addEventListener("click",()=>{ insertSnippet(el.dataset.ins); closeSidebar(); })
+);
+
+document.querySelectorAll(".qt[data-ins]").forEach(el=>
+  el.addEventListener("click",()=>insertSnippet(el.dataset.ins))
+);
+
+document.querySelectorAll(".chip").forEach(chip=>
+  chip.addEventListener("click",()=>{
+    const map={">>":">> ","<* *>":"<* \n*>","&":"& ","&&":"&& ","RENDER{}":"RENDER{\n  \n}"};
+    const t = chip.textContent.trim();
+    insertSnippet(map[t] || (t+" "));
+  })
+);
+
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("drawer-overlay");
+document.getElementById("hambtn").onclick = ()=>{
+  sidebar.classList.toggle("open");
+  overlay.classList.toggle("open");
+};
+function closeSidebar(){
+  sidebar.classList.remove("open");
+  overlay.classList.remove("open");
+}
+overlay.onclick = closeSidebar;
+
+const fileInput = document.getElementById("file-input");
+document.getElementById("btn-open").onclick = () => { fileInput.click(); closeSidebar(); };
+fileInput.onchange = function() {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    editor.setValue(e.target.result);
+    editor.setCursor({line:0,ch:0});
+    editor.focus();
+    document.getElementById("filename").value = file.name.replace(/\.line$/i,"");
+  };
+  reader.readAsText(file);
+  this.value = "";
+};
+
+/* ══════════════════════════════════════════
+   CONSOLE PANEL
+══════════════════════════════════════════ */
+const conWrap   = document.getElementById("console-wrap");
+const conOut    = document.getElementById("console-output");
+const conStatus = document.getElementById("console-status");
+const conInpRow = document.getElementById("console-input-row");
+const conInp    = document.getElementById("console-input");
+const conSend   = document.getElementById("console-send");
+
+let inputResolve = null;
+
+/* Formattazione testo console: \R...\R (KaTeX inline) e \C{colore+stile} */
+let _conStyle = null;
+
+const _CCOLORS = {
+  red:    '#ff5370', green:  '#69f0ae', blue:   '#82aaff',
+  yellow: '#ffcc02', orange: '#ff9100', pink:   '#ff4081',
+  cyan:   '#00e5ff', purple: '#ce93d8', teal:   '#80cbc4',
+  white:  '#e4e4e4', gray:   '#7a8fa8', amber:  '#ffb300',
+  lime:   '#b9f56f', navy:   '#80b0ff', gold:   '#ffd04b',
+  magenta:'#f48fb1', brown:  '#c4a97b', sky:    '#40c4ff',
+};
+
+function _parseColorSpec(spec) {
+  if (!spec.trim()) return null;
+  const parts = spec.split('+').map(p => p.trim().toLowerCase());
+  const s = { color:null, bold:false, italic:false, strike:false, underline:false };
+  for (const p of parts) {
+    if      (p === 'bold')   s.bold    = true;
+    else if (p === 'italic') s.italic  = true;
+    else if (p === '-')      s.strike  = true;
+    else if (p === '_')      s.underline = true;
+    else s.color = _CCOLORS[p] || (p.match(/^#[0-9a-f]{3,6}$/) ? p : null) || p;
+  }
+  return s;
+}
+
+function _applyStyle(el, s) {
+  if (!s) return;
+  const css = [];
+  if (s.color)     css.push('color:' + s.color);
+  if (s.bold)      css.push('font-weight:700');
+  if (s.italic)    css.push('font-style:italic');
+  const td = [];
+  if (s.strike)    td.push('line-through');
+  if (s.underline) td.push('underline');
+  if (td.length)   css.push('text-decoration:' + td.join(' '));
+  if (css.length)  el.style.cssText = css.join(';');
+}
+
+function _buildLine(rawText, cls) {
+  const el = document.createElement('div');
+  el.className = cls;
+  el.style.whiteSpace = 'pre-wrap';
+
+  let i = 0, buf = '';
+
+  const flush = () => {
+    if (!buf) return;
+    const span = document.createElement('span');
+    span.textContent = buf;
+    _applyStyle(span, _conStyle);
+    el.appendChild(span);
+    buf = '';
+  };
+
+  while (i < rawText.length) {
+    const c = rawText[i];
+
+    if (c === '\\' && rawText[i+1] === 'R') {
+      flush();
+      i += 2;
+      const _re = /\\R(?![A-Za-z])/g; _re.lastIndex = i;
+      const _m = _re.exec(rawText);
+      const end = _m ? _m.index : -1;
+      const mathSrc = end >= 0 ? rawText.slice(i, end) : rawText.slice(i);
+      i = end >= 0 ? end + 2 : rawText.length;
+
+      const span = document.createElement('span');
+      span.className = 'con-inline-render';
+      if (typeof katex !== 'undefined' && typeof LINE_render_to_latex === 'function') {
+        try {
+          katex.render(LINE_render_to_latex(mathSrc.trim()), span,
+            { displayMode: false, throwOnError: false });
+        } catch(e) { span.textContent = mathSrc; }
+      } else {
+        span.textContent = '\\R' + mathSrc + '\\R';
+      }
+      _applyStyle(span, _conStyle);
+      el.appendChild(span);
+      continue;
+    }
+
+    if (c === '\\' && rawText[i+1] === 'C' && rawText[i+2] === '{') {
+      flush();
+      i += 3;
+      const end = rawText.indexOf('}', i);
+      const spec = end >= 0 ? rawText.slice(i, end) : '';
+      i = end >= 0 ? end + 1 : rawText.length;
+      _conStyle = _parseColorSpec(spec);
+      continue;
+    }
+
+    buf += c;
+    i++;
+  }
+  flush();
+
+  if (!el.hasChildNodes()) el.appendChild(document.createTextNode('\u200b'));
+  return el;
+}
+
+function conOpen()  { conWrap.classList.add("open"); }
+function conClose() { conWrap.classList.remove("open","tall"); }
+
+function conAppend(text, cls = "con-line-out") {
+  const formattable = (cls === "con-line-out" || cls === "con-line-err");
+  String(text).split("\n").forEach(line => {
+    const el = formattable ? _buildLine(line, cls) : (() => {
+      const d = document.createElement("div");
+      d.className = cls; d.textContent = line; return d;
+    })();
+    conOut.appendChild(el);
+  });
+  conOut.scrollTop = conOut.scrollHeight;
+}
+
+function conAppendRender(content) {
+  if (typeof LINE_render_html !== "function") {
+    conAppend(LT("js_no_render"), "con-line-err");
+    return;
+  }
+  const wrap = document.createElement("div");
+  wrap.className = "con-line-render";
+  wrap.innerHTML = LINE_render_html(content);
+  conOut.appendChild(wrap);
+  conOut.scrollTop = conOut.scrollHeight;
+}
+
+function conSetStatus(state, text) {
+  conStatus.className = "con-status " + state;
+  conStatus.textContent = text;
+}
+
+function conClear() {
+  conOut.innerHTML = "";
+  _conStyle = null;
+}
+
+function conShowInput(prompt) {
+  document.getElementById("console-prompt").textContent = prompt ? prompt + " >" : ">";
+  conInpRow.classList.add("visible");
+  conInp.value = "";
+  conInp.focus();
+}
+function conHideInput() {
+  conInpRow.classList.remove("visible");
+  conInp.value = "";
+}
+
+function submitInput() {
+  if (!inputResolve) return;
+  const val = conInp.value;
+  conAppend((document.getElementById("console-prompt").textContent || ">") + " " + val, "con-line-inp");
+  conHideInput();
+  const res = inputResolve;
+  inputResolve = null;
+  res(val);
+}
+
+conSend.onclick = submitInput;
+conInp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); submitInput(); } });
+
+document.getElementById("con-close").onclick = conClose;
+document.getElementById("con-clear").onclick = conClear;
+
+document.getElementById("con-save").onclick = () => {
+  const lines = [...conOut.children].map(el => {
+    if (el.classList.contains('con-line-render')) return '[RENDER]';
+    return el.textContent;
+  }).join("\n");
+  const name = (document.getElementById("filename").value.trim() || "output") + "_log.txt";
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([lines], {type:"text/plain"}));
+  a.download = name; a.click(); URL.revokeObjectURL(a.href);
+};
+
+document.getElementById("con-pdf").onclick = async function() {
+  const btn = this;
+  const orig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '…';
+
+  let ghost = null, styleEl = null;
+  try {
+    if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+      alert(LT('js_pdf_libs'));
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+
+    /* A4 in punti; 1px CSS = 0.75pt */
+    const PW = 595.28, PH = 841.89, M = 40, PX = 0.75;
+    const gW = Math.floor((PW - 2 * M) / PX);        /* larghezza contenuto (px) */
+    const gPageH = Math.floor((PH - 2 * M) / PX);    /* altezza utile per pagina (px) */
+
+    const name = (document.getElementById("filename").value.trim() || "output");
+    const when = new Date().toLocaleString(window.LINE_LANG === 'en' ? 'en-GB' : 'it-IT');
+
+    /* Tema "carta": nero su bianco, solo dentro il clone */
+    styleEl = document.createElement('style');
+    styleEl.textContent = `
+#pdf-ghost{position:fixed;top:0;left:-99999px;width:${gW}px;background:#fff;color:#111;box-sizing:border-box;font-family:"Share Tech Mono",monospace;font-size:12.5px;line-height:1.65;}
+#pdf-ghost .pdf-title{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:"Syne",sans-serif;font-weight:700;font-size:13px;padding:0 0 8px;margin-bottom:14px;border-bottom:1.5px solid #0d6efd;color:#111;}
+#pdf-ghost .pdf-title span{font-family:"Share Tech Mono",monospace;font-weight:400;font-size:10.5px;color:#64748b;}
+#pdf-ghost .pdf-body{white-space:pre-wrap;word-break:break-word;}
+#pdf-ghost .con-line-out{color:#111;}
+#pdf-ghost .con-line-err{color:#b91c1c;}
+#pdf-ghost .con-line-sys{color:#6b7280;}
+#pdf-ghost .con-line-inp{color:#92400e;}
+#pdf-ghost .con-line-render{display:block;margin:8px 0;padding:8px 0;border:0;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;border-radius:0;background:transparent;overflow:visible;white-space:normal;box-sizing:content-box;}
+#pdf-ghost .lrender-math,#pdf-ghost .lrender-chem{width:max-content;min-width:100%;}
+#pdf-ghost .lrender-line,#pdf-ghost .lrender-line .katex{color:#111;}
+#pdf-ghost .lrender-sep{background:#cbd5e1;opacity:1;}
+#pdf-ghost .lrender-err{color:#b91c1c;}
+#pdf-ghost .lrender-empty{color:#6b7280;}
+`;
+    document.head.appendChild(styleEl);
+
+    ghost = document.createElement('div');
+    ghost.id = 'pdf-ghost';
+
+    const title = document.createElement('div');
+    title.className = 'pdf-title';
+    const tName = document.createElement('b');
+    tName.textContent = name + '.line';
+    const tDate = document.createElement('span');
+    tDate.textContent = when;
+    title.appendChild(tName); title.appendChild(tDate);
+
+    const body = document.createElement('div');
+    body.className = 'pdf-body';
+    body.innerHTML = conOut.innerHTML;
+
+    ghost.appendChild(title);
+    ghost.appendChild(body);
+
+    /* I colori scelti con \C{} sono pensati per sfondo scuro: li scurisco per la carta */
+    const darken = css => {
+      const m = css.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+      if (!m) return css;
+      const r = +m[1] / 255, g = +m[2] / 255, b = +m[3] / 255;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      let h = 0, s = 0, l = (mx + mn) / 2;
+      if (mx !== mn) {
+        const d = mx - mn;
+        s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+        if (mx === r) h = (g - b) / d + (g < b ? 6 : 0);
+        else if (mx === g) h = (b - r) / d + 2;
+        else h = (r - g) / d + 4;
+        h /= 6;
+      }
+      l = s < 0.12 ? Math.min(l, 0.15) : Math.min(l, 0.33);
+      return 'hsl(' + Math.round(h * 360) + ',' + Math.round(s * 100) + '%,' + Math.round(l * 100) + '%)';
+    };
+    ghost.querySelectorAll('[style]').forEach(el => {
+      if (el.style.color) el.style.color = darken(el.style.color);
+    });
+
+    document.body.appendChild(ghost);
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    /* Formule più larghe della pagina: ridotte in proporzione, mai tagliate */
+    ghost.querySelectorAll('.con-line-render').forEach(el => {
+      const inner = el.firstElementChild;
+      if (!inner) return;
+      const avail = el.clientWidth;
+      const need = inner.scrollWidth;
+      if (need > avail + 1) {
+        const k = avail / need;
+        inner.style.transform = 'scale(' + k + ')';
+        inner.style.transformOrigin = 'top left';
+        el.style.height = Math.ceil(inner.offsetHeight * k) + 'px';
+        el.style.overflow = 'hidden';
+      }
+    });
+
+    /* Punti dove è lecito andare a pagina nuova: l'inizio di ogni riga/blocco */
+    const gTop = ghost.getBoundingClientRect().top;
+    const tops = [...ghost.querySelectorAll('.pdf-title, .pdf-body > *')]
+      .map(e => Math.round(e.getBoundingClientRect().top - gTop));
+    const totalH = Math.ceil(ghost.getBoundingClientRect().height);
+
+    const scale = Math.max(1, Math.min(2, 14000 / totalH));
+    const canvas = await html2canvas(ghost, {
+      backgroundColor: '#ffffff',
+      scale,
+      logging: false,
+      useCORS: true,
+      allowTaint: true,
+      x: 0, y: 0, scrollX: 0, scrollY: 0,
+      width: gW, height: totalH,
+      windowWidth: gW, windowHeight: totalH,
+      onclone: doc => {
+        const g = doc.getElementById('pdf-ghost');
+        if (g) { g.style.left = '0'; g.style.top = '0'; g.style.position = 'absolute'; }
+      }
+    });
+
+    document.body.removeChild(ghost); ghost = null;
+    document.head.removeChild(styleEl); styleEl = null;
+
+    /* Impaginazione A4 senza spezzare righe o formule */
+    const slices = [];
+    let start = 0;
+    while (start < totalH - 1) {
+      const limit = start + gPageH;
+      let end;
+      if (totalH <= limit) end = totalH;
+      else {
+        const cands = tops.filter(t => t > start + 20 && t <= limit);
+        end = cands.length ? Math.max(...cands) : limit;
+      }
+      slices.push([start, end]);
+      start = end;
+    }
+
+    const pdf = new jsPDF({ unit: 'pt', format: 'a4', compress: true });
+    const sc = canvas.width / gW;
+    slices.forEach(([s, e], idx) => {
+      if (idx > 0) pdf.addPage();
+      const sy = Math.round(s * sc);
+      const h = Math.max(1, Math.min(canvas.height - sy, Math.round((e - s) * sc)));
+      const sl = document.createElement('canvas');
+      sl.width = canvas.width; sl.height = h;
+      const cx = sl.getContext('2d');
+      cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, sl.width, h);
+      cx.drawImage(canvas, 0, sy, canvas.width, h, 0, 0, canvas.width, h);
+      pdf.addImage(sl.toDataURL('image/png'), 'PNG', M, M, gW * PX, (h / sc) * PX);
+    });
+
+    /* Piè di pagina */
+    const n = pdf.getNumberOfPages();
+    const safeName = name.replace(/[^\x20-\x7E]/g, '') || 'output';
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    pdf.setTextColor(140);
+    for (let p = 1; p <= n; p++) {
+      pdf.setPage(p);
+      pdf.text(safeName + '.line', M, PH - 22);
+      pdf.text(p + ' / ' + n, PW - M, PH - 22, { align: 'right' });
+    }
+
+    pdf.save(name + "_log.pdf");
+
+  } catch(e) {
+    console.error('[LINE PDF]', e);
+    alert(LT('js_pdf_err') + e.message);
+  } finally {
+    if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
+    if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
+    btn.disabled = false;
+    btn.textContent = orig;
+  }
+};
+
+(function(){
+  const handle = document.getElementById("console-resize");
+  let dragging = false, startY = 0, startH = 0;
+  handle.addEventListener("mousedown", e => {
+    dragging = true; startY = e.clientY;
+    startH = conWrap.offsetHeight; e.preventDefault();
+  });
+  document.addEventListener("mousemove", e => {
+    if (!dragging) return;
+    const delta = startY - e.clientY;
+    const h = Math.max(80, Math.min(600, startH + delta));
+    conWrap.style.height = h + "px";
+    conWrap.classList.add("open");
+  });
+  document.addEventListener("mouseup", () => { dragging = false; });
+})();
+
+/* ── ESEGUI ── */
+const runBtn = document.getElementById("btn-run");
+
+function checkInterpreter() {
+  if (typeof LINE_run === "function") {
+    runBtn.classList.add("run");
+    runBtn.style.opacity = "";
+    runBtn.title = LT("js_run_title");
+  } else {
+    runBtn.style.opacity = "0.4";
+    runBtn.title = LT("js_no_interp_title");
+  }
+}
+checkInterpreter();
+window.addEventListener("load", checkInterpreter);
+
+runBtn.onclick = async function() {
+  if (typeof LINE_run !== "function") {
+    alert(LT("js_no_interp"));
+    return;
+  }
+
+  conOpen();
+  conClear();
+  conHideInput();
+  conSetStatus("running", LT("js_running"));
+
+  let renderBlocks = {};
+  let sourceToRun = editor.getValue();
+  if (typeof LINE_render_preprocess === "function") {
+    const { processedSrc, blocks } = LINE_render_preprocess(sourceToRun);
+    sourceToRun = processedSrc;
+    blocks.forEach(b => { renderBlocks[b.index] = b.content; });
+  }
+
+  const startTime = Date.now();
+
+  try {
+    await LINE_run(sourceToRun, {
+      output(text) {
+        if (typeof LINE_RENDER_MARKER !== "undefined" &&
+            text.startsWith(LINE_RENDER_MARKER)) {
+          const idx = parseInt(text.slice(LINE_RENDER_MARKER.length));
+          if (!isNaN(idx) && renderBlocks[idx] !== undefined) {
+            conAppendRender(renderBlocks[idx]);
+            return;
+          }
+        }
+        conAppend(text, "con-line-out");
+      },
+      async input(prompt) {
+        conShowInput(prompt || "");
+        return new Promise(resolve => { inputResolve = resolve; });
+      }
+    });
+    const ms = Date.now() - startTime;
+    conSetStatus("done", `${LT("js_done")} (${ms}ms)`);
+    conAppend(`\n── ${LT("js_end")} (${ms}ms) ──`, "con-line-sys");
+  } catch(e) {
+    conSetStatus("error", LT("js_error"));
+    conAppend(LT("js_err_prefix") + e.message, "con-line-err");
+    console.error("[LINE]", e);
+  } finally {
+    conHideInput();
+  }
+};
+
+setTimeout(()=>editor.focus(),80);
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/mhchem.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="line-render.js" onerror="console.warn('[LINE-RENDER] line-render.js non trovato')"></script>
+<script src="interpreter.js" onerror="/* interpreter.js non trovato */"></script>
+<script data-goatcounter="https://qc17.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
